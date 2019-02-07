@@ -616,7 +616,7 @@
 
 (defun pubmed--summary-elocation (summary)
   "Return an plist of Elocation IDs of the article SUMMARY.  The plist has the form \"('type TYPE 'id ID)\"."
-  (let* ((elocationidlist (esxml-query-all "ELocationID" (esxml-query "PubmedData Article" pubmed-summary)))
+  (let* ((elocationidlist (esxml-query-all "ELocationID" (esxml-query "PubmedData Article" summary)))
 	 elocationids)
     (dolist (elocationid elocationidlist elocationids)
       (let* ((type (intern (esxml-node-attribute 'EIdType elocationid)))
@@ -818,7 +818,7 @@ authors)
 
 (defun pubmed--summary-articleid (summary)
   "Return an plist of the article IDs. The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
-  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" pubmed-summary)))
+  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
 	articleids)
     (dolist (articleid articleidlist articleids)
       (let ((idtype (intern (esxml-node-attribute 'IdType articleid)))
