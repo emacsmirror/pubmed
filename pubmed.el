@@ -26,7 +26,7 @@
 
 ;; This is a GNU Emacs interface to the PubMed database of references on life sciences and biomedical topics.
 
-;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API key. See <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>. If you don’t have an API key, E-utilities will still work, but you may be limited to fewer requests than allowed with an API key. Any computer (IP address) that submits more than three E-utility requests per second will receive an error message. This limit applies to any combination of requests to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery. 
+;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API key. See <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>. If you don't have an API key, E-utilities will still work, but you may be limited to fewer requests than allowed with an API key. Any computer (IP address) that submits more than three E-utility requests per second will receive an error message. This limit applies to any combination of requests to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery. 
 
 ;; First, you will need an NCBI account. If you don't have one already, register at <https://www.ncbi.nlm.nih.gov/account/>.
 
@@ -97,7 +97,7 @@
 ;; "journal": Records are sorted alphabetically by journal title, and then by publication date.
 ;; "pub+date": Records are sorted chronologically by publication date (with most recent first), and then alphabetically by journal title.
 ;; "most+recent": Records are sorted chronologically by date added to PubMed (with the most recent additions first).
-;; "relevance": Records are sorted based on relevance to your search. For more information about PubMed’s relevance ranking, see the PubMed Help section on Computation of Weighted Relevance Order in PubMed.
+;; "relevance": Records are sorted based on relevance to your search. For more information about PubMed's relevance ranking, see the PubMed Help section on Computation of Weighted Relevance Order in PubMed.
 ;; "title": Records are sorted alphabetically by article title.
 ;; "author": Records are sorted alphabetically by author name, and then by publication date.
 (defvar pubmed-sort ""
