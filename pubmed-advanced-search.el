@@ -92,7 +92,7 @@
   "Add BOOLEAN and QUERY from the history to the `search-builder'."
   (interactive)
   (with-current-buffer "*PubMed Advanced Search Builder*"
-    (let ((old-value (widget-editable-list-value-get (pubmed-widget-get 'search-builder)))
+    (let* ((old-value (widget-editable-list-value-get (pubmed-widget-get 'search-builder)))
 	  (new-value (append old-value (list `(,boolean "" ,query)))))
       (widget-value-set (pubmed-widget-get 'search-builder) new-value)
       (widget-setup)
