@@ -114,7 +114,7 @@
 (defvar pubmed-time-format-string "%Y-%m-%d"
   "The format-string that is used by `format-time-string' to convert time values. Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\".")
 
-(defvar uid nil
+(defvar pubmed-uid nil
   "The entry being displayed in this buffer.")
 
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
@@ -193,26 +193,26 @@
 (defun pubmed-show-current-entry ()
   "Show the current entry in the \"pubmed-show\" buffer."
   (interactive)
-  (setq uid (tabulated-list-get-id))
-  (pubmed-show-entry uid))
+  (setq pubmed-uid (tabulated-list-get-id))
+  (pubmed-show-entry pubmed-uid))
 
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
   (interactive)
   (with-current-buffer "*PubMed*"
     (forward-line)
-    (setq uid (tabulated-list-get-id))
+    (setq pubmed-uid (tabulated-list-get-id))
     (if (get-buffer-window "*PubMed-entry*" "visible")
-	(pubmed-show-entry uid))))
+	(pubmed-show-entry pubmed-uid))))
 
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
   (interactive)
   (with-current-buffer "*PubMed*"
     (forward-line -1)
-    (setq uid (tabulated-list-get-id))
+    (setq pubmed-uid (tabulated-list-get-id))
     (if (get-buffer-window "*PubMed-entry*" "visible")
-	(pubmed-show-entry uid))))
+	(pubmed-show-entry pubmed-uid))))
 
 (defun pubmed-convert-id (uid)
   "Return the doi of article UID.  Use commas to separate multiple UIDs. This service allows for conversion of up to 200 UIDs in a single request. If you have a larger number of IDs, split your list into smaller subsets."
@@ -235,8 +235,8 @@
 (defun pubmed-get-unpaywall ()
   "Fetch fulltext article from Unpaywall"
   (interactive)
-  (if uid
-      (pubmed--unpaywall uid)
+  (if pubmed-uid
+      (pubmed--unpaywall pubmed-uid)
     (message "No entry selected")))
 
 ;;;; Functions

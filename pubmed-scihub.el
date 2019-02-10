@@ -53,8 +53,8 @@
 (defun pubmed-get-scihub ()
   "Fetch fulltext article from Sci-Hub"
   (interactive)
-  (if uid
-      (pubmed--scihub uid)
+  (if pubmed-uid
+      (pubmed--scihub pubmed-uid)
     (message "No entry selected")))
 
 ;;;; Functions
