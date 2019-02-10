@@ -1,6 +1,12 @@
 # Emacs PubMed
 
-`Emacs-pubmed` is a GNU Emacs interface to the PubMed database.  I started the development to be able to search PubMed in my favorite environment.  It is in an early state of development and far from complete, but already usable.  `Emacs-pubmed` uses the [NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/) to query the PubMed database.  The most powerful feature probably is the easy access to full text PDFs of most articles.
+`Emacs-pubmed` is a GNU Emacs interface to the PubMed database. I started the
+development to be able to search PubMed in my favorite environment. It is in an
+early state of development and far from complete, but already usable.
+`Emacs-pubmed` uses the [NCBI
+E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/) to query the PubMed
+database. The most powerful feature probably is the easy access to full text
+PDFs of most articles.
 
 ## Installation
 
