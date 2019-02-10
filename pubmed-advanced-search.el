@@ -1,4 +1,5 @@
-;;; pubmed-advanced-search.el --- PubMed Advanced search Builder  -*- lexical-binding: t; -*-
+;;; pubmed-advanced-search.el --- PubMed Advanced search Builder -*-
+;;; lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 ;; Created: 2018-05-23
@@ -9,22 +10,27 @@
 
 ;; This file is NOT part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; This program is free software; you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation, either version 3 of the License, or (at your option) any later
+;; version.
 
-;; This program is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; This program is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+;; details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License along with
+;; this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; This is a GNU Emacs interface to the PubMed database of references on life sciences and biomedical topics. Use the PubMed Advanced search Builder to search for terms in a specific search field, browse the index of terms, combine searches using history and preview the number of search results. See [PubMed Help](https://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Advanced_Search) for instructions.
+;; This is a GNU Emacs interface to the PubMed database of references on life
+;; sciences and biomedical topics. Use the PubMed Advanced search Builder to
+;; search for terms in a specific search field, browse the index of terms,
+;; combine searches using history and preview the number of search results. See
+;; <https://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Advanced_Search> for
+;; instructions.
 
 ;;; Code:
 
