@@ -736,6 +736,16 @@
   "Return the pagination of the article SUMMARY."
   (esxml-query "Article Pagination MedlinePgn *" summary))
 
+(defun pubmed--summary-elocation (summary)
+  "Return an plist of Elocation IDs of the article SUMMARY.  The plist has the form \"('type TYPE 'id ID)\"."
+  (let* ((elocationidlist (esxml-query-all "ELocationID" (esxml-query "Article" summary)))
+	 elocationids)
+    (dolist (elocationid elocationidlist elocationids)
+      (let* ((type (esxml-node-attribute 'EIdType elocationid))
+	     (id (car (esxml-node-children elocationid))))
+    	(push (list 'type type 'id id) elocationids)))
+    (nreverse elocationids)))
+
 (defun pubmed--summary-abstract (summary)
   "Return the abstract of the article SUMMARY. Return nil if no abstract is available."
   (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Article Abstract" summary)))
