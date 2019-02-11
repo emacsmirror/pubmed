@@ -851,6 +851,10 @@ authors)
     	(push (list 'reftype reftype 'refsource refsource 'pmid pmid) commentscorrections)))
     (nreverse commentscorrections)))
 
+(defun pubmed--summary-publicationstatus (summary)
+  "Return the publication status of the article SUMMARY."
+  (esxml-query "PubmedData PublicationStatus *" summary))
+
 (defun pubmed--summary-articleid (summary)
   "Return an plist of the article IDs. The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
   (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
