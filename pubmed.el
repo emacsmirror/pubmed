@@ -704,15 +704,19 @@
     (list 'year year 'season season 'issue issue 'volume volume 'citedmedium citedmedium)))
 
 (defun pubmed--summary-journal-pubdate (summary)
-  "Return the journal publication date of the article SUMMARY."
+  "Return a string with the journal publication date of the article SUMMARY."
   (let* ((day (esxml-query "Article Journal JournalIssue PubDate Day *" summary))
 	 (month (esxml-query "Article Journal JournalIssue PubDate Month *" summary))
-	 (year (esxml-query "Article Journal JournalIssue PubDate Year *" summary)))
+	 (year (esxml-query "Article Journal JournalIssue PubDate Year *" summary))
+	 (medlinedate (esxml-query "Article Journal JournalIssue PubDate MedlineDate *" summary)))
     ;; If MONTH is a number
-    (when (string-match "[0-9]+" month)
+    (when (and month (string-match "[[:digit:]]+" month))
       ;; Convert the month number to the abbreviated month name
-	(setq month (nth (1- (string-to-number month)) pubmed-months)))
+      (setq month (nth (1- (string-to-number month)) pubmed-months)))
     (cond
+     ;; Non-standard date formats are stored in MedlineDate fields
+     (medlinedate
+      medlinedate)
      ((and month day)
       (concat year " " month " " day))
      (month
