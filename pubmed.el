@@ -948,16 +948,18 @@ authors)
       (goto-char (point-min)))
     (save-selected-window
       (switch-to-buffer-other-frame buffer))
-    (if
-	(equal (car content-type) "application/pdf")
-	(progn
-	  (message "Content-type: %s" (car content-type))
-	  (let ((data (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	    (with-current-buffer buffer
-       	      (set-buffer-file-coding-system 'binary)
-	      (erase-buffer)
-	      (insert data)
-      	      (pdf-view-mode)))) (eww-display-raw buffer))))
+    (cond
+     ((equal (car content-type) "application/pdf")
+      (progn
+	(message "Content-type: %s" (car content-type))
+	(let ((data (buffer-substring (1+ url-http-end-of-headers) (point-max))))
+	  (with-current-buffer buffer
+       	    (set-buffer-file-coding-system 'binary)
+	    (erase-buffer)
+	    (insert data)
+      	    (pdf-view-mode)))))
+     (t
+      (eww-display-raw buffer)))))
 
 ;;;; Footer
 
