@@ -510,15 +510,32 @@
       (pubmed-show-mode)
       (erase-buffer)
       (insert (pubmed--summary-journal-isoabbreviation summary))
-      (insert ". ")
+      (if (s-suffix-p "." (pubmed--summary-journal-isoabbreviation summary))
+	  (insert " ")
+	(insert ". "))
       (insert (pubmed--summary-journal-pubdate summary))
-      (insert ";")
-      (insert (plist-get (pubmed--summary-journal-issue summary) 'volume))
-      (when (plist-get (pubmed--summary-journal-issue summary) 'issue)
-      	(insert "(" (plist-get (pubmed--summary-journal-issue summary) 'issue) ")" ))
-      (insert ":")
-      (insert (pubmed--summary-pagination summary))
-      (insert ".\n\n")
+
+      (if (equal (pubmed--summary-publicationstatus summary) "aheadofprint")
+	  (progn
+	    (when (pubmed--summary-elocation summary)
+      	      (let ((elocationlist (pubmed--summary-elocation summary))
+      		    elocations)
+      		(dolist (elocation elocationlist)
+      		  (push (concat (plist-get elocation 'type) ": " (plist-get elocation 'id)) elocations))
+		(insert ". ")
+      		(insert (s-join ". " (nreverse elocations)))
+		(insert ". ")))
+	    (insert "[Epub ahead of print]"))
+	(when (plist-get (pubmed--summary-journal-issue summary) 'volume)
+	  (insert ";")
+	  (insert (plist-get (pubmed--summary-journal-issue summary) 'volume)))
+	(when (plist-get (pubmed--summary-journal-issue summary) 'issue)
+      	  (insert "(" (plist-get (pubmed--summary-journal-issue summary) 'issue) ")" ))
+	(when (pubmed--summary-pagination summary)
+	  (insert ":")
+	  (insert (pubmed--summary-pagination summary))
+	  (insert ". ")))
+      (insert "\n\n")
       (let ((article-title (pubmed--summary-article-title summary)))
 	(put-text-property 0 (length article-title) 'face 'bold article-title)
 	(insert article-title))
@@ -584,7 +601,7 @@
       	    ;; (insert (plist-get comment 'reftype))
       	    (insert (plist-get comment 'refsource))
       	    ;; TODO: make refsource a link
-      	    ;; (insert (plist-get comment 'pmid))	    
+      	    ;; (insert (plist-get comment 'pmid))
       	    (insert "\n"))))
       (when (pubmed--summary-references summary)
       	(insert "\n")
@@ -628,7 +645,7 @@
       		    (insert (plist-get qualifier 'qualifier))
       		    (insert "\n"))
       		;; If the descriptor (or subject heading) has no qualifiers (or subheadings)
-      		;; Insert "descriptor"		
+      		;; Insert "descriptor"
       		(insert (plist-get meshheading 'descriptor))
       		(insert "\n"))))))
       (when (pubmed--summary-grant summary)
@@ -648,16 +665,6 @@
       (goto-char (point-min)))
     (save-selected-window
       (display-buffer pubmed-entry-buffer))))
-
-(defun pubmed--summary-elocation (summary)
-  "Return an plist of Elocation IDs of the article SUMMARY.  The plist has the form \"('type TYPE 'id ID)\"."
-  (let* ((elocationidlist (esxml-query-all "ELocationID" (esxml-query "PubmedData Article" summary)))
-	 elocationids)
-    (dolist (elocationid elocationidlist elocationids)
-      (let* ((type (intern (esxml-node-attribute 'EIdType elocationid)))
-	     (id (car (esxml-node-children elocationid))))
-    	(push (list 'type type 'id id) elocationids)))
-    (nreverse elocationids)))
 
 (defun pubmed--summary-pmid (summary)
   "Return the PMID of the article SUMMARY"
@@ -769,7 +776,7 @@
 (defun pubmed--summary-authors (summary)
   "Return an plist with the authors of the article SUMMARY. Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
   (let ((authorlist (esxml-query-all "Author" (esxml-query "Article AuthorList" summary)))
-authors)
+	authors)
     (dolist (author authorlist)
       (let ((lastname (esxml-query "LastName *" author))
 	    (forename (esxml-query "ForeName *" author))
@@ -920,7 +927,7 @@ authors)
 	 (arguments (concat "?email=" unpaywall-email)))
     (message "doi: %s" doi)
     (url-retrieve (concat url arguments) 'pubmed--check-unpaywall)))
-  
+
 (defun pubmed--check-unpaywall (status)
   "Callback function of `pubmed--unpaywall'. Check the STATUS and HTTP status of the response. Call `pubmed--parse-unpaywall' when no error occurred."
   (let ((url-error (plist-get status :error))
