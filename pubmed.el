@@ -662,8 +662,9 @@
       		(insert (plist-get grant 'grantid))
       		(insert "/")
       		(insert (plist-get grant 'agency))
-      		(insert "/")
-      		(insert (plist-get grant 'country))
+		(when (plist-get grant 'country)
+      		  (insert "/")
+      		  (insert (plist-get grant 'country)))
       		(insert "\n"))))
 	  (goto-char (point-min))))
        (t
