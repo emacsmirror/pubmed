@@ -38,6 +38,7 @@
 
 (require 'pubmed)
 (require 'pubmed-history)
+(require 'pubmed-completion-at-point)
 (require 's)
 (require 'widget)
 
@@ -99,10 +100,18 @@
   (interactive)
   (with-current-buffer "*PubMed Advanced Search Builder*"
     (let* ((old-value (widget-editable-list-value-get (pubmed-widget-get 'search-builder)))
-	  (new-value (append old-value (list `(,boolean "" ,query)))))
+	   (new-value (append old-value (list `(,boolean "" ,query)))))
       (widget-value-set (pubmed-widget-get 'search-builder) new-value)
       (widget-setup)
       (pubmed-widget-build-search))))
+
+(defun pubmed-widget-get-sibling (widget widget-type)
+  "Get the sibling of WIDGET with type WIDGET-TYPE."
+  (let ((siblings (widget-get (widget-get widget :parent) :children))
+	sibling-of-type)
+    (dolist (sibling siblings sibling-of-type)
+      (when (eq (widget-type sibling) 'editable-field)
+	(setq sibling-of-type sibling)))))
 
 (defun pubmed-advanced-search ()
   (interactive)
@@ -154,7 +163,19 @@
 					     :value ""
 					     :help-echo "Select Field"
 					     :notify (lambda (widget &rest ignore)
-						       (pubmed-widget-build-search))
+					     	       (pubmed-widget-build-search)
+						       (let ((value (widget-get widget :value))
+							     (sibling (pubmed-widget-get-sibling widget 'editable-field)))
+							 (cond
+							  ((equal value "")
+							   (widget-put sibling :complete-function 'pubmed-complete))
+							  ((string-prefix-p "[Author" value)
+							   (widget-put sibling :complete-function 'pubmed-author-complete))
+							  ((equal value "[Journal]")
+							   (widget-put sibling :complete-function 'pubmed-journal-complete))
+							  (t
+							   (widget-put sibling :complete-function nil)))
+							 (widget-setup)))
     					     (item :tag "Affiliation" :value "[Affiliation]")
   					     (item :tag "All Fields" :value "")
   					     (item :tag "Author" :value "[Author]")
@@ -225,7 +246,7 @@
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
 			   (when (yes-or-no-p "Your entire search history is about to be cleared.")
-			   (pubmed-clear-history)))
+			     (pubmed-clear-history)))
 		 "Clear history")
 
   (use-local-map widget-keymap)
