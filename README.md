@@ -56,10 +56,12 @@ The following keybindings are available:
 - <kbd>f</kbd>: Get the free, maybe not legal, full text PDF of the current
   entry.
 - <kbd>g</kbd>: Get the free, legal, full text PDF of the current entry.
+- <kbd>m</kbd>: Mark the current entry.
 - <kbd>n</kbd>: Show the next entry.
 - <kbd>p</kbd>: Show the previous entry.
 - <kbd>q</kbd>: Quit window.
 - <kbd>s</kbd>: Search PubMed.
+- <kbd>u</kbd>: Unmark the current entry.
 
 **Completion**
 

@@ -138,10 +138,12 @@
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "RET") 'pubmed-show-current-entry)
     (define-key map (kbd "g") 'pubmed-get-unpaywall)
+    (define-key map (kbd "m") 'pubmed-mark)
     (define-key map (kbd "n") 'pubmed-show-next)
     (define-key map (kbd "p") 'pubmed-show-prev)
     (define-key map (kbd "q") 'quit-window)
     (define-key map (kbd "s") 'pubmed-search)
+    (define-key map (kbd "u") 'pubmed-unmark)
     map)
   "Local keymap for `pubmed-mode'.")
 
@@ -213,6 +215,16 @@
     (setq pubmed-uid (tabulated-list-get-id))
     (if (get-buffer-window "*PubMed-entry*" "visible")
 	(pubmed-show-entry pubmed-uid))))
+
+(defun pubmed-mark (&optional _num)
+  "Mark an entry and move to the next line."
+  (interactive "p")
+  (tabulated-list-put-tag "*" t))
+
+(defun pubmed-unmark (&optional _num)
+  "Unmark an entry and move to the next line."
+  (interactive "p")
+  (tabulated-list-put-tag " " t))
 
 (defun pubmed-convert-id (uid)
   "Return the doi of article UID.  Use commas to separate multiple UIDs. This service allows for conversion of up to 200 UIDs in a single request. If you have a larger number of IDs, split your list into smaller subsets."
