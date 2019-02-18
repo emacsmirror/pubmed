@@ -221,10 +221,11 @@
   					     (item :tag "Volume" :value "[Volume]"))
 					    (editable-field
 					     :action (lambda (widget &rest ignore)
-						       ;; Insert a new item.
+						       ;; Insert a new group when <RET> is hit
 						       (widget-apply (pubmed-widget-get 'search-builder) :insert-before (widget-get (pubmed-widget-get 'search-builder) :widget)))
 					     :notify (lambda (widget &rest ignore)
 						       (pubmed-widget-build-search))
+					     :complete-function pubmed-complete
 					     "")))))
   
   (widget-insert "\n")
