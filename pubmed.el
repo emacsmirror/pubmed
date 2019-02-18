@@ -624,8 +624,8 @@
 	      (put-text-property 0 (length heading) 'face 'bold heading)
 	      (insert heading))
       	    (insert "\n")
-      	    (let ((publicationtypes (pubmed--summary-publicationtype summary)))
-      	      (dolist (publicationtype publicationtypes)
+      	    (let ((publicationtypelist (pubmed--summary-publicationtype summary)))
+      	      (dolist (publicationtype publicationtypelist)
       		(insert (plist-get publicationtype 'type))
       		(insert "\n"))))
 	  (when (pubmed--summary-mesh summary)
@@ -634,9 +634,9 @@
 	      (put-text-property 0 (length heading) 'face 'bold heading)
 	      (insert heading))
       	    (insert "\n")
-      	    (let ((meshheadings (pubmed--summary-mesh summary)))
+      	    (let ((meshheadinglist (pubmed--summary-mesh summary)))
       	      ;; Iterate over the meshheadings
-      	      (dolist (meshheading meshheadings)
+      	      (dolist (meshheading meshheadinglist)
       		(let ((qualifiers (plist-get meshheading 'qualifiers)))
       		  ;; If the descriptor (or subject heading) has qualifiers (or subheadings)
       		  (if qualifiers
@@ -657,8 +657,8 @@
 	      (put-text-property 0 (length heading) 'face 'bold heading)
 	      (insert heading))
       	    (insert "\n")
-      	    (let ((grants (pubmed--summary-grant summary)))
-      	      (dolist (grant grants)
+      	    (let ((grantlist (pubmed--summary-grant summary)))
+      	      (dolist (grant grantlist)
       		(insert (plist-get grant 'grantid))
       		(insert "/")
       		(insert (plist-get grant 'agency))
@@ -770,7 +770,7 @@
 	texts)
     (when textlist
       ;; Iterate through AbstractText nodes, where structure is like: (AbstractText ((Label . "LABEL") (NlmCategory . "CATEGORY")) "ABSTRACTTEXT")
-      (dolist (text textlist texts)
+      (dolist (text textlist)
 	(let ((label (esxml-node-attribute 'Label text))
 	      (nlmcategory (esxml-node-attribute 'NlmCategory text)) ; NlmCategory attribute is ignored
 	      (abstracttext (car (esxml-node-children text))))
@@ -813,7 +813,7 @@
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
   (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "Article PublicationTypeList" summary)))
 	publicationtypes) ;; make sure list starts empty
-    (dolist (publicationtype publicationtypelist publicationtypes)
+    (dolist (publicationtype publicationtypelist)
       (let ((type (car (esxml-node-children publicationtype)))
     	    (ui (esxml-node-attribute 'UI publicationtype)))
 	;; For each `publicationtype' push the type to the list `publicationtypes'
@@ -871,7 +871,7 @@
   "Return the correction of the article SUMMARY. The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
   (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
 	commentscorrections)
-    (dolist (commentscorrection commentscorrectionslist commentscorrections)
+    (dolist (commentscorrection commentscorrectionslist)
       (let ((reftype (esxml-node-attribute 'RefType commentscorrection))
 	    (refsource (esxml-query "RefSource *" commentscorrection))
 	    (pmid (esxml-query "PMID *" commentscorrection)))
@@ -887,7 +887,7 @@
   "Return an plist of the article IDs. The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
   (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
 	articleids)
-    (dolist (articleid articleidlist articleids)
+    (dolist (articleid articleidlist)
       (let ((idtype (intern (esxml-node-attribute 'IdType articleid)))
 	    (id (car (esxml-node-children articleid))))
 	(push idtype articleids)
@@ -906,7 +906,7 @@
   "Return an plist with the investigators of the article SUMMARY. Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
   (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
 	investigators)
-    (dolist (investigator investigatorlist investigators)
+    (dolist (investigator investigatorlist)
       (let ((lastname (esxml-query "LastName *" investigator))
 	    (forename (esxml-query "ForeName *" investigator))
     	    (initials (esxml-query "Initials *" investigator)))
