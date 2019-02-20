@@ -46,6 +46,12 @@
 (require 'url)
 
 ;;;; Variables
+(defvar pubmed-search-completion t
+  "When non-NIL use completion using PubMed suggestions.")
+
+(defvar pubmed-history-list nil
+  "The PubMed history list.")
+
 (defvar pubmed-api_key ""
   "E-utilities API key.")
 
@@ -171,10 +177,15 @@
   (buffer-disable-undo))
 
 (defun pubmed-search (query)
-  "Search PubMed with QUERY return a vector of UIDs."
+  "Search PubMed with QUERY."
   (interactive
-   (let ((query (read-string "Query: ")))
-     (list query)))
+   (progn
+     (when pubmed-search-completion
+       (setq pubmed-mode-map (copy-keymap minibuffer-local-map))
+       (define-key pubmed-mode-map (kbd "TAB") 'completion-at-point)
+       (setq minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions 'pubmed-completion-at-point nil t))))
+     (let ((query (read-from-minibuffer "Query: " nil pubmed-mode-map nil pubmed-history-list)))
+       (list query))))
   (pubmed--esearch query))
 
 (defun pubmed-show-entry (uid)
@@ -183,13 +194,13 @@
   ;; "Return the parsed summary for an UID"
   ;; TODO: Only the summary of the first UID is returned. Consider returning multiple summaries at once when multiple UIDs are passed as argument.
   (let ((url-request-method "POST")
-	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	 (url-request-data (concat "db=" pubmed-db
-				   "&retmode=xml"
-				   "&rettype=abstract"
-				   "&id=" uid
-				   (when (not (string-empty-p pubmed-api_key))
-				     (concat "&api_key=" pubmed-api_key)))))
+	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
+	(url-request-data (concat "db=" pubmed-db
+				  "&retmode=xml"
+				  "&rettype=abstract"
+				  "&id=" uid
+				  (when (not (string-empty-p pubmed-api_key))
+				    (concat "&api_key=" pubmed-api_key)))))
     (url-retrieve pubmed-efetch-url 'pubmed--check-efetch)))
 
 (defun pubmed-show-current-entry ()
