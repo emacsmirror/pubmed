@@ -154,6 +154,12 @@
     map)
   "Local keymap for `pubmed-mode'.")
 
+(defvar pubmed-search-mode-map
+  (let ((map (copy-keymap minibuffer-local-map)))
+    (define-key map (kbd "TAB") 'completion-at-point)
+    map)
+  "Local keymap for `pubmed-search-mode'.")
+
 ;;;; Mode
 
 (define-derived-mode pubmed-mode tabulated-list-mode "pubmed"
@@ -180,13 +186,9 @@
 (defun pubmed-search (query)
   "Search PubMed with QUERY."
   (interactive
-   (progn
-     (when pubmed-search-completion
-       (setq pubmed-mode-map (copy-keymap minibuffer-local-map))
-       (define-key pubmed-mode-map (kbd "TAB") 'completion-at-point)
-       (setq minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions 'pubmed-completion-at-point nil t))))
-     (let ((query (read-from-minibuffer "Query: " nil pubmed-mode-map nil pubmed-history-list)))
-       (list query))))
+   (let* ((minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions 'pubmed-completion-at-point nil t)))
+	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil pubmed-history-list)))
+     (list query)))
   (pubmed--esearch query))
 
 (defun pubmed-show-entry (uid)
