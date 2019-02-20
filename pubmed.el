@@ -38,6 +38,7 @@
 
 ;;;; Requirements
 
+(require 'pubmed-completion-at-point)
 (require 'esxml)
 (require 'esxml-query)
 (require 'eww)
