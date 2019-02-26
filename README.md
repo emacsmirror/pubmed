@@ -67,14 +67,14 @@ The following keybindings are available:
 
 If pubmed-search-completion is set to non-nil, the `pubmed-search` function
 includes completion for PubMed suggestions. The default key to invoke completion
-is `<TAB>'.
+is `<TAB>`.
 
 In `pubmed-advanced-search`, the "All Fields", "Author" and "Journal" search
 boxes include completion for PubMed suggestions. The default key to invoke
-completion is the `C-M-i' or `M-<TAB>' command, bound to `completion-at-point'.
-On graphical displays, the `M-<TAB>' key is usually reserved by the window
-manager for switching graphical windows, so you should type `C-M-i' or `<ESC>
-<TAB>' instead.
+completion is the `C-M-i` or `M-<TAB>` command, bound to `completion-at-point`.
+On graphical displays, the `M-<TAB>` key is usually reserved by the window
+manager for switching graphical windows, so you should type `C-M-i` or `<ESC>
+<TAB>` instead.
 
 
 **NCBI API key**
