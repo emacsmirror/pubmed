@@ -55,7 +55,7 @@ The following keybindings are available:
 - <kbd>RET</kbd>: Show the current entry.
 - <kbd>f</kbd>: Get the free, maybe not legal, full text PDF of the current
   entry.
-- <kbd>g</kbd>: Get the free, legal, full text PDF of the current entry.
+- <kbd>g</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
 - <kbd>n</kbd>: Show the next entry.
 - <kbd>p</kbd>: Show the previous entry.
@@ -108,13 +108,48 @@ file:
 Full text PDFs can be found by using
 [Unpaywall](https://unpaywall.org/products/api) or Sci-Hub:
 
-- Using Unpaywall is legal and requires you to provide your email address by
-  setting the value of `unpaywall-email` in your `init.el` or `.emacs` file:
+- The Unpaywall fulltext function is invoked by `M-x
+  pubmed-get-unpaywall`. Using Unpaywall is legal and requires you to
+  provide your email address by setting the value of `unpaywall-email`
+  in your `init.el` or `.emacs` file:
 
 ```lisp
 (setq unpaywall-email "your_email@example.com")
 ```
 
-- Using Sci-Hub may not be legal and requires you to provide the url by setting
-the value of `scihub-url` in your `init.el` or `.emacs` file: ```lisp (require
-'pubmed-scihub) (setq scihub-url "http://url-of-sci-hub.com/") ```
+- The Sci-Hub fulltext function is invoked by `M-x pubmed-get-scihub`.
+Using Sci-Hub may not be legal and requires you to provide the url by
+setting the value of `scihub-url` in your `init.el` or `.emacs` file:
+
+```lisp
+(require 'pubmed-scihub)
+(setq scihub-url "http://url-of-sci-hub.com/")
+```
+
+- The command `M-x pubmed-get-fulltext` (or the <kbd>g</kbd>) tries to
+  fetch the fulltext PDF of the current entry, using multiple methods.
+  The functions in `pubmed-fulltext-functions` are tried in order,
+  until a fulltext PDF is found.
+
+- The value of the variable `pubmed-fulltext-functions` should be a
+  list of functions, which are tried in order by `pubmed-get-fulltext`
+  to fetch fulltext articles. To change the behavior of
+  `pubmed-get-fulltext`, remove, change the order of, or insert
+  functions in this list. When the command `pubmed-get-fulltext` runs,
+  it calls the functions in the list one by one, without any argument.
+  Each function should return `nil` if it is unable to find a fulltext
+  article of the entry at point. Otherwise it should return the buffer
+  of the PDF and show the PDF in a new frame as a side effect. By
+  default, only `pubmed-get-unpaywall` is used. To add
+  `pubmed-get-scihub`, set the value of `pubmed-fulltext-functions` in
+  your `init.el` or `.emacs` file:
+
+```lisp
+(setq pubmed-fulltext-functions '(pubmed-get-unpaywall pubmed-get-scihub))
+```
+
+or
+
+```lisp
+(add-to-list 'pubmed-fulltext-functions 'pubmed-get-scihub t)
+```
