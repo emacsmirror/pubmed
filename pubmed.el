@@ -127,16 +127,8 @@
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
-(defvar unpaywall-url "https://api.unpaywall.org"
-  "Unpaywall URL.")
-
-;; The current version of the API is Version 2, and this is the only version supported.
-(defvar unpaywall-version "v2"
-  "Unpaywall API version.")
-
-;; Requests must include your email as a parameter at the end of the URL, like this: api.unpaywall.org/my/request?email=YOUR_EMAIL.
-(defvar unpaywall-email ""
-  "E-mail address to authenticate Unpaywall requests.")
+(defvar pubmed-fulltext-functions '(pubmed-get-unpaywall)
+  "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles. To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list.")
 
 ;;;; Keymap
 
@@ -144,7 +136,7 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "RET") 'pubmed-show-current-entry)
-    (define-key map (kbd "g") 'pubmed-get-unpaywall)
+    (define-key map (kbd "g") 'pubmed-get-fulltext)
     (define-key map (kbd "m") 'pubmed-mark)
     (define-key map (kbd "n") 'pubmed-show-next)
     (define-key map (kbd "p") 'pubmed-show-prev)
@@ -258,12 +250,31 @@
 	 (doi (plist-get (car records) :doi)))
     doi))
 
-(defun pubmed-get-unpaywall ()
-  "Fetch fulltext article from Unpaywall"
+(defun pubmed-get-fulltext ()
+  "In Pubmed, try to fetch the fulltext PDF of the current entry, using multiple methods.
+The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
   (interactive)
-  (if pubmed-uid
-      (pubmed--unpaywall pubmed-uid)
-    (message "No entry selected")))
+  (lexical-let ((i 0))
+    (deferred:$
+      (deferred:next
+	(deferred:lambda ()
+	  (cond
+	   ((eq 0 (length pubmed-fulltext-functions))
+	    (error "No functions in the list `pubmed-fulltext-functions'"))
+	   ((>= i (length pubmed-fulltext-functions))
+	    (error "No fulltext PDF found"))
+	   ((< i (length pubmed-fulltext-functions))
+	    (progn
+	      (message "Trying %S..." (nth i pubmed-fulltext-functions))
+	      
+	      (deferred:$
+		(deferred:call (nth i pubmed-fulltext-functions))
+
+		(deferred:nextc it
+		  (lambda (result)
+		    (setq i (1+ i))
+		    (unless result
+		      (deferred:next self)))))))))))))
 
 ;;;; Functions
 
@@ -951,73 +962,6 @@
 		(id (car (esxml-node-children articleid))))
 	    (push (list 'citation citation idtype id) references)))))
     (nreverse references)))
-
-(defun pubmed--unpaywall (uid)
-  "Return buffer of Unpaywall request. Retrieve the response of a POST request with the DOI of the currently selected PubMed entry and call `pubmed--parse-unpaywall' with the current buffer containing the reponse."
-  (let* ((doi (pubmed-convert-id uid))
-	 (url-request-method "GET")
-	 (url (concat unpaywall-url "/" unpaywall-version "/" doi))
-	 (arguments (concat "?email=" unpaywall-email)))
-    (message "doi: %s" doi)
-    (url-retrieve (concat url arguments) 'pubmed--check-unpaywall)))
-
-(defun pubmed--check-unpaywall (status)
-  "Callback function of `pubmed--unpaywall'. Check the STATUS and HTTP status of the response. Call `pubmed--parse-unpaywall' when no error occurred."
-  (let ((url-error (plist-get status :error))
-	;; (url-redirect (plist-get status :redirect))
-	(first-header-line (buffer-substring (point-min) (line-end-position))))
-    (cond
-     (url-error
-      (signal (car url-error) (cdr url-error)))
-     ;; (url-redirect
-     ;;  (message "Redirected-to: %s" (url-redirect)))
-     ((pubmed--header-error-p (pubmed--parse-header first-header-line))
-      (error "HTTP error: %s" (pubmed--get-header-error (pubmed--parse-header first-header-line))))
-     (t
-      (pubmed--parse-unpaywall)))))
-
-(defun pubmed--parse-unpaywall ()
-  "Parse the JSON object in the data retrieved by `pubmed--unpaywall'."
-  (let* ((json (decode-coding-string (buffer-substring (1+ url-http-end-of-headers) (point-max)) 'utf-8))
-	 (json-object-type 'plist)
-         (json-array-type 'list)
-         (json-key-type nil)
-	 (json-object (json-read-from-string json))
-	 (best_oa_location (plist-get json-object :best_oa_location))
-	 (url_for_pdf (plist-get best_oa_location :url_for_pdf)))
-    (if url_for_pdf
-	(progn
-	  (message "URL for PDF: %s" url_for_pdf)
-	  (url-retrieve url_for_pdf 'pubmed--unpaywall-pdf (list url_for_pdf)))
-      (message "No pdf found"))))
-
-(defun pubmed--unpaywall-pdf (status url)
-  "Retrieve URL for PDF."
-  (let* ((headers (eww-parse-headers))
-	 (content-type
-	  (mail-header-parse-content-type
-           (if (zerop (length (cdr (assoc "content-type" headers))))
-	       "text/plain"
-             (cdr (assoc "content-type" headers)))))
-	 (buffer (generate-new-buffer "*Unpaywall*")))
-    (with-current-buffer buffer
-      (erase-buffer)
-      (insert (format "Loading %s..." url))
-      (goto-char (point-min)))
-    (save-selected-window
-      (switch-to-buffer-other-frame buffer))
-    (cond
-     ((equal (car content-type) "application/pdf")
-      (progn
-	(message "Content-type: %s" (car content-type))
-	(let ((data (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	  (with-current-buffer buffer
-       	    (set-buffer-file-coding-system 'binary)
-	    (erase-buffer)
-	    (insert data)
-      	    (pdf-view-mode)))))
-     (t
-      (eww-display-raw buffer)))))
 
 ;;;; Footer
 

@@ -1,10 +1,10 @@
-;;; pubmed-scihub.el --- Interface to PubMed -*- lexical-binding: t; -*-
+;;; pubmed-scihub.el --- Deferred fulltext functions for PubMed -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 ;; Created: 2018-05-23
 ;; Version: 0.1
 ;; Keywords: pubmed
-;; Package-Requires: ((emacs "25.1") (esxml) (pdf-tools))
+;; Package-Requires: ((emacs "25.1") (deferred) (esxml) (pdf-tools)
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.
@@ -19,203 +19,185 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
-;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License along with
+;; this program. If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
-;; Download PDFs using the Sci-Hub database. You need to provide a Sci-Hub url by setting the value of SCIHUB-URL in your .emacs: (setq scihub-url "http://url-of-sci-hub.com/")
+;; Download fulltext PDFs of articles using the Sci-Hub database. You need to provide a Sci-Hub url by setting the value of SCIHUB-URL in your .init.el or .emacs file: (setq scihub-url "http://url-of-sci-hub.com/")
 
 ;;; Code:
 
 ;;;; Requirements
 
 (require 'pubmed)
+(require 'deferred)
 (require 'esxml)
 (require 'esxml-query)
 (require 'eww)
-(require 'pdf-tools)
-(require 's)
 (require 'url)
 
 ;;;; Variables
 
 (defvar scihub-url ""
-  "Sci-Hub URL")
-
-(add-hook 'pubmed-mode-hook
-          (lambda ()
-            (define-key pubmed-mode-map "f"
-              'pubmed-get-scihub)))
+  "Sci-Hub URL.")
 
 ;;;; Commands
-
 (defun pubmed-get-scihub ()
-  "Fetch fulltext article from Sci-Hub"
   (interactive)
-  (if pubmed-uid
-      (pubmed--scihub pubmed-uid)
-    (message "No entry selected")))
+  "In Pubmed, fetch the fulltext PDF from Sci-Hub of the current entry or return nil if none is found."
+  ;; FIXME: Loading of Sci-Hub can be quite slow, so the user is tempted to invoke `pubmed-get-scihub' multiple times if it doesn't seem to respond immediately. Therefore, consider a locking mechanism to prevent multiple parallel processes.
+    (if pubmed-uid
+	(pubmed--scihub pubmed-uid)
+      (error "No entry selected")))
 
 ;;;; Functions
 
-(defun pubmed--scihub (uid)
-  "Return buffer of Sci-Hub request.
-Retrieve the response of a POST request with the UID of the currently selected PubMed entry and call `pubmed--parse-scihub' with the current buffer containing the reponse."
-  ;; Sci-Hub provides academic papers for direct download. The Sci-Hub website accepts HTTP POST requests with a key-value pair, where the key is `request' and the value can be one of:
-  ;; - a search string
-  ;; - an URL of a scholarly article
-  ;; - a DOI
-  ;; - a PMID
-  (interactive)
-  (let ((url-request-method "POST")
-        (url-request-extra-headers '(("Content-Type" . "application/x-www-form-urlencoded")))
-	(url-request-data (concat "request=" uid)))
-    (url-retrieve scihub-url 'pubmed--check-scihub)))
+(defun pubmed--scihub (pmid)
+  "Deferred chain to retrieve the fulltext PDF of the PMID."
+  ;; FIXME: Every captcha and PDF opens a new frame. Consider reusing the same frame.
+  (let ((iframe-url))
+    (deferred:$
+      ;; try
+      (deferred:$
 
-(defun pubmed--check-scihub (status)
-  "Callback function of `pubmed--scihub'. Check the STATUS and HTTP status of the response, and signal an error if an HTTP error occurred. If we are redirected, the article is Open Access and ask a WWW browser to open the URL. Call `pubmed--parse-scihub' when no error occurred and if we are not redirected."
-  (let ((url-error (plist-get status :error))
-	(url-redirect (plist-get status :redirect))
-	(first-header-line (buffer-substring (point-min) (line-end-position))))
-    (cond
-     (url-error
-      (signal (car url-error) (cdr url-error)))
-     ((pubmed--header-error-p (pubmed--parse-header first-header-line))
-      (error "HTTP error: %s" (pubmed--get-header-error (pubmed--parse-header first-header-line))))
-     (url-redirect
-      (message "Redirected to: %s" url-redirect)
-      ;; The redirect URL is a concatenation of the SCIHUB-URL and the URL of the article source.
-      (let ((buffer (generate-new-buffer "*Sci-Hub redirect*")))
-	(with-current-buffer buffer
-	  (browse-url (s-chop-prefix scihub-url url-redirect)))
-	(switch-to-buffer buffer)))
-     (t
-      (pubmed--parse-scihub)))))
+	(deferred:timeout 5000 "Time-out"
+	  ;; Sci-Hub provides academic papers for direct download. The Sci-Hub website accepts HTTP POST requests with a key-value pair, where the key is `request' and the value can be one of:
+	  ;; - a search string
+	  ;; - an URL of a scholarly article
+	  ;; - a DOI
+	  ;; - a PMID
+	  (let ((parameters (list (cons "request" pmid))))
+	    (deferred:url-post scihub-url parameters)))
 
-(defun pubmed--parse-scihub ()
-  "Parse the buffer returned by `pubmed--check-scihub'.
-Extract the link to the PDF and call `pubmed--scihub-iframe' with the current buffer containing the reponse."
-  (let* ((headers (eww-parse-headers))
-	 (content-type
-	  (mail-header-parse-content-type
-	   (if (zerop (length (cdr (assoc "content-type" headers))))
-	       "text/plain"
-	     (cdr (assoc "content-type" headers)))))
-	 (dom (libxml-parse-html-region (1+ url-http-end-of-headers) (point-max))))
-    (cond
-     ;; If the article is not found, the HTTP response contains the message in Russian and English
-     ((equal (esxml-query "p *" dom) "статья не найдена / article not found")
-      (with-current-buffer
-	  (generate-new-buffer "*Sci-Hub*")
-       	(erase-buffer)
-	(insert "Article not found")))
-     ;; If the article is found, the HTTP response contains an inline frame marked up as follows:
-     ;; <iframe src = "pdflink#view=FitH" id = "pdf"></iframe>
-     ((esxml-node-attribute 'src (esxml-query "iframe[id=pdf]" dom))
-      (let* ((url (esxml-node-attribute 'src (esxml-query "iframe[id=pdf]" dom)))
-	     (parsed-url (url-generic-parse-url url)))
-	;; Sometimes, the URL is not valid and misses the `http' type.
-	(when (not (url-type parsed-url))
-	  (setf (url-type parsed-url) "http")
-	  (setq url (url-recreate-url parsed-url)))
-	;; Always chop off anchors.
-	(when (string-match "#.*" url)
-	  (setq url (substring url 0 (match-beginning 0))))
-	(message "Found article: %s" url)
-	(pubmed--scihub-iframe url)))
-     (t
-      (with-current-buffer
-	  (generate-new-buffer "*Sci-Hub*")
-       	(erase-buffer)
-	(shr-insert-document dom) ; render the parsed document DOM into the current buffer.
-	)))))
+	(deferred:nextc it
+	  (lambda (buffer)
+	    "Parse the HTML in BUFFER. Return the url of the iframe or nil if none is found."
+	    (let ((dom (with-current-buffer buffer (libxml-parse-html-region (point-min) (point-max)))))
+	      (cond
+	       ;; If the article is found, the HTTP response contains an inline frame marked up as follows:
+	       ;; <iframe src = "pdflink#view=FitH" id = "pdf"></iframe>
+	       ((esxml-node-attribute 'src (esxml-query "iframe[id=pdf]" dom))
+		(let* ((url (esxml-node-attribute 'src (esxml-query "iframe[id=pdf]" dom)))
+    		       (parsed-url (url-generic-parse-url url)))
+    		  ;; Sometimes, the URL is not valid and misses the `http' type.
+    		  (when (not (url-type parsed-url))
+    		    (setf (url-type parsed-url) "http")
+    		    (setq url (url-recreate-url parsed-url)))
+    		  ;; Always chop off anchors.
+    		  (when (string-match "#.*" url)
+    		    (setq url (substring url 0 (match-beginning 0))))
+    		  url))
+	       (t
+		(error "Sci-Hub found no fulltext article"))))))
 
-(defun pubmed--scihub-iframe (url)
-  "Retrieve URL of the iframe and call `pubmed--parse-scihub-iframe' with the current buffer containing the reponse."
-  (let ((buffer (generate-new-buffer "*Sci-Hub*"))
-	(inhibit-read-only t))
-    (with-current-buffer buffer
-      (read-only-mode)
-      (erase-buffer)
-      (insert (format "Loading %s..." url))
-      (goto-char (point-min))
-      (url-retrieve url 'pubmed--check-scihub-iframe (list url (current-buffer))))
-    (save-selected-window
-      (switch-to-buffer-other-frame buffer))))
+	(deferred:nextc it
+	  (lambda (url)
+	    "Retrieve the URL of the iframe." 
+	    (setq iframe-url url)
+	    (deferred:timeout 5000 "Time-out"
+	      (deferred:url-retrieve iframe-url))))
 
-(defun pubmed--check-scihub-iframe (status url buffer)
-  "Callback function of `pubmed--scihub'. Check the STATUS and HTTP status of the response, and signal an error if an HTTP error occurred. Call `pubmed--parse-scihub' when no error occurred."
-  (let ((url-error (plist-get status :error))
-	(first-header-line (buffer-substring (point-min) (line-end-position))))
-    (cond
-     (url-error
-      (signal (car url-error) (cdr url-error)))
-     ((pubmed--header-error-p (pubmed--parse-header first-header-line))
-      (error "HTTP error: %s" (pubmed--get-header-error (pubmed--parse-header first-header-line))))
-     (t
-      (pubmed--parse-scihub-iframe url buffer)))))
+	(deferred:nextc it
+	  (deferred:lambda (buffer)
+	    "Parse the HTML object in BUFFER and extract the PDF or captcha."
+	    ;; The buffer contains either a PDF file or a HTML file with a captcha image.
+	    (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
+		   (content-type (cdr (assoc "content-type" headers))))
+	      ;; Extract the captcha if the buffer contains a HTML file. The captcha image is marked up as follows:
+	      ;; <img id="captcha" src="CAPTCHA" />
+	      (cond
+	       ((equal content-type "text/html; charset=UTF-8")
+		(let (captcha-id
+		      captcha-url)
+		  (deferred:$
+		    (deferred:next
+		      (lambda ()
+			(let* ((base-url (car (shr-parse-base iframe-url)))
+      			       (dom (with-current-buffer buffer
+				      (libxml-parse-html-region (1+ url-http-end-of-headers) (point-max)))) ; create a DOM parse tree
+      			       (img-tag (esxml-query "img[id=captcha]" dom)) ; extract the img tag of the DOM parse tree
+      			       (rel-url (dom-attr img-tag 'src)) ; extract the image url
+      			       (url (concat base-url rel-url))
+			       (id (esxml-node-attribute 'value (esxml-query "input[name=id]" dom))))
+			  (if (and url id)
+			      ;; Retrieve captcha image.
+			      (progn
+				(setq captcha-id id
+				      captcha-url url)
+				(deferred:url-get captcha-url))
+			    (error "No captcha found")))))
+		    
+		    (deferred:nextc it
+		      (lambda (image-buffer)
+			"Show captcha image in a new buffer."
+			(let ((image-data (with-current-buffer image-buffer (buffer-string)))
+		      	      (captcha-buffer (generate-new-buffer "*Sci-Hub Captcha*")))
+			  (unwind-protect
+		      	      (with-current-buffer captcha-buffer
+		      		(erase-buffer)
+		      		(insert-image (create-image image-data nil t))
+				(read-only-mode)
+		      		(switch-to-buffer-other-frame captcha-buffer))
+		            (kill-buffer image-buffer)))))
+		    
+		    (deferred:nextc it
+		      (lambda ()
+			"Read the text displayed by the CAPTCHA from the minibuffer."
+			(read-from-minibuffer "Captcha: ")))
+		    
+		    (deferred:nextc it
+		      (lambda (answer)
+			"Send the answer to the CAPTCHA in an HTTP POST request to IFRAME-URL"
+			(deferred:timeout 5000 "Time-out"
+			  (let ((url-request-method "POST")
+				(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
+				(url-request-data (concat "id=" captcha-id "&answer=" answer)))
+			    (deferred:url-retrieve iframe-url)))))
 
-(defun pubmed--parse-scihub-iframe (url buffer)
-  "Parse the buffer returned by `pubmed--scihub-frame'.
-Check whether the buffer contains a PDF file or an HTML file with a captcha, and open the PDF file or show the captcha."
-  (let* ((headers (eww-parse-headers))
-	 (content-type
-	  (mail-header-parse-content-type
-           (if (zerop (length (cdr (assoc "content-type" headers))))
-	       "text/plain"
-             (cdr (assoc "content-type" headers))))))
-    ;; The buffer contains either a PDF file or a HTML file with a captcha image.
-    (cond
-     ;; Extract the captcha if the buffer contains a HTML file
-     ;; The captcha image is marked up as follows:
-     ;; <img id="captcha" src="CAPTCHA" />
-     ((eww-html-p (car content-type))
-      (message "Content-type: %s" (car content-type))
-      (let* ((base-url (car (shr-parse-base url)))
-	     (dom (libxml-parse-html-region (1+ url-http-end-of-headers) (point-max))) ; create a DOM parse tree
-	     (img-tag (esxml-query "img[id=captcha]" dom)) ; extract the img tag of the DOM parse tree
-	     (captcha-url-rel (dom-attr img-tag 'src)) ; extract the image url
-	     (captcha-url-abs (concat base-url captcha-url-rel))
-	     (captcha-data (with-current-buffer (url-retrieve-synchronously captcha-url-abs)
-	     		    (goto-char (point-min))
-	     		    (search-forward "\n\n")
-	     		    (buffer-substring (point) (point-max))))
-	     (inhibit-read-only t))
-	(with-current-buffer buffer
-	  (read-only-mode)
-       	  (erase-buffer)
-	  (insert-image (create-image captcha-data nil t)))
-	(let* ((answer (read-from-minibuffer "Captcha: "))
-	       (id (esxml-node-attribute 'value (esxml-query "input[name=id]" dom)))
-	       (url-request-method "POST")
-	       (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	       (url-request-data (concat "id=" id "&answer=" answer)))
-	  (url-retrieve url 'pubmed--solve-captcha (list url buffer)))))
-     ;; Show the PDF if the iframe contains a pdf file
-     ((equal (car content-type) "application/pdf")
-      (message "Content-type: %s" (car content-type))
-      (let ((data (buffer-substring (1+ url-http-end-of-headers) (point-max)))
-	    (inhibit-read-only t)) ; remove the HTTP headers
-	(with-current-buffer buffer
-	  (read-only-mode)
-       	  (set-buffer-file-coding-system 'binary)
+		    (deferred:nextc it
+		      (lambda (buffer)
+			"After the postback, retrieve the URL again with HTTP GET."
+			(deferred:timeout 5000 "Time-out"
+	  		    (deferred:url-retrieve iframe-url))))
+
+		    ;; Return the deferred to parse the HTML object again
+		    (deferred:nextc it self))))
+
+	       ;; Show the PDF if the iframe contains a pdf file
+	       ((equal content-type "application/pdf")
+		(deferred:call 'pubmed--scihub-view-pdf buffer))
+	       (t
+		(error "Unknown content-type: %s" content-type)))))))
+      
+      ;; catch
+      (deferred:error it
+	(lambda (deferred-error)
+	  "Catch any errors that occur during the deferred chain and return nil."
+	  (message "%S: %S" (car deferred-error) (cdr deferred-error))
+	  nil))
+      
+      ;; finally
+      (deferred:nextc it
+	(lambda (result)
+	  "Return non-nil if a fulltext article is found, otherwise nil."
+	  result)))))
+
+(defun pubmed--scihub-view-pdf (buffer)
+  "View PDF in BUFFER with `pdf-tools'."
+  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
+	(pdf-buffer (generate-new-buffer "*Sci-Hub PDF*")))
+    (unwind-protect
+	(with-current-buffer pdf-buffer
+	  (set-buffer-file-coding-system 'binary)
 	  (erase-buffer)
 	  (insert data)
-      	  (pdf-view-mode))))
-     (t
-      (eww-display-raw buffer)))))
-
-(defun pubmed--solve-captcha (status url buffer)
-  "Callback function."
-  ;; Somehow, the postback keeps returning redirect responses. The page is retrieved again with HTTP GET to avoid an endless redirect loop.
-  (let ((url-request-method "GET")
-	url-request-extra-headers
-	url-request-data)
-    (url-retrieve url 'pubmed--check-scihub-iframe (list url buffer))))
+	  (pdf-view-mode)
+	  (switch-to-buffer-other-frame pdf-buffer))
+      (kill-buffer buffer))))
 
 ;;;; Footer
 
 (provide 'pubmed-scihub)
 
-;;; pubmed.el ends here
+;;; pubmed-scihub.el ends here
