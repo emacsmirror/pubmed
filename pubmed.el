@@ -127,7 +127,7 @@
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
-(defvar pubmed-fulltext-functions '(pubmed-get-unpaywall)
+(defvar pubmed-fulltext-functions '(pubmed-get-pmc)
   "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles. To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list.")
 
 ;;;; Keymap
