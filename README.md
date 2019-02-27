@@ -105,8 +105,14 @@ file:
 
 **Full text PDFs**
 
-Full text PDFs can be found by using
+Full text PDFs can be found by using [PubMed Central®
+(PMC)](https://www.ncbi.nlm.nih.gov/pmc/),
 [Unpaywall](https://unpaywall.org/products/api) or Sci-Hub:
+
+- The PMC fulltext function is invoked by `M-x pubmed-get-pmc`. PubMed
+  Central® (PMC) is a free full-text archive of biomedical and life
+  sciences journal literature at the U.S. National Institutes of
+  Health's National Library of Medicine (NIH/NLM).
 
 - The Unpaywall fulltext function is invoked by `M-x
   pubmed-get-unpaywall`. Using Unpaywall is legal and requires you to
@@ -140,16 +146,17 @@ setting the value of `scihub-url` in your `init.el` or `.emacs` file:
   Each function should return `nil` if it is unable to find a fulltext
   article of the entry at point. Otherwise it should return the buffer
   of the PDF and show the PDF in a new frame as a side effect. By
-  default, only `pubmed-get-unpaywall` is used. To add
-  `pubmed-get-scihub`, set the value of `pubmed-fulltext-functions` in
-  your `init.el` or `.emacs` file:
+  default, only `pubmed-get-pmc` is used. To add other fulltext
+  functions, set the value of `pubmed-fulltext-functions` in your
+  `init.el` or `.emacs` file:
 
 ```lisp
-(setq pubmed-fulltext-functions '(pubmed-get-unpaywall pubmed-get-scihub))
+(setq pubmed-fulltext-functions '(pubmed-get-pmc pubmed-get-unpaywall pubmed-get-scihub))
 ```
 
 or
 
 ```lisp
+(add-to-list 'pubmed-fulltext-functions 'pubmed-get-unpaywall t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-get-scihub t)
 ```
