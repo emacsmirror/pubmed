@@ -273,8 +273,23 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
 		(deferred:nextc it
 		  (lambda (result)
 		    (setq i (1+ i))
-		    (unless result
+		    (if result
+			(when (bufferp result)
+			  (pubmed--view-pdf result))
 		      (deferred:next self)))))))))))))
+
+(defun pubmed--view-pdf (buffer)
+  "View PDF in BUFFER with `pdf-tools'."
+  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
+	(pdf-buffer (generate-new-buffer "*PDF*")))
+    (unwind-protect
+    	(with-current-buffer pdf-buffer
+    	  (set-buffer-file-coding-system 'binary)
+    	  (erase-buffer)
+    	  (insert data)
+    	  (pdf-view-mode)
+    	  (switch-to-buffer-other-frame pdf-buffer))
+      (kill-buffer buffer))))
 
 ;;;; Functions
 

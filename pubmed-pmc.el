@@ -4,7 +4,7 @@
 ;; Created: 2018-05-23
 ;; Version: 0.1
 ;; Keywords: pubmed
-;; Package-Requires: ((emacs "25.1") (deferred) (esxml) (pdf-tools)
+;; Package-Requires: ((emacs "25.1") (deferred) (esxml))
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.
@@ -35,7 +35,6 @@
 (require 'eww)
 (require 'esxml)
 (require 'esxml-query)
-(require 'pdf-tools)
 (require 'url)
 
 ;;;; Variables
@@ -129,9 +128,9 @@
 		 (content-type (cdr (assoc "content-type" headers))))
 	    (message "Content-type: %s" content-type)
 	    (cond
-	     ;; Show the PDF if the iframe contains a pdf file
+	     ;; Return buffer if the iframe contains a pdf file
 	     ((equal content-type "application/pdf")
-	      (deferred:call 'pubmed--pmc-view-pdf buffer))
+	      buffer)
 	     (t
 	      (error "Unknown content-type: %s" content-type)))))))
     
@@ -147,19 +146,6 @@
       (lambda (result)
 	"Return non-nil if a fulltext article is found, otherwise nil."
 	result))))
-
-(defun pubmed--pmc-view-pdf (&optional buffer)
-  "View PDF in BUFFER with `pdf-tools'."
-  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	(pdf-buffer (generate-new-buffer "*PMC PDF*")))
-    (unwind-protect
-    	(with-current-buffer pdf-buffer
-    	  (set-buffer-file-coding-system 'binary)
-    	  (erase-buffer)
-    	  (insert data)
-    	  (pdf-view-mode)
-    	  (switch-to-buffer-other-frame pdf-buffer))
-      (kill-buffer buffer))))
 
 ;;;; Footer
 
