@@ -76,7 +76,6 @@
 	(deferred:nextc it
 	  (lambda (buffer)
 	    "Parse the JSON object in BUFFER. Return the url of the Open Access fulltext article or nil if none is found."
-	    ;; FIXME: look for `url_for_pdf' in all `oa_locations'
 	    (let* ((json (with-current-buffer buffer (decode-coding-string (buffer-string) 'utf-8)))
 		   (json-object-type 'plist)
 		   (json-array-type 'list)
@@ -86,16 +85,25 @@
 		   (is_error (plist-get json-object :error))
 		   (error_message (plist-get json-object :message))
 		   (best_oa_location (plist-get json-object :best_oa_location))
-		   (url_for_pdf (plist-get best_oa_location :url_for_pdf)))
+		   (url_for_pdf (plist-get best_oa_location :url_for_pdf))
+		   (oa_locations (plist-get json-object :oa_locations)))
 	      (cond
 	       ((equal is_error t)
 		(signal is_error error_message))
 	       (msg
 		(error "Unpaywall message: %s" msg))
+	       ;; Return url_for_pdf if it is found in :best_oa_location
 	       (url_for_pdf
-		(progn
-		  (setq url_for_pdf url_for_pdf)
-		  url_for_pdf))
+		  (setq url_for_pdf url_for_pdf))
+	       ;; Loop through oa_locations to find an url_for_pdf and return the first one found
+	       (oa_locations
+		(let ((i 0))
+		  (while (not (or (>= i (length oa_locations))
+				  (plist-get (nth i oa_locations) :url_for_pdf)))
+		    (setq i (1+ i)))
+		  (if (>= i (length oa_locations))
+		      (error "Unpaywall found no fulltext article")
+		    (setq url_for_pdf (plist-get (nth i oa_locations) :url_for_pdf)))))
 	       (t
 		(error "Unpaywall found no fulltext article"))))))
 
