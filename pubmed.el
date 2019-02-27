@@ -254,7 +254,7 @@
   "In Pubmed, try to fetch the fulltext PDF of the current entry, using multiple methods.
 The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
   (interactive)
-  (lexical-let ((i 0))
+  (let ((i 0))
     (deferred:$
       (deferred:next
 	(deferred:lambda ()
