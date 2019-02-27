@@ -62,6 +62,7 @@ The following keybindings are available:
 - <kbd>q</kbd>: Quit window.
 - <kbd>s</kbd>: Search PubMed.
 - <kbd>u</kbd>: Unmark the current entry.
+- <kbd>U</kbd>: Unmark all entries.
 
 **Completion**
 
@@ -133,9 +134,9 @@ setting the value of `scihub-url` in your `init.el` or `.emacs` file:
 ```
 
 - The command `M-x pubmed-get-fulltext` (or the <kbd>g</kbd>) tries to
-  fetch the fulltext PDF of the current entry, using multiple methods.
-  The functions in `pubmed-fulltext-functions` are tried in order,
-  until a fulltext PDF is found.
+  fetch the fulltext PDF of the marked entries or current entry, using
+  multiple methods. The functions in `pubmed-fulltext-functions` are
+  tried in order, until a fulltext PDF is found.
 
 - The value of the variable `pubmed-fulltext-functions` should be a
   list of functions, which are tried in order by `pubmed-get-fulltext`
