@@ -63,7 +63,7 @@
 
 (defun pubmed--unpaywall (pmid)
   "Deferred chain to retrieve the fulltext PDF of the PMID."
-  (let ((url_for_pdf))
+  (let ((pdf-url))
     (deferred:$
       ;; try
       (deferred:$
@@ -94,7 +94,7 @@
 		(error "Unpaywall message: %s" msg))
 	       ;; Return url_for_pdf if it is found in :best_oa_location
 	       (url_for_pdf
-		  (setq url_for_pdf url_for_pdf))
+		(setq pdf-url url_for_pdf))
 	       ;; Loop through oa_locations to find an url_for_pdf and return the first one found
 	       (oa_locations
 		(let ((i 0))
@@ -103,7 +103,7 @@
 		    (setq i (1+ i)))
 		  (if (>= i (length oa_locations))
 		      (error "Unpaywall found no fulltext article")
-		    (setq url_for_pdf (plist-get (nth i oa_locations) :url_for_pdf)))))
+		    (setq pdf-url (plist-get (nth i oa_locations) :url_for_pdf)))))
 	       (t
 		(error "Unpaywall found no fulltext article"))))))
 
@@ -133,7 +133,7 @@
 		  (message "Redirected-to: %s" url-redirect)
 		  url-redirect))
 	       (t
-		url_for_pdf)))))
+		pdf-url)))))
 
 	(deferred:nextc it
 	  (lambda (url)
