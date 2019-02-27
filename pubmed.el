@@ -131,6 +131,9 @@
 (defvar pubmed-fulltext-functions '(pubmed-pmc)
   "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles. To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list.")
 
+(defvar pubmed-temp-prefix "pubmed"
+  "Prefix for temporary files created by pubmed.")
+
 ;;;; Keymap
 
 (defvar pubmed-mode-map
@@ -1018,17 +1021,13 @@
     (nreverse references)))
 
 (defun pubmed--view-pdf (buffer)
-  "View PDF in BUFFER with `pdf-tools'."
+  "Create a temporary pdf file containing BUFFER and open it with the default pdf viewer."
   (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	(pdf-buffer (generate-new-buffer "*PDF*")))
-    (unwind-protect
-    	(with-current-buffer pdf-buffer
-    	  (set-buffer-file-coding-system 'binary)
-    	  (erase-buffer)
-    	  (insert data)
-    	  (pdf-view-mode)
-    	  (switch-to-buffer-other-frame pdf-buffer))
-      (kill-buffer buffer))))
+	(tempfile (make-nearby-temp-file "pubmed-" nil ".pdf")))
+    (with-temp-file tempfile
+      (set-buffer-file-coding-system 'binary)
+      (insert data))
+    (find-file tempfile)))
 
 ;;;; Footer
 
