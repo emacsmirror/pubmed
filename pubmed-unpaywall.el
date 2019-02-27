@@ -66,7 +66,7 @@
     (deferred:$
       ;; try
       (deferred:$
-	(deferred:timeout 5000 "Time-out"
+	(deferred:timeout 10000 "Time-out"
 	  (let* ((doi (pubmed-convert-id pmid))
     		 (url (concat unpaywall-url "/" unpaywall-version "/" doi))
 		 (parameters (list (cons "email" unpaywall-email))))
@@ -136,7 +136,7 @@
 
 	(deferred:nextc it
 	  (lambda (url)
-	    (deferred:timeout 5000 "Time-out"
+	    (deferred:timeout 10000 "Time-out"
 	      (deferred:url-retrieve url))))
 	
 	(deferred:nextc it

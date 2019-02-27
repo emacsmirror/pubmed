@@ -99,7 +99,7 @@
       
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout 5000 "Time-out"
+	  (deferred:timeout 10000 "Time-out"
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it
@@ -118,7 +118,7 @@
 
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout 5000 "Time-out"
+	  (deferred:timeout 10000 "Time-out"
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it
