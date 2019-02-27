@@ -146,17 +146,17 @@ setting the value of `scihub-url` in your `init.el` or `.emacs` file:
   Each function should return `nil` if it is unable to find a fulltext
   article of the entry at point. Otherwise it should return the buffer
   of the PDF and show the PDF in a new frame as a side effect. By
-  default, only `pubmed-get-pmc` is used. To add other fulltext
+  default, only `pubmed-pmc` is used. To add other fulltext
   functions, set the value of `pubmed-fulltext-functions` in your
   `init.el` or `.emacs` file:
 
 ```lisp
-(setq pubmed-fulltext-functions '(pubmed-get-pmc pubmed-get-unpaywall pubmed-get-scihub))
+(setq pubmed-fulltext-functions '(pubmed-pmc pubmed-unpaywall pubmed-scihub))
 ```
 
 or
 
 ```lisp
-(add-to-list 'pubmed-fulltext-functions 'pubmed-get-unpaywall t)
-(add-to-list 'pubmed-fulltext-functions 'pubmed-get-scihub t)
+(add-to-list 'pubmed-fulltext-functions 'pubmed-unpaywall t)
+(add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```

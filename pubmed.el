@@ -127,7 +127,7 @@
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
-(defvar pubmed-fulltext-functions '(pubmed-get-pmc)
+(defvar pubmed-fulltext-functions '(pubmed-pmc)
   "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles. To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list.")
 
 ;;;; Keymap
@@ -143,6 +143,7 @@
     (define-key map (kbd "q") 'quit-window)
     (define-key map (kbd "s") 'pubmed-search)
     (define-key map (kbd "u") 'pubmed-unmark)
+    (define-key map (kbd "U") 'pubmed-unmark-all)
     map)
   "Local keymap for `pubmed-mode'.")
 
@@ -232,6 +233,33 @@
   (interactive "p")
   (tabulated-list-put-tag " " t))
 
+(defun pubmed-mark-all (&optional _num)
+  "Unmark all entries."
+  ;; TODO: mark all entries in active region
+  (interactive "p")
+  (unless (derived-mode-p 'pubmed-mode)
+    (error "The current buffer is not in PubMed mode"))
+  (let (mark-list
+	pubmed-uid)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(setq pubmed-uid (tabulated-list-get-id))
+        (push pubmed-uid mark-list)
+        (tabulated-list-put-tag "*" t)))))
+
+(defun pubmed-unmark-all (&optional _num)
+  "Unmark all entries."
+  (interactive "p")
+  (unless (derived-mode-p 'pubmed-mode)
+    (error "The current buffer is not in PubMed mode"))
+  (let (mark-list)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(tabulated-list-put-tag " " t)))
+    (setq mark-list nil)))
+
 (defun pubmed-convert-id (uid)
   "Return the doi of article UID.  Use commas to separate multiple UIDs. This service allows for conversion of up to 200 UIDs in a single request. If you have a larger number of IDs, split your list into smaller subsets."
   (interactive)
@@ -250,10 +278,33 @@
 	 (doi (plist-get (car records) :doi)))
     doi))
 
-(defun pubmed-get-fulltext ()
-  "In Pubmed, try to fetch the fulltext PDF of the current entry, using multiple methods.
-The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
-  (interactive)
+(defun pubmed-get-fulltext (&optional entries)
+  "Try to fetch the fulltext PDF of the marked entries or current entry."
+  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
+  (interactive "P")
+  (unless (derived-mode-p 'pubmed-mode)
+    (error "The current buffer is not in PubMed mode"))
+  (let (mark
+	mark-list
+	pubmed-uid)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (setq mark (char-after))
+        (setq pubmed-uid (tabulated-list-get-id))
+	(when (eq mark ?*)
+          (push pubmed-uid mark-list))
+	(forward-line)))
+    (cond
+     (mark-list
+      (mapcar 'pubmed--fulltext mark-list))
+     ((tabulated-list-get-id)
+      (pubmed--fulltext (tabulated-list-get-id)))
+     (t
+      (error "No entry selected")))))
+
+(defun pubmed--fulltext (uid)
+  "Try to fetch the fulltext PDF of UID, using multiple methods. The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
   (let ((i 0))
     (deferred:$
       (deferred:next
@@ -268,7 +319,7 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
 	      (message "Trying %S..." (nth i pubmed-fulltext-functions))
 	      
 	      (deferred:$
-		(deferred:call (nth i pubmed-fulltext-functions))
+		(deferred:call (nth i pubmed-fulltext-functions) uid)
 
 		(deferred:nextc it
 		  (lambda (result)
@@ -277,19 +328,6 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
 			(when (bufferp result)
 			  (pubmed--view-pdf result))
 		      (deferred:next self)))))))))))))
-
-(defun pubmed--view-pdf (buffer)
-  "View PDF in BUFFER with `pdf-tools'."
-  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	(pdf-buffer (generate-new-buffer "*PDF*")))
-    (unwind-protect
-    	(with-current-buffer pdf-buffer
-    	  (set-buffer-file-coding-system 'binary)
-    	  (erase-buffer)
-    	  (insert data)
-    	  (pdf-view-mode)
-    	  (switch-to-buffer-other-frame pdf-buffer))
-      (kill-buffer buffer))))
 
 ;;;; Functions
 
@@ -977,6 +1015,19 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
 		(id (car (esxml-node-children articleid))))
 	    (push (list 'citation citation idtype id) references)))))
     (nreverse references)))
+
+(defun pubmed--view-pdf (buffer)
+  "View PDF in BUFFER with `pdf-tools'."
+  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
+	(pdf-buffer (generate-new-buffer "*PDF*")))
+    (unwind-protect
+    	(with-current-buffer pdf-buffer
+    	  (set-buffer-file-coding-system 'binary)
+    	  (erase-buffer)
+    	  (insert data)
+    	  (pdf-view-mode)
+    	  (switch-to-buffer-other-frame pdf-buffer))
+      (kill-buffer buffer))))
 
 ;;;; Footer
 

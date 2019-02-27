@@ -43,17 +43,21 @@
 
 ;;;; Commands
 
-(defun pubmed-get-pmc ()
-  (interactive)
-  "In Pubmed, fetch the fulltext PDF of the current entry from PMC or return nil if none is found."
-  (if pubmed-uid
-      (pubmed--pmc pubmed-uid)
-    (error "No entry selected")))
+(defun pubmed-get-pmc (&optional entries)
+  "In Pubmed, fetch the fulltext PDF of the marked entries or current entry from PMC or return nil if none is found."
+  (interactive "P")
+  (cond
+   (entries
+    (mapcar 'pubmed-pmc entries))
+   (pubmed-uid
+    (pubmed-pmc pubmed-uid))
+   (t
+    (error "No entry selected"))))
 
 ;;;; Functions
 
-(defun pubmed--pmc (pmid)
-  "Deferred chain to retrieve the fulltext PDF of the PMID."
+(defun pubmed-pmc (uid)
+  "Deferred chain to retrieve the fulltext PDF of the UID."
   (deferred:$
     ;; try
     (deferred:$
@@ -64,7 +68,7 @@
 				   "dbfrom=" pubmed-db
 				   "&cmd=prlinks"
 				   "&retmode=ref"
-				   "&id=" pmid
+				   "&id=" uid
 				   (when (not (string-empty-p pubmed-api_key))
 				     (concat "&api_key=" pubmed-api_key)))))
 	    (concat pubmed-elink-url arguments))))

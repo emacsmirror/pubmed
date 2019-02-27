@@ -51,23 +51,28 @@
 
 ;;;; Commands
 
-(defun pubmed-get-unpaywall ()
+(defun pubmed-get-unpaywall (&optional entries)
   (interactive)
-  "In Pubmed, fetch the fulltext PDF of the current entry from Unpaywall or return nil if none is found."
-  (if pubmed-uid
-      (pubmed--unpaywall pubmed-uid)
-    (error "No entry selected")))
+  "In Pubmed, fetch the fulltext PDF of the marked entries or the current entry from Unpaywall or return nil if none is found."
+  (interactive "P")
+  (cond
+   (entries
+    (mapcar 'pubmed-unpaywall entries))
+   (pubmed-uid
+    (pubmed-unpaywall pubmed-uid))
+   (t
+    (error "No entry selected"))))
 
 ;;;; Functions
 
-(defun pubmed--unpaywall (pmid)
-  "Deferred chain to retrieve the fulltext PDF of the PMID."
+(defun pubmed-unpaywall (uid)
+  "Deferred chain to retrieve the fulltext PDF of the UID."
   (let ((pdf-url))
     (deferred:$
       ;; try
       (deferred:$
 	(deferred:timeout 10000 "Time-out"
-	  (let* ((doi (pubmed-convert-id pmid))
+	  (let* ((doi (pubmed-convert-id uid))
     		 (url (concat unpaywall-url "/" unpaywall-version "/" doi))
 		 (parameters (list (cons "email" unpaywall-email))))
 	    (deferred:url-get url parameters)))

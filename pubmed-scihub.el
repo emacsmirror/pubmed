@@ -43,18 +43,24 @@
   "Sci-Hub URL.")
 
 ;;;; Commands
-(defun pubmed-get-scihub ()
-  (interactive)
-  "In Pubmed, fetch the fulltext PDF from Sci-Hub of the current entry or return nil if none is found."
+(defun pubmed-get-scihub (&optional entries)
+  (interactive "P")
+  "In Pubmed, fetch the fulltext PDF from Sci-Hub of the marked entries or current entry or return nil if none is found."
   ;; FIXME: Loading of Sci-Hub can be quite slow, so the user is tempted to invoke `pubmed-get-scihub' multiple times if it doesn't seem to respond immediately. Therefore, consider a locking mechanism to prevent multiple parallel processes.
-    (if pubmed-uid
-	(pubmed--scihub pubmed-uid)
-      (error "No entry selected")))
+  (interactive "P")
+  (cond
+   (entries
+    (mapcar 'pubmed-scihub entries))
+   (pubmed-uid
+    (pubmed-scihub pubmed-uid))
+   (t
+    (error "No entry selected"))))
+
 
 ;;;; Functions
 
-(defun pubmed--scihub (pmid)
-  "Deferred chain to retrieve the fulltext PDF of the PMID."
+(defun pubmed-scihub (uid)
+  "Deferred chain to retrieve the fulltext PDF of the UID."
   ;; FIXME: Every captcha and PDF opens a new frame. Consider reusing the same frame.
   (let ((iframe-url))
     (deferred:$
@@ -67,7 +73,7 @@
 	  ;; - an URL of a scholarly article
 	  ;; - a DOI
 	  ;; - a PMID
-	  (let ((parameters (list (cons "request" pmid))))
+	  (let ((parameters (list (cons "request" uid))))
 	    (deferred:url-post scihub-url parameters)))
 
 	(deferred:nextc it
@@ -144,6 +150,7 @@
 		    (deferred:nextc it
 		      (lambda ()
 			"Read the text displayed by the CAPTCHA from the minibuffer."
+			;; FIXME: when the minibuffer is left, the prompt disappears so the captcha cannot be solved anymore
 			(read-from-minibuffer "Captcha: ")))
 		    
 		    (deferred:nextc it
