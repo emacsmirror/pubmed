@@ -512,17 +512,30 @@
 	(max (if (boundp 'retmax)
 		 retmax
 	       pubmed-retmax))
+	(counter 0)
 	(pubmed-buffer (get-buffer-create "*PubMed*")))
     (with-current-buffer pubmed-buffer
       ;; Remove previous entries from the `tabulated-list-entries' variable.
       (setq tabulated-list-entries nil))
     (while (< start count)
       ;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
-      (if (not (string-empty-p pubmed-api_key))
-	  ;; Pause for 0.1 seconds, because of the limit to 10 requests/second with an API key.
-	  (run-with-timer "0.1 sec" nil 'pubmed--esummary querykey webenv start max)
-	;; Pause for 0.33 seconds, because of the limit to 3 requests/second without an API key.
-	(run-with-timer "0.33 sec" nil 'pubmed--esummary querykey webenv start max))
+      (if (string-empty-p pubmed-api_key)
+	  (progn
+	    (if (<= counter 3)
+		(progn
+		  (pubmed--esummary querykey webenv start max)
+		  (setq counter (1+ counter)))
+	      (progn
+		(run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
+		(setq counter 0))))
+	(progn
+	  (if (<= counter 10)
+	      (progn
+		(pubmed--esummary querykey webenv start max)
+		(setq counter (1+ counter)))
+	    (progn
+	      (run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
+	      (setq counter 0)))))
       (setq start (+ start max)))))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
