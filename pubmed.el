@@ -122,8 +122,11 @@
 (defvar pubmed-time-format-string "%Y-%m-%d"
   "The format-string that is used by `format-time-string' to convert time values. Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\".")
 
+(defvar pubmed-entries nil
+  "The plist of citations retrieved by the last PubMed search.")
+
 (defvar pubmed-uid nil
-  "The entry being displayed in this buffer.")
+  "The UID of the entry currently selected in the PubMed buffer.")
 
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
@@ -186,6 +189,7 @@
    (let* ((minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions 'pubmed-completion-at-point nil t)))
 	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil pubmed-history-list)))
      (list query)))
+  (setq pubmed-entries nil)
   (pubmed--esearch query))
 
 (defun pubmed-show-entry (uid)
@@ -577,7 +581,9 @@
   	 (result (plist-get json-object :result))
 	 (uids (plist-get result :uids))
 	 entries)
-    ;; The JSON object is converted to a plist. The first keyword is `:uids', with a list of all uids as value. The rest of the keywords are named `:<uid>', with a plist containing the document summary (DocSum) as value.
+    ;; The JSON object is converted to a plist. The first keyword is ":uids", with a list of all uids as value. The rest of the keywords are named ":<uid>", with a plist containing the document summary (DocSum) as value.
+    ;; Add the plist containing the DocSums to `pubmed-entries'
+    (setq pubmed-entries (append (cddr (plist-member result :uids)) pubmed-entries))
     ;; Iterate over the list of UIDs, convert them to a keyword, and get the value.
     ;; The  `tabulated-list-entries' variable specifies the entries displayed in the Tabulated List buffer. Each list element corresponds to one entry, and has the form "(ID CONTENTS)", where "ID" is UID and "CONTENTS" is a vector with the same number of elements as `tabulated-list-format'.
     (dolist (uid uids entries)
