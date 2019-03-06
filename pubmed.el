@@ -268,6 +268,7 @@
 
 (defun pubmed-convert-id (uid)
   "Return the doi of article UID.  Use commas to separate multiple UIDs. This service allows for conversion of up to 200 UIDs in a single request. If you have a larger number of IDs, split your list into smaller subsets."
+  ;; TODO: use the doi from the DocSum in stead of retrieving it from the NCBI ID converter
   (interactive)
   (let* ((url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
