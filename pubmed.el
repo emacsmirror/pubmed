@@ -245,8 +245,7 @@
   "Unmark all entries."
   ;; TODO: mark all entries in active region
   (interactive "p")
-  (unless (derived-mode-p 'pubmed-mode)
-    (error "The current buffer is not in PubMed mode"))
+  (pubmed--guard)
   (let (mark-list
 	pubmed-uid)
     (save-excursion
@@ -259,8 +258,7 @@
 (defun pubmed-unmark-all (&optional _num)
   "Unmark all entries."
   (interactive "p")
-  (unless (derived-mode-p 'pubmed-mode)
-    (error "The current buffer is not in PubMed mode"))
+  (pubmed--guard)
   (let (mark-list)
     (save-excursion
       (goto-char (point-min))
@@ -290,8 +288,7 @@
   "Try to fetch the fulltext PDF of the marked entries or current entry."
   ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
   (interactive "P")
-  (unless (derived-mode-p 'pubmed-mode)
-    (error "The current buffer is not in PubMed mode"))
+  (pubmed--guard)
   (let (mark
 	mark-list
 	pubmed-uid)
@@ -338,6 +335,10 @@
 		      (deferred:next self)))))))))))))
 
 ;;;; Functions
+
+(defun pubmed--guard ()
+  (unless (eq major-mode 'pubmed-mode)
+    (error "The current buffer is not in PubMed mode")))
 
 (defun pubmed--header-error-p (header)
   "Return t if HEADER is an error code or null header."
