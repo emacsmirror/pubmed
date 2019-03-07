@@ -449,7 +449,8 @@
     (with-current-buffer pubmed-buffer
       (pubmed-mode)
       (setq tabulated-list-entries (append entries tabulated-list-entries))
-      (tabulated-list-print nil t))
+      (tabulated-list-print nil t)
+      (setq pubmed-uid (tabulated-list-get-id)))
     (switch-to-buffer pubmed-buffer)))
 
 (defun pubmed--esearch (query)
