@@ -52,6 +52,7 @@ Entries are shown in a tabulated list in `PubMed mode'.
 
 The following keybindings are available:
 
+- <kbd>a</kbd>: Append the BibTeX references of the marked entries or current entry to file.
 - <kbd>RET</kbd>: Show the current entry.
 - <kbd>f</kbd>: Get the free, maybe not legal, full text PDF of the current
   entry.
@@ -63,6 +64,8 @@ The following keybindings are available:
 - <kbd>s</kbd>: Search PubMed.
 - <kbd>u</kbd>: Unmark the current entry.
 - <kbd>U</kbd>: Unmark all entries.
+- <kbd>w</kbd>: Write the BibTeX references of the marked entries or current entry to file.
+- <kbd>TAB</kbd>: Show the BibTeX references of the marked entries or current entry.
 
 **Completion**
 
@@ -160,4 +163,79 @@ or
 ```lisp
 (add-to-list 'pubmed-fulltext-functions 'pubmed-unpaywall t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
+```
+
+**BibTeX**
+
+The PubMed document summaries (DocSums) can be exported to BibTeX
+references.
+
+- The command `M-x pubmed-show-bibtex` (or the <kbd>TAB</kbd>) opens a
+  new frame with the BibTeX references of the marked entries, or if
+  there are none, the current entry in `bibtex-mode`.
+
+- The command `M-x pubmed-write-bibtex` (or the <kbd>w</kbd>) writes
+  the BibTeX references to a file.
+
+- The command `M-x pubmed-write-bibtex` (or the <kbd>w</kbd>) appends
+  the BibTeX references to a file.
+
+***Choosing BibTeX field types***
+
+PubMed includes citations for journal articles and a subset
+of books and book chapters available on the NCBI Bookshelf. These are
+declared as @article, @book, and @incollection, respectively.
+
+The @article reference type is used for an article from a magazine or
+a journal. Required fields are: author, title, journal, year. Optional
+fields are: volume, number, pages, month, note.
+
+The @book reference type is used for a published book. Required fields
+are: author/editor, title, publisher, year. Optional fields are:
+volume/number, series, address, edition, month, note.
+
+The @incollection is used for a section of a book having its own
+title. Required fields are: author, title, booktitle, publisher, year.
+Optional fields are: editor, volume/number, series, type, chapter,
+pages, address, edition, month, note.
+
+Of the optional fields, the series, type, and chapter fields are not
+included in the PubMed DocSums. When the note field is enabled, it is
+set to an empty value for later use. Besides the required and optional
+fields, the following non-standard fields can be included in the
+BibTeX entries: issn, pubmed, pii, doi, url.
+
+The optional and non-standard fields can be included by setting the
+values of the corresponding variables in your `init.el` or `.emacs`, e.g.
+
+```lisp
+(setq pubmed-bibtex-article-number t)
+```
+
+***Choosing BibTeX citation key***
+
+The first key of a BibTeX entry the citation key, or the BibTeX key.
+This key must be unique for all entries in your bibliography. It is
+this identifier that you will use within your document to
+cross-reference it to this entry (i.e., the identifier you use in the
+\cite{} command in your LaTeX file). By default the key is composed of
+a the PMID prefixed with the string "pmid". Alternatively, you could
+use the "authoryear" citation style, that follow the loose standard in
+which the author's surname followed by the year of publication is
+used. This could be more convenient, because it enables you to guess
+the key from looking at the reference. This protects you from
+accidentally duplicating a reference in the Bibtex file and referring
+to it under two different keys. However, multiple papers from the same
+author and year will have duplicate citation keys. Untill this is
+fixed, you have to correct this manually.
+
+***Configuring default BibTeX file***
+
+If you have a master BibTeX file, e.g. bibliography.bib, and want it
+to serve as the default file to append or write the BibTeX reference
+to, you can set PUBMED-DEFAULT-BIBTEX-FILE in your `init.el` or `.emacs`:
+
+```lisp
+(setq pubmed-default-bibtex-file "/path/to/bibliography.bib")
+`pubmed-default-bibtex-file'
 ```
