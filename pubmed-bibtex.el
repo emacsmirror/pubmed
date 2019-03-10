@@ -328,8 +328,7 @@
 	  (let* ((author (s-join " " (butlast (split-string (plist-get value :sortfirstauthor) " "))))
 		 (year (nth 0 (split-string (plist-get value :pubdate) " ")))
 		 (authoryear (concat author year)))
-	    (message "Author: %s Year: %s" author year)
-	    (push authoryear pubmed-citation-keys)
+	    (push authoryear pubmed-bibtex-citation-keys)
 	    (insert authoryear))))
 	;; BibTeX accepts names in the format "forename surname" or "surname, forename". Here, the latter is used.
 	(let ((authorlist (plist-get value :authors))
@@ -429,7 +428,7 @@
 	  (let* ((author (s-join " " (butlast (split-string (plist-get value :sortfirstauthor) " "))))
 		 (year (nth 0 (split-string (plist-get value :pubdate) " ")))
 		 (authoryear (concat author year)))
-	    (push authoryear pubmed-citation-keys)
+	    (push authoryear pubmed-bibtex-citation-keys)
 	    (insert authoryear))))
 	;; BibTeX accepts names in the format "forename/initials surname" or "surname, forename/initials".
 	;; Here, the latter is used.
@@ -525,7 +524,7 @@
 	  (let* ((author (s-join " " (butlast (split-string (plist-get value :sortfirstauthor) " "))))
 		 (year (nth 0 (split-string (plist-get value :pubdate) " ")))
 		 (authoryear (concat author year)))
-	    (push authoryear pubmed-citation-keys)
+	    (push authoryear pubmed-bibtex-citation-keys)
 	    (insert authoryear))))
 	;; BibTeX accepts names in the format "forename surname" or "surname, forename". Here, the latter is used.
 	(let ((authorlist (plist-get value :authors))
