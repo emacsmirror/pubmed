@@ -177,7 +177,7 @@ references.
 - The command `M-x pubmed-write-bibtex` (or the <kbd>w</kbd>) writes
   the BibTeX references to a file.
 
-- The command `M-x pubmed-write-bibtex` (or the <kbd>a</kbd>) appends
+- The command `M-x pubmed-append-bibtex` (or the <kbd>a</kbd>) appends
   the BibTeX references to a file.
 
 ***Choosing BibTeX field types***
