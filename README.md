@@ -237,5 +237,4 @@ to, you can set PUBMED-DEFAULT-BIBTEX-FILE in your `init.el` or `.emacs`:
 
 ```lisp
 (setq pubmed-default-bibtex-file "/path/to/bibliography.bib")
-`pubmed-default-bibtex-file'
 ```
