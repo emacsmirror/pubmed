@@ -227,7 +227,13 @@ the key from looking at the reference. This protects you from
 accidentally duplicating a reference in the Bibtex file and referring
 to it under two different keys. However, multiple papers from the same
 author and year will have duplicate citation keys. Untill this is
-fixed, you have to correct this manually.
+fixed, you have to correct this manually. To change the default
+citation style to the "authoryear" scheme, you can set the value of
+PUBMED-BIBTEX-CITATION-KEY in your `init.el` or `.emacs`:
+
+```lisp
+(setq pubmed-bibtex-citation-key "authoryear")
+```
 
 ***Configuring default BibTeX file***
 
