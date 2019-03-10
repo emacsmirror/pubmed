@@ -229,7 +229,8 @@
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
      ((tabulated-list-get-id)
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name))
+	    (pubmed-uid (tabulated-list-get-id)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (pubmed--bibtex pubmed-uid)
