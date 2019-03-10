@@ -316,6 +316,7 @@
   "Insert the BibTeX reference of UID in the current buffer."
   ;; TODO: Ensure unique citation keys by appending letters to multiple papers from the same author and year when using the "authoryear" naming scheme
   ;; TODO: Correct incorrectly capitalized authors, e.g. uid 21026888
+  ;; FIXME: Fix parsing of author values where the initials aren't last, e.g. uid 15137
   (let* ((keyword (intern (concat ":" uid)))
 	 (value (plist-get pubmed-entries keyword)))
     (cond
