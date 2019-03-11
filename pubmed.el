@@ -541,6 +541,8 @@
 	       pubmed-retmax))
 	(counter 0)
 	(pubmed-buffer (get-buffer-create "*PubMed*")))
+    ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
+    (sleep-for 0.5) 
     (with-current-buffer pubmed-buffer
       ;; Remove previous entries from the `tabulated-list-entries' variable.
       (setq tabulated-list-entries nil))
