@@ -58,6 +58,12 @@
 (defvar pubmed-api_key ""
   "E-utilities API key.")
 
+(defvar pubmed-limit-with-api_key 10
+  "Maximum amount of E-utilities requests/second with API key.")
+
+(defvar pubmed-limit-without-api_key 3
+  "Maximum amount of E-utilities requests/second without API key.")
+
 ;; When using the ID Converter API, the tool and email parameters should be used to identify the application making the request. See <https://www.ncbi.nlm.nih.gov/pmc/tools/id-converter-api/>.
 (defvar pubmed-idconv-tool "emacs-pubmed"
   "Tool paramater for the ID Converter API.")
@@ -542,7 +548,7 @@
       ;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
       (if (string-empty-p pubmed-api_key)
 	  (progn
-	    (if (<= counter 3)
+	    (if (<= counter pubmed-limit-without-api_key)
 		(progn
 		  (pubmed--esummary querykey webenv start max)
 		  (setq counter (1+ counter)))
@@ -550,7 +556,7 @@
 		(run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
 		(setq counter 0))))
 	(progn
-	  (if (<= counter 10)
+	  (if (<= counter pubmed-limit-with-api_key)
 	      (progn
 		(pubmed--esummary querykey webenv start max)
 		(setq counter (1+ counter)))
