@@ -76,7 +76,8 @@
 	    (let* ((keyword (intern (concat ":" uid)))
 		   (value (plist-get pubmed-entries keyword))
 		   (articleids (plist-get value :articleids))
-		   articleid)
+		   articleid
+		   doi)
 	      (dolist (articleid articleids doi)
 		(when (equal (plist-get articleid :idtype) "doi")
 		  (setq doi (plist-get articleid :value)))))))
