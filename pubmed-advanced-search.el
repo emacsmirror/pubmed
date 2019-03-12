@@ -66,7 +66,7 @@
 (defun pubmed-widget-build-search ()
   "Build the search and return PUBMED-QUERY."
   (interactive)
-  ;; Get values of the child widgets of the `search-builder'
+  ;; Get values of the child widgets of the "search-builder"
   (let ((search-list (widget-editable-list-value-get (pubmed-widget-get 'search-builder))))
     (if (eq search-list nil)
 	(setq pubmed-query "")
@@ -84,7 +84,7 @@
 	      ;; Else wrap the previous query in parentheses and append the query BOOLEAN TEXT[FIELD]
 	      (progn
 		(setq pubmed-query (s-append (s-concat " " boolean " " text field) (s-wrap pubmed-query "(" ")")))))))))
-    ;; Show PUBMED-QUERY in the `searchbox' widget
+    ;; Show PUBMED-QUERY in the "searchbox" widget
     (save-excursion
       (pubmed-widget-change-text (pubmed-widget-get 'searchbox) pubmed-query))
     pubmed-query))
@@ -96,7 +96,7 @@
     (insert string)))
 
 (defun pubmed-add-to-builder (query &optional boolean)
-  "Add BOOLEAN and QUERY from the history to the `search-builder'."
+  "Add BOOLEAN and QUERY from the history to the \"search-builder\"."
   (interactive)
   (with-current-buffer "*PubMed Advanced Search Builder*"
     (let* ((old-value (widget-editable-list-value-get (pubmed-widget-get 'search-builder)))
@@ -138,13 +138,13 @@
   (setq pubmed-search-builder
 	(pubmed-widget-add 'search-builder
 			   (widget-create 'editable-list
-  					  ;; for each entry in the list, insert the [INS] button, the [DEL] button and the `group' widget.
+  					  ;; for each entry in the list, insert the [INS] button, the [DEL] button and the "group" widget.
 					  :entry-format "%i %d %v"
 					  ;; start with two entries with default values
 					  :value  '(("AND" "" ""))
 					  ;; custom :list-length property with the length of the list as argument
 					  :list-length 2
-					  ;; update the :list-length property when the `editable-list' is changed
+					  ;; update the :list-length property when the "editable-list" is changed
 					  :notify (lambda (widget &rest ignore)
 						    (pubmed-widget-build-search))
 					  '(group
