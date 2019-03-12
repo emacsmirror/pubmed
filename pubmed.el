@@ -135,6 +135,12 @@
 (defvar pubmed-uid nil
   "The UID of the entry currently selected in the PubMed buffer.")
 
+(defvar pubmed-entry-timer nil
+  "The timer that is set to delay EFetch calls.")
+
+(defvar pubmed-entry-delay 0.5
+  "Delay in seconds before fetching the PubMed entry; default=0.5. Seconds may be an integer or floating point number. Purpose of the delay is to prevent frequent EFetch calls and exceeding the E-utilities rate limit when walking fast through the PubMed entries.")
+
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
@@ -221,7 +227,9 @@
   "Show the current entry in the \"pubmed-show\" buffer."
   (interactive)
   (setq pubmed-uid (tabulated-list-get-id))
-  (pubmed-show-entry pubmed-uid))
+  (when (timerp pubmed-entry-timer)
+    (cancel-timer pubmed-entry-timer))
+  (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))
 
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
@@ -229,8 +237,10 @@
   (with-current-buffer "*PubMed*"
     (forward-line)
     (setq pubmed-uid (tabulated-list-get-id))
-    (if (get-buffer-window "*PubMed-entry*" "visible")
-	(pubmed-show-entry pubmed-uid))))
+    (when (get-buffer-window "*PubMed-entry*" "visible")
+      (when (timerp pubmed-entry-timer)
+	(cancel-timer pubmed-entry-timer))
+      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))))
 
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
@@ -238,8 +248,10 @@
   (with-current-buffer "*PubMed*"
     (forward-line -1)
     (setq pubmed-uid (tabulated-list-get-id))
-    (if (get-buffer-window "*PubMed-entry*" "visible")
-	(pubmed-show-entry pubmed-uid))))
+    (when (get-buffer-window "*PubMed-entry*" "visible")
+      (when (timerp pubmed-entry-timer)
+	(cancel-timer pubmed-entry-timer))
+      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))))
 
 (defun pubmed-mark (&optional _num)
   "Mark an entry and move to the next line."
