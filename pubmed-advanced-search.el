@@ -108,10 +108,10 @@
 (defun pubmed-widget-get-sibling (widget widget-type)
   "Get the sibling of WIDGET with type WIDGET-TYPE."
   (let ((siblings (widget-get (widget-get widget :parent) :children))
-	sibling-of-type)
-    (dolist (sibling siblings sibling-of-type)
-      (when (eq (widget-type sibling) 'editable-field)
-	(setq sibling-of-type sibling)))))
+	match)
+    (dolist (sibling siblings match)
+      (when (eq (widget-type sibling) widget-type)
+	(setq match sibling)))))
 
 (defun pubmed-advanced-search ()
   (interactive)
