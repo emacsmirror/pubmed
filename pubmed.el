@@ -445,6 +445,11 @@
   (let ((regexp "<[[:alnum:][:blank:]/=\"-]*?>"))
     (replace-regexp-in-string regexp "" string)))
 
+(defun pubmed---html-cleanup (string)
+  "Cleanup all HTML from STRING."
+  (pubmed--remove-html-tags
+   (pubmed--html-to-unicode string)))
+
 (defun pubmed--list (entries)
   "Populate the tabulated list mode buffer."
   (let ((pubmed-buffer (get-buffer-create "*PubMed*"))
@@ -599,10 +604,9 @@
 	     (value (plist-get result keyword))
 	     (entry (list (plist-get value :uid)
 	    		  (vector (plist-get value :sortfirstauthor)
-				  (pubmed--remove-html-tags (pubmed--html-to-unicode (plist-get value :title)))
+				  (pubmed---html-cleanup (plist-get value :title))
 	    			  (plist-get value :source)
-				  (pubmed--parse-time-string (plist-get value :sortpubdate))
-				  ))))
+				  (pubmed--parse-time-string (plist-get value :sortpubdate))))))
 	(push entry entries)))
     (pubmed--list (nreverse entries))))
 
