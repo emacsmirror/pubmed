@@ -64,16 +64,6 @@
 (defvar pubmed-limit-without-api_key 3
   "Maximum amount of E-utilities requests/second without API key.")
 
-;; When using the ID Converter API, the tool and email parameters should be used to identify the application making the request. See <https://www.ncbi.nlm.nih.gov/pmc/tools/id-converter-api/>.
-(defvar pubmed-idconv-tool "emacs-pubmed"
-  "Tool paramater for the ID Converter API.")
-
-(defvar pubmed-idconv-email "folkertvanderbeek@xs4all.nl"
-  "Email parameter for the ID Converter API.")
-
-(defvar pubmed-idconv-url "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/"
-  "ID converter URL.")
-
 (defvar pubmed-efetch-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
   "EFetch base URL.")
 
@@ -287,25 +277,6 @@
       (while (not (eobp))
 	(tabulated-list-put-tag " " t)))
     (setq mark-list nil)))
-
-(defun pubmed-convert-id (uid)
-  "Return the doi of article UID.  Use commas to separate multiple UIDs. This service allows for conversion of up to 200 UIDs in a single request. If you have a larger number of IDs, split your list into smaller subsets."
-  ;; TODO: use the doi from the DocSum in stead of retrieving it from the NCBI ID converter
-  (interactive)
-  (let* ((url-request-method "POST")
-	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	 (url-request-data (concat "ids=" uid
-				   "&format=json"
-				   "&versions=no"
-				   "&tool=" pubmed-idconv-tool
-				   "&email=" pubmed-idconv-email))
-	 (json-object-type 'plist)
-         (json-array-type 'list)
-         (json-key-type nil)
-	 (json (with-current-buffer (url-retrieve-synchronously pubmed-idconv-url) (json-read-from-string (buffer-substring (1+ url-http-end-of-headers) (point-max)))))
-	 (records (plist-get json :records))
-	 (doi (plist-get (car records) :doi)))
-    doi))
 
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries or current entry."

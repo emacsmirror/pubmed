@@ -71,11 +71,22 @@
     (deferred:$
       ;; try
       (deferred:$
-	(deferred:timeout 10000 "Time-out"
-	  (let* ((doi (pubmed-convert-id uid))
-    		 (url (concat unpaywall-url "/" unpaywall-version "/" doi))
-		 (parameters (list (cons "email" unpaywall-email))))
-	    (deferred:url-get url parameters)))
+	(deferred:next
+	  (lambda (uid)
+	    (let* ((keyword (intern (concat ":" uid)))
+		   (value (plist-get pubmed-entries keyword))
+		   (articleids (plist-get value :articleids))
+		   articleid)
+	      (dolist (articleid articleids doi)
+		(when (equal (plist-get articleid :idtype) "doi")
+		  (setq doi (plist-get articleid :value)))))))
+
+	(deferred:nextc it
+	  (lambda (doi)
+	    (deferred:timeout 10000 "Time-out"
+	      (let* ((url (concat unpaywall-url "/" unpaywall-version "/" doi))
+		     (parameters (list (cons "email" unpaywall-email))))
+		(deferred:url-get url parameters)))))
 
 	(deferred:nextc it
 	  (lambda (buffer)
