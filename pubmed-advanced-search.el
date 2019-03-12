@@ -77,8 +77,8 @@
 	  ;; Construct PUBMED-QUERY
 	  ;; Use only the elements with text in the editable field
 	  (when (not (string-empty-p text))
-	    ;; If the element is the first in SEARCH-LIST, ignore BOOLEAN
-	    (if (eq element (nth 0 search-list))
+	    ;; If the element is the first in SEARCH-LIST and BOOLEAN is "AND", ignore BOOLEAN
+	    (if (and (eq element (nth 0 search-list)) (equal boolean "AND"))
 		(progn
 		  (setq pubmed-query (s-concat text field)))
 	      ;; Else wrap the previous query in parentheses and append the query BOOLEAN TEXT[FIELD]
