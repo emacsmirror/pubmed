@@ -87,7 +87,9 @@
 	    (deferred:timeout 10000 "Time-out"
 	      (let* ((url (concat unpaywall-url "/" unpaywall-version "/" doi))
 		     (parameters (list (cons "email" unpaywall-email))))
-		(deferred:url-get url parameters)))))
+		(if doi
+		    (deferred:url-get url parameters)
+		  (error "Article has no doi"))))))
 
 	(deferred:nextc it
 	  (lambda (buffer)
