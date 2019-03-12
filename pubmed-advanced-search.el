@@ -63,6 +63,12 @@
   "Look up the widget by ID."
   (cdr (assoc id pubmed-widget-lookup-table)))
 
+(defun pubmed-widget-set-point ()
+  "Set point to the last editable-field widget of the \"search-builder\"."
+  (interactive)
+    (goto-char (point-max))
+    (widget-move -5))
+
 (defun pubmed-widget-build-search ()
   "Build the search and return PUBMED-QUERY."
   (interactive)
@@ -222,7 +228,8 @@
 					    (editable-field
 					     :action (lambda (widget &rest ignore)
 						       ;; Insert a new group when <RET> is hit
-						       (widget-apply (pubmed-widget-get 'search-builder) :insert-before (widget-get (pubmed-widget-get 'search-builder) :widget)))
+						       (widget-apply (pubmed-widget-get 'search-builder) :insert-before (widget-get (pubmed-widget-get 'search-builder) :widget))
+						       (widget-move 5))
 					     :notify (lambda (widget &rest ignore)
 						       (pubmed-widget-build-search))
 					     :complete-function pubmed-complete
@@ -231,12 +238,14 @@
   (widget-insert "\n")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-search pubmed-query))
+			   (pubmed-search pubmed-query)
+			   (pubmed-advanced-search))
 		 "Search")
   (widget-insert " or ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-add-to-history pubmed-query))
+			   (pubmed-add-to-history pubmed-query)
+			   (pubmed-advanced-search))
 		 "Add to history")
   (widget-insert "\n\n")
   (widget-create 'push-button
@@ -247,12 +256,14 @@
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
 			   (when (yes-or-no-p "Your entire search history is about to be cleared.")
-			     (pubmed-clear-history)))
+			     (pubmed-clear-history)
+			     (pubmed-advanced-search)))
 		 "Clear history")
 
   (use-local-map widget-keymap)
   
-  (widget-setup))
+  (widget-setup)
+  (pubmed-widget-set-point))
 
 ;;;; Footer
 
