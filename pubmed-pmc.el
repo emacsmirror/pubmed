@@ -43,17 +43,42 @@
 ;;;; Commands
 
 (defun pubmed-get-pmc (&optional entries)
-  "In Pubmed, fetch the fulltext PDF of the marked entries or current entry from PMC or return nil if none is found."
+  "In PubMed, try to fetch the fulltext PDF of the marked entries or current entry."
+  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
   (interactive "P")
-  (cond
-   (entries
-    (mapcar 'pubmed-pmc entries))
-   (pubmed-uid
-    (pubmed-pmc pubmed-uid))
-   (t
-    (error "No entry selected"))))
+  (pubmed--guard)
+  (let (mark
+	mark-list
+	pubmed-uid)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (setq mark (char-after))
+        (setq pubmed-uid (tabulated-list-get-id))
+	(when (eq mark ?*)
+          (push pubmed-uid mark-list))
+	(forward-line)))
+    (cond
+     (entries
+      (mapcar 'pubmed--get-pmc entries))
+     (mark-list
+      (mapcar 'pubmed--get-pmc mark-list))
+     ((tabulated-list-get-id)
+      (pubmed--get-pmc (tabulated-list-get-id)))
+     (t
+      (error "No entry selected")))))
 
 ;;;; Functions
+
+(defun pubmed--get-pmc (uid)
+  "Try to fetch the fulltext PDF of UID, using PMC."
+  (deferred:$
+    (deferred:call 'pubmed-pmc uid)
+
+    (deferred:nextc it
+      (lambda (result)
+	(when (bufferp result)
+	  (pubmed--view-pdf result))))))
 
 (defun pubmed-pmc (uid)
   "Deferred chain to retrieve the fulltext PDF of the UID."
@@ -68,8 +93,8 @@
 				   "&cmd=prlinks"
 				   "&retmode=ref"
 				   "&id=" uid
-				   (when (not (string-empty-p pubmed-api_key))
-				     (concat "&api_key=" pubmed-api_key)))))
+				   (when (not (string-empty-p pubmed-api-key))
+				     (concat "&api_key=" pubmed-api-key)))))
 	    (concat pubmed-elink-url arguments))))
 
       (deferred:nextc it
@@ -129,7 +154,6 @@
 	  "Parse the HTML object in BUFFER and show the PDF."
 	  (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
 		 (content-type (cdr (assoc "content-type" headers))))
-	    (message "Content-type: %s" content-type)
 	    (cond
 	     ;; Return buffer if the iframe contains a pdf file
 	     ((equal content-type "application/pdf")

@@ -43,21 +43,48 @@
   "Sci-Hub URL.")
 
 ;;;; Commands
-(defun pubmed-get-scihub (&optional entries)
-  (interactive "P")
-  "In Pubmed, fetch the fulltext PDF from Sci-Hub of the marked entries or current entry or return nil if none is found."
-  ;; FIXME: Loading of Sci-Hub can be quite slow, so the user is tempted to invoke `pubmed-get-scihub' multiple times if it doesn't seem to respond immediately. Therefore, consider a locking mechanism to prevent multiple parallel processes.
-  (interactive "P")
-  (cond
-   (entries
-    (mapcar 'pubmed-scihub entries))
-   (pubmed-uid
-    (pubmed-scihub pubmed-uid))
-   (t
-    (error "No entry selected"))))
 
+(defun pubmed-get-scihub (&optional entries)
+  "In PubMed, try to fetch the fulltext PDF of the marked entries or current entry."
+  ;; TODO: optional argument NOQUERY non-nil means do not ask the user
+  ;; to confirm. FIXME: Loading of Sci-Hub can be quite slow, so the
+  ;; user is tempted to invoke `pubmed-get-scihub' multiple times if
+  ;; it doesn't seem to respond immediately. Therefore, consider a
+  ;; locking mechanism to prevent multiple parallel processes.
+  (interactive "P")
+  (pubmed--guard)
+  (let (mark
+	mark-list
+	pubmed-uid)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        (setq mark (char-after))
+        (setq pubmed-uid (tabulated-list-get-id))
+	(when (eq mark ?*)
+          (push pubmed-uid mark-list))
+	(forward-line)))
+    (cond
+     (entries
+      (mapcar 'pubmed--get-scihub entries))
+     (mark-list
+      (mapcar 'pubmed--get-scihub mark-list))
+     ((tabulated-list-get-id)
+      (pubmed--get-scihub (tabulated-list-get-id)))
+     (t
+      (error "No entry selected")))))
 
 ;;;; Functions
+
+(defun pubmed--get-scihub (uid)
+  "Try to fetch the fulltext PDF of UID, using SCIHUB."
+  (deferred:$
+    (deferred:call 'pubmed-scihub uid)
+
+    (deferred:nextc it
+      (lambda (result)
+	(when (bufferp result)
+	  (pubmed--view-pdf result))))))
 
 (defun pubmed-scihub (uid)
   "Deferred chain to retrieve the fulltext PDF of the UID."
