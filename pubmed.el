@@ -4,7 +4,7 @@
 ;; Created: 2018-05-23
 ;; Version: 0.1
 ;; Keywords: pubmed
-;; Package-Requires: ((emacs "25.1") (esxml) (s "1.10"))
+;; Package-Requires: ((emacs "25.1") (deferred "20170901.1330") (esxml "20171129.807") (s "20180406.808"))
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.

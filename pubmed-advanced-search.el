@@ -1,12 +1,6 @@
-;;; pubmed-advanced-search.el --- PubMed Advanced search Builder -*-
-;;; lexical-binding: t; -*-
+;;; pubmed-advanced-search.el --- PubMed Advanced search Builder -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
-;; Created: 2018-05-23
-;; Version: 0.1
-;; Keywords: pubmed
-;; Package-Requires: ((emacs "25.1") (s "1.10"))
-;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.
 
