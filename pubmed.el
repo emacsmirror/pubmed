@@ -1017,7 +1017,7 @@
     (with-temp-file tempfile
       (set-buffer-file-coding-system 'binary)
       (insert data))
-    (find-file tempfile)))
+    (find-file-other-frame tempfile)))
 
 ;;;; Footer
 
