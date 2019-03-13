@@ -255,7 +255,7 @@
   (widget-insert " or ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (when (yes-or-no-p "Your entire search history is about to be cleared.")
+			   (when (y-or-n-p "Your entire search history is about to be cleared. Are you sure? ")
 			     (pubmed-clear-history)
 			     (pubmed-advanced-search)))
 		 "Clear history")
