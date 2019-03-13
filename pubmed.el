@@ -295,6 +295,8 @@
           (push pubmed-uid mark-list))
 	(forward-line)))
     (cond
+     (entries
+      (mapcar 'pubmed--fulltext entries))
      (mark-list
       (mapcar 'pubmed--fulltext mark-list))
      ((tabulated-list-get-id)
