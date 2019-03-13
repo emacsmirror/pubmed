@@ -83,7 +83,7 @@
 
 ;;;; Requirements
 
-(require 'cl)
+(require 'cl-lib)
 (require 'json)
 (require 's)
 
