@@ -168,6 +168,7 @@
 
 ;;;; Mode
 
+;;;###autoload
 (define-derived-mode pubmed-mode tabulated-list-mode "pubmed"
   "Major mode for PubMed."
   :group 'pubmed
