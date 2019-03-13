@@ -502,7 +502,8 @@
 	    (progn
 	      (run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
 	      (setq counter 0)))))
-      (setq start (+ start max)))))
+      (setq start (+ start max)))
+    (message "Searching...done")))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
   "Retrieve the document summaries (DocSums) of a set of UIDs stored on the Entrez History server."
