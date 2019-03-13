@@ -304,32 +304,6 @@
      (t
       (error "No entry selected")))))
 
-(defun pubmed--fulltext (uid)
-  "Try to fetch the fulltext PDF of UID, using multiple methods. The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
-  (let ((i 0))
-    (deferred:$
-      (deferred:next
-	(deferred:lambda ()
-	  (cond
-	   ((eq 0 (length pubmed-fulltext-functions))
-	    (error "No functions in the list `pubmed-fulltext-functions'"))
-	   ((>= i (length pubmed-fulltext-functions))
-	    (error "No fulltext PDF found"))
-	   ((< i (length pubmed-fulltext-functions))
-	    (progn
-	      (message "Trying %S..." (nth i pubmed-fulltext-functions))
-	      
-	      (deferred:$
-		(deferred:call (nth i pubmed-fulltext-functions) uid)
-
-		(deferred:nextc it
-		  (lambda (result)
-		    (setq i (1+ i))
-		    (if result
-			(when (bufferp result)
-			  (pubmed--view-pdf result))
-		      (deferred:next self)))))))))))))
-
 ;;;; Functions
 
 (defun pubmed--guard ()
@@ -1009,6 +983,32 @@
 		(id (car (esxml-node-children articleid))))
 	    (push (list 'citation citation idtype id) references)))))
     (nreverse references)))
+
+(defun pubmed--fulltext (uid)
+  "Try to fetch the fulltext PDF of UID, using multiple methods. The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
+  (let ((i 0))
+    (deferred:$
+      (deferred:next
+	(deferred:lambda ()
+	  (cond
+	   ((eq 0 (length pubmed-fulltext-functions))
+	    (error "No functions in the list `pubmed-fulltext-functions'"))
+	   ((>= i (length pubmed-fulltext-functions))
+	    (error "No fulltext PDF found"))
+	   ((< i (length pubmed-fulltext-functions))
+	    (progn
+	      (message "Trying %S..." (nth i pubmed-fulltext-functions))
+
+	      (deferred:$
+		(deferred:call (nth i pubmed-fulltext-functions) uid)
+
+		(deferred:nextc it
+		  (lambda (result)
+		    (setq i (1+ i))
+		    (if result
+			(when (bufferp result)
+			  (pubmed--view-pdf result))
+		      (deferred:next self)))))))))))))
 
 (defun pubmed--view-pdf (buffer)
   "Create a temporary pdf file containing BUFFER and open it with the default pdf viewer."
