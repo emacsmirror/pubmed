@@ -1005,6 +1005,7 @@
 
 		(deferred:nextc it
 		  (lambda (result)
+		    (message "Trying %S...done" (nth i pubmed-fulltext-functions))
 		    (setq i (1+ i))
 		    (if result
 			(when (bufferp result)
