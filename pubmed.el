@@ -32,7 +32,7 @@
 
 ;; To create the key, go to the "Settings" page of your NCBI account. (Hint: after signing in, simply click on your NCBI username in the upper right corner of any NCBI page.) You'll see a new "API Key Management" area. Click the "Create an API Key" button, and copy the resulting key.
 
-;; Use the key by setting the value of PUBMED-API_KEY in your .emacs: (setq pubmed-api_key "1234567890abcdefghijklmnopqrstuvwxyz")
+;; Use the key by setting the value of PUBMED-API-KEY in your .emacs: (setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 
 ;;; Code:
 
@@ -55,13 +55,13 @@
 (defvar pubmed-history-list nil
   "The PubMed history list.")
 
-(defvar pubmed-api_key ""
+(defvar pubmed-api-key ""
   "E-utilities API key.")
 
-(defvar pubmed-limit-with-api_key 10
+(defvar pubmed-limit-with-api-key 10
   "Maximum amount of E-utilities requests/second with API key.")
 
-(defvar pubmed-limit-without-api_key 3
+(defvar pubmed-limit-without-api-key 3
   "Maximum amount of E-utilities requests/second without API key.")
 
 (defvar pubmed-efetch-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
@@ -209,8 +209,8 @@
 				  "&retmode=xml"
 				  "&rettype=abstract"
 				  "&id=" uid
-				  (when (not (string-empty-p pubmed-api_key))
-				    (concat "&api_key=" pubmed-api_key)))))
+				  (when (not (string-empty-p pubmed-api-key))
+				    (concat "&api_key=" pubmed-api-key)))))
     (url-retrieve pubmed-efetch-url 'pubmed--parse-efetch)))
 
 (defun pubmed-show-current-entry ()
@@ -457,8 +457,8 @@
 				   "&usehistory=" pubmed-usehistory
 				   (when (not (string-empty-p pubmed-webenv))
 				     (concat "&webenv=" pubmed-webenv))
-				   (when (not (string-empty-p pubmed-api_key))
-				     (concat "&api_key=" pubmed-api_key)))))
+				   (when (not (string-empty-p pubmed-api-key))
+				     (concat "&api_key=" pubmed-api-key)))))
     (message "Searching...")
     (url-retrieve pubmed-esearch-url 'pubmed--parse-esearch)))
 
@@ -509,9 +509,9 @@
       (setq tabulated-list-entries nil))
     (while (< start count)
       ;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
-      (if (string-empty-p pubmed-api_key)
+      (if (string-empty-p pubmed-api-key)
 	  (progn
-	    (if (<= counter pubmed-limit-without-api_key)
+	    (if (<= counter pubmed-limit-without-api-key)
 		(progn
 		  (pubmed--esummary querykey webenv start max)
 		  (setq counter (1+ counter)))
@@ -519,7 +519,7 @@
 		(run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
 		(setq counter 0))))
 	(progn
-	  (if (<= counter pubmed-limit-with-api_key)
+	  (if (<= counter pubmed-limit-with-api-key)
 	      (progn
 		(pubmed--esummary querykey webenv start max)
 		(setq counter (1+ counter)))
@@ -538,8 +538,8 @@
 				  "&retmax=" (number-to-string retmax)
 				  "&query_key=" querykey
 				  "&webenv=" webenv
-				  (when (not (string-empty-p pubmed-api_key))
-				    (concat "&api_key=" pubmed-api_key)))))
+				  (when (not (string-empty-p pubmed-api-key))
+				    (concat "&api_key=" pubmed-api-key)))))
     (url-retrieve pubmed-esummary-url 'pubmed--parse-esummary)))
 
 (defun pubmed--parse-esummary (status)
