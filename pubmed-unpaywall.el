@@ -65,9 +65,9 @@
 	(forward-line)))
     (cond
      (entries
-      (mapcar 'pubmed--get-unpaywall entries))
+      (mapcar #'pubmed--get-unpaywall entries))
      (mark-list
-      (mapcar 'pubmed--get-unpaywall mark-list))
+      (mapcar #'pubmed--get-unpaywall mark-list))
      ((tabulated-list-get-id)
       (pubmed--get-unpaywall (tabulated-list-get-id)))
      (t
@@ -78,7 +78,7 @@
 (defun pubmed--get-unpaywall (uid)
   "Try to fetch the fulltext PDF of UID, using UNPAYWALL."
   (deferred:$
-    (deferred:call 'pubmed-unpaywall uid)
+    (deferred:call #'pubmed-unpaywall uid)
 
     (deferred:nextc it
       (lambda (result)

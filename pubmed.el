@@ -145,24 +145,24 @@
 (defvar pubmed-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "a") 'pubmed-append-bibtex)
-    (define-key map (kbd "RET") 'pubmed-show-current-entry)
-    (define-key map (kbd "g") 'pubmed-get-fulltext)
-    (define-key map (kbd "m") 'pubmed-mark)
-    (define-key map (kbd "n") 'pubmed-show-next)
-    (define-key map (kbd "p") 'pubmed-show-prev)
-    (define-key map (kbd "q") 'quit-window)
-    (define-key map (kbd "s") 'pubmed-search)
-    (define-key map (kbd "u") 'pubmed-unmark)
-    (define-key map (kbd "U") 'pubmed-unmark-all)
-    (define-key map (kbd "w") 'pubmed-write-bibtex)
-    (define-key map (kbd "TAB") 'pubmed-show-bibtex)
+    (define-key map (kbd "a") #'pubmed-append-bibtex)
+    (define-key map (kbd "RET") #'pubmed-show-current-entry)
+    (define-key map (kbd "g") #'pubmed-get-fulltext)
+    (define-key map (kbd "m") #'pubmed-mark)
+    (define-key map (kbd "n") #'pubmed-show-next)
+    (define-key map (kbd "p") #'pubmed-show-prev)
+    (define-key map (kbd "q") #'quit-window)
+    (define-key map (kbd "s") #'pubmed-search)
+    (define-key map (kbd "u") #'pubmed-unmark)
+    (define-key map (kbd "U") #'pubmed-unmark-all)
+    (define-key map (kbd "w") #'pubmed-write-bibtex)
+    (define-key map (kbd "TAB") #'pubmed-show-bibtex)
     map)
   "Local keymap for `pubmed-mode'.")
 
 (defvar pubmed-search-mode-map
   (let ((map (copy-keymap minibuffer-local-map)))
-    (define-key map (kbd "TAB") 'completion-at-point)
+    (define-key map (kbd "TAB") #'completion-at-point)
     map)
   "Local keymap for `pubmed-search-mode'.")
 
@@ -196,7 +196,7 @@
 (defun pubmed-search (query)
   "Search PubMed with QUERY."
   (interactive
-   (let* ((minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions 'pubmed-completion-at-point nil t)))
+   (let* ((minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t)))
 	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil 'pubmed-history-list)))
      (list query)))
   (setq pubmed-entries nil)
@@ -215,7 +215,7 @@
 				  "&id=" uid
 				  (when (not (string-empty-p pubmed-api-key))
 				    (concat "&api_key=" pubmed-api-key)))))
-    (url-retrieve pubmed-efetch-url 'pubmed--parse-efetch)))
+    (url-retrieve pubmed-efetch-url #'pubmed--parse-efetch)))
 
 (defun pubmed-show-current-entry ()
   "Show the current entry in the \"pubmed-show\" buffer."
@@ -223,7 +223,7 @@
   (setq pubmed-uid (tabulated-list-get-id))
   (when (timerp pubmed-entry-timer)
     (cancel-timer pubmed-entry-timer))
-  (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))
+  (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))
 
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
@@ -234,7 +234,7 @@
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
 	(cancel-timer pubmed-entry-timer))
-      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))))
+      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
 
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
@@ -245,7 +245,7 @@
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
 	(cancel-timer pubmed-entry-timer))
-      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil 'pubmed-show-entry pubmed-uid)))))
+      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
 
 (defun pubmed-mark (&optional _num)
   "Mark an entry and move to the next line."
@@ -300,9 +300,9 @@
 	(forward-line)))
     (cond
      (entries
-      (mapcar 'pubmed--fulltext entries))
+      (mapcar #'pubmed--fulltext entries))
      (mark-list
-      (mapcar 'pubmed--fulltext mark-list))
+      (mapcar #'pubmed--fulltext mark-list))
      ((tabulated-list-get-id)
       (pubmed--fulltext (tabulated-list-get-id)))
      (t
@@ -442,7 +442,7 @@
 				   (when (not (string-empty-p pubmed-api-key))
 				     (concat "&api_key=" pubmed-api-key)))))
     (message "Searching...")
-    (url-retrieve pubmed-esearch-url 'pubmed--parse-esearch)))
+    (url-retrieve pubmed-esearch-url #'pubmed--parse-esearch)))
 
 (defun pubmed--parse-esearch (status)
   "Check STATUS and parse the JSON object in the current buffer.
@@ -507,7 +507,7 @@ RETMAX is the total number of records to be retrieved."
 		  (pubmed--esummary querykey webenv start max)
 		  (setq counter (1+ counter)))
 	      (progn
-		(run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
+		(run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
 		(setq counter 0))))
 	(progn
 	  (if (<= counter pubmed-limit-with-api-key)
@@ -515,7 +515,7 @@ RETMAX is the total number of records to be retrieved."
 		(pubmed--esummary querykey webenv start max)
 		(setq counter (1+ counter)))
 	    (progn
-	      (run-with-timer "1 sec" nil 'pubmed--esummary querykey webenv start max)
+	      (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
 	      (setq counter 0)))))
       (setq start (+ start max)))
     (message "Searching...done")))
@@ -536,7 +536,7 @@ the total number of records to be retrieved."
 				  "&webenv=" webenv
 				  (when (not (string-empty-p pubmed-api-key))
 				    (concat "&api_key=" pubmed-api-key)))))
-    (url-retrieve pubmed-esummary-url 'pubmed--parse-esummary)))
+    (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary)))
 
 (defun pubmed--parse-esummary (status)
   "Check STATUS and parse the JSON object in the current buffer."

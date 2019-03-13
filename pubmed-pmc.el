@@ -56,9 +56,9 @@
 	(forward-line)))
     (cond
      (entries
-      (mapcar 'pubmed--get-pmc entries))
+      (mapcar #'pubmed--get-pmc entries))
      (mark-list
-      (mapcar 'pubmed--get-pmc mark-list))
+      (mapcar #'pubmed--get-pmc mark-list))
      ((tabulated-list-get-id)
       (pubmed--get-pmc (tabulated-list-get-id)))
      (t
@@ -69,7 +69,7 @@
 (defun pubmed--get-pmc (uid)
   "Try to fetch the fulltext PDF of UID, using PMC."
   (deferred:$
-    (deferred:call 'pubmed-pmc uid)
+    (deferred:call #'pubmed-pmc uid)
 
     (deferred:nextc it
       (lambda (result)

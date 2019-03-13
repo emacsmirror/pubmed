@@ -62,9 +62,9 @@
 	(forward-line)))
     (cond
      (entries
-      (mapcar 'pubmed--get-scihub entries))
+      (mapcar #'pubmed--get-scihub entries))
      (mark-list
-      (mapcar 'pubmed--get-scihub mark-list))
+      (mapcar #'pubmed--get-scihub mark-list))
      ((tabulated-list-get-id)
       (pubmed--get-scihub (tabulated-list-get-id)))
      (t
@@ -75,7 +75,7 @@
 (defun pubmed--get-scihub (uid)
   "Try to fetch the fulltext PDF of UID, using SCIHUB."
   (deferred:$
-    (deferred:call 'pubmed-scihub uid)
+    (deferred:call #'pubmed-scihub uid)
 
     (deferred:nextc it
       (lambda (result)

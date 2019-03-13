@@ -42,8 +42,8 @@
 (defvar pubmed-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "q") 'quit-window)
-    (define-key map (kbd "s") 'pubmed-search)
+    (define-key map (kbd "q") #'quit-window)
+    (define-key map (kbd "s") #'pubmed-search)
     map)
   "Local keymap for `pubmed-history-mode'.")
 
@@ -115,7 +115,7 @@
 					      (pubmed-show-history)))))
 		  query
 		  (cons count `(help-echo "Show search results" action (lambda (button)
-									 (funcall 'pubmed--get-docsums ,querykey ,webenv (string-to-number ,count)))))
+									 (funcall #'pubmed--get-docsums ,querykey ,webenv (string-to-number ,count)))))
 		  time))))
     (push entry pubmed-history)
     (pubmed-show-history)))

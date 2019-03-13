@@ -173,11 +173,11 @@
 							     (sibling (pubmed-widget-get-sibling widget 'editable-field)))
 							 (cond
 							  ((equal value "")
-							   (widget-put sibling :complete-function 'pubmed-complete))
+							   (widget-put sibling :complete-function #'pubmed-complete))
 							  ((string-prefix-p "[Author" value)
-							   (widget-put sibling :complete-function 'pubmed-author-complete))
+							   (widget-put sibling :complete-function #'pubmed-author-complete))
 							  ((equal value "[Journal]")
-							   (widget-put sibling :complete-function 'pubmed-journal-complete))
+							   (widget-put sibling :complete-function #'pubmed-journal-complete))
 							  (t
 							   (widget-put sibling :complete-function nil)))
 							 (widget-setup)))
