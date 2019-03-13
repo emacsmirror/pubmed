@@ -196,8 +196,7 @@
 (defun pubmed-show-bibtex (&optional entries)
   "In PubMed, show the BibTeX references of the marked entries or current entry. If optional argument ENTRIES is a list of UIDs, show the BibTeX references of the entries."
   (interactive "P")
-  ;; (unless (derived-mode-p 'pubmed-mode)
-  ;;   (error "The current buffer is not in PubMed mode"))
+  (pubmed--guard)
   (let (mark
 	mark-list
 	pubmed-uid)
@@ -245,6 +244,7 @@
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive
    (list (read-file-name "Write to BibTeX file: " nil pubmed-default-bibtex-file nil pubmed-default-bibtex-file)))
+  (pubmed--guard)
   (if (not (file-writable-p file)) (error "Output file not writable")
     (if entries
 	(pubmed--write-bibtex file entries)
@@ -253,6 +253,7 @@
 (defun pubmed-append-bibtex (&optional file entries)
   "In PubMed, append the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive "FAppend to BibTeX file: ")
+  (pubmed--guard)
   (if (not (file-writable-p file)) (error "Output file not writable")
     (if entries
 	(pubmed--write-bibtex file entries append)
@@ -271,8 +272,6 @@
 
 (defun pubmed--write-bibtex (file &optional entries append)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries. If optional argument APPEND is non-nil, append the BibTeX references to a BibTeX database."
-  (unless (derived-mode-p 'pubmed-mode)
-    (error "The current buffer is not in PubMed mode"))
   (let (mark
 	mark-list
 	pubmed-uid)
