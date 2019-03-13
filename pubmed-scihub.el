@@ -1,4 +1,4 @@
-;;; pubmed-scihub.el --- Deferred fulltext functions for PubMed -*- lexical-binding: t; -*-
+;;; pubmed-scihub.el --- Fetch fulltext PDFs from Sci-Hub -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 ;; Created: 2018-05-23

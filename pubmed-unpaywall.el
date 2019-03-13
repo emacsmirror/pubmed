@@ -1,4 +1,4 @@
-;;; pubmed-unpaywall.el --- Deferred functions to PubMed -*- lexical-binding: t; -*-
+;;; pubmed-unpaywall.el --- Fetch fulltext PDFs from Unpaywall -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 ;; Created: 2018-05-23

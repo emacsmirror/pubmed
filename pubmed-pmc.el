@@ -1,4 +1,4 @@
-;;; pubmed-pmc.el --- Deferred functions to PubMed Central (PMC) -*- lexical-binding: t; -*-
+;;; pubmed-pmc.el --- Fetch fulltext PDFs from PubMed Central (PMC) -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 ;; Created: 2018-05-23
