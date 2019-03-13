@@ -133,7 +133,7 @@
 (defun pubmed--get-count (query)
   "Search PubMed with QUERY. Use ESearch to post the UIDs on the Entrez History server. Return a plist with the count, querykey and webenv."
   (interactive)
-  (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded. 
+  (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
 	 (url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))

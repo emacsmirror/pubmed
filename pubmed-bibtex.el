@@ -88,11 +88,11 @@
   "Default BibTeX file.")
 
 (defvar pubmed-bibtex-citation-key "pmid"
-  "The scheme for creating citation keys of the BibTeX entries. Default is \"pmid\",
- in which \"pmid\" followed by the PMID of the publication is
- used. Alternatively, you could use \"authoryear\", to follow the
- loose standard in which the author's surname followed by the
- year of publication is used.")
+  "The scheme for creating citation keys of the BibTeX entries.
+Default is \"pmid\", in which \"pmid\" followed by the PMID of
+the publication is used. Alternatively, you could use
+\"authoryear\", to follow the loose standard in which the
+author's surname followed by the year of publication is used.")
 
 (defvar pubmed-bibtex-citation-keys nil)
 

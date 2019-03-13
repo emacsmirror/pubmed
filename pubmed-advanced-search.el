@@ -20,7 +20,7 @@
 ;;; Commentary:
 
 ;; This is a GNU Emacs interface to the PubMed database of references on life
-;; sciences and biomedical topics. Use the PubMed Advanced search Builder to
+;; sciences and biomedical topics. Use the PubMed Advanced Search Builder to
 ;; search for terms in a specific search field, browse the index of terms,
 ;; combine searches using history and preview the number of search results. See
 ;; <https://www.ncbi.nlm.nih.gov/books/NBK3827/#pubmedhelp.Advanced_Search> for
@@ -43,18 +43,20 @@
   "A table for lookup markers created in current buffer.")
 
 (defun pubmed-widget-create (id widget)
+  "Store ID and WIDGET in `pubmed-widget-lookup-table'."
   (if (assoc id widget-demo-form)
-      (error "identifier %S is used!" id)
+      (error "Identifier %S is used!" id)
     (push (cons id widget) pubmed-widget-lookup-table)))
 
 (defun pubmed-widget-add (id widget)
+  "Store ID and WIDGET in `pubmed-widget-lookup-table', and replace ID if it is in use already."
   (let ((old (assoc id pubmed-widget-lookup-table)))
     (if old
         (setcdr old widget)
       (push (cons id widget) pubmed-widget-lookup-table))))
 
 (defun pubmed-widget-get (id)
-  "Look up the widget by ID."
+  "Look up the widget by ID in `pubmed-widget-lookup-table'."
   (cdr (assoc id pubmed-widget-lookup-table)))
 
 (defun pubmed-widget-set-point ()
@@ -89,11 +91,12 @@
       (pubmed-widget-change-text (pubmed-widget-get 'searchbox) pubmed-query))
     pubmed-query))
 
-(defun pubmed-widget-change-text (widget string)
+(defun pubmed-widget-change-text (widget value)
+  "Set editable text field WIDGET to VALUE."
   (save-excursion
     (goto-char (widget-field-start widget))
     (delete-region (point) (widget-field-end widget))
-    (insert string)))
+    (insert value)))
 
 (defun pubmed-add-to-builder (query &optional boolean)
   "Add BOOLEAN and QUERY from the history to the \"search-builder\"."
@@ -115,6 +118,7 @@
 
 ;;;###autoload
 (defun pubmed-advanced-search ()
+  "Show PubMed Advanced Search Builder."
   (interactive)
   (switch-to-buffer "*PubMed Advanced Search Builder*")
   (kill-all-local-variables)
@@ -264,4 +268,4 @@
 
 (provide 'pubmed-advanced-search)
 
-;;; pubmed.el ends here
+;;; pubmed-advanced-search.el ends here

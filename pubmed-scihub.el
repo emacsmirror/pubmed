@@ -41,7 +41,7 @@
 
 ;;;###autoload
 (defun pubmed-get-scihub (&optional entries)
-  "In PubMed, try to fetch the fulltext PDF of the marked entries or current entry."
+  "In PubMed, try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
   ;; TODO: optional argument NOQUERY non-nil means do not ask the user
   ;; to confirm. FIXME: Loading of Sci-Hub can be quite slow, so the
   ;; user is tempted to invoke `pubmed-get-scihub' multiple times if
@@ -122,7 +122,7 @@
 
 	(deferred:nextc it
 	  (lambda (url)
-	    "Retrieve the URL of the iframe." 
+	    "Retrieve the URL of the iframe."
 	    (setq iframe-url url)
 	    (deferred:timeout 10000 "Time-out"
 	      (deferred:url-retrieve iframe-url))))

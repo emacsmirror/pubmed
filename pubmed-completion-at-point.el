@@ -90,7 +90,7 @@
 
 ;;;###autoload
 (defun pubmed-completion-at-point ()
-  "Function used for `completion-at-point-functions'"
+  "Function used for `completion-at-point-functions'."
   ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))
@@ -105,7 +105,7 @@
 
 ;;;###autoload
 (defun pubmed-author-completion-at-point ()
-  "Function used for `completion-at-point-functions'"
+  "Function used for `completion-at-point-functions'."
   ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))
@@ -120,7 +120,7 @@
 
 ;;;###autoload
 (defun pubmed-journal-completion-at-point ()
-  "Function used for `completion-at-point-functions'"
+  "Function used for `completion-at-point-functions'."
   ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))

@@ -26,7 +26,7 @@
 
 ;; This is a GNU Emacs interface to the PubMed database of references on life sciences and biomedical topics.
 
-;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API key. See <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>. If you don't have an API key, E-utilities will still work, but you may be limited to fewer requests than allowed with an API key. Any computer (IP address) that submits more than three E-utility requests per second will receive an error message. This limit applies to any combination of requests to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery. 
+;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API key. See <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>. If you don't have an API key, E-utilities will still work, but you may be limited to fewer requests than allowed with an API key. Any computer (IP address) that submits more than three E-utility requests per second will receive an error message. This limit applies to any combination of requests to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery.
 
 ;; First, you will need an NCBI account. If you don't have one already, register at <https://www.ncbi.nlm.nih.gov/account/>.
 
@@ -203,7 +203,7 @@
   (pubmed--esearch query))
 
 (defun pubmed-show-entry (uid)
-  "Display ENTRY in the current buffer."
+  "Display entry UID in the current buffer."
   (interactive)
   ;; "Return the parsed summary for an UID"
   ;; TODO: Only the summary of the first UID is returned. Consider returning multiple summaries at once when multiple UIDs are passed as argument.
@@ -283,7 +283,7 @@
     (setq mark-list nil)))
 
 (defun pubmed-get-fulltext (&optional entries)
-  "Try to fetch the fulltext PDF of the marked entries or current entry."
+  "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
   ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
   (interactive "P")
   (pubmed--guard)
@@ -311,6 +311,7 @@
 ;;;; Functions
 
 (defun pubmed--guard ()
+  "Signal an error when the current buffer is not in pubmed-mode."
   (unless (eq major-mode 'pubmed-mode)
     (error "The current buffer is not in PubMed mode")))
 
@@ -399,6 +400,7 @@
     (format-time-string pubmed-time-format-string encoded-time)))
 
 (defun pubmed--html-to-unicode (string)
+  "Replace HTML entities with unicode in STRING."
   (let* ((html-entities '(Aacute "Á" aacute "á" Acirc "Â" acirc "â" acute "´" AElig "Æ" aelig "æ" Agrave "À" agrave "à" alefsym "ℵ" Alpha "Α" alpha "α" amp "&" and "∧" ang "∠" apos "'" aring "å" Aring "Å" asymp "≈" atilde "ã" Atilde "Ã" auml "ä" Auml "Ä" bdquo "„" Beta "Β" beta "β" brvbar "¦" bull "•" cap "∩" ccedil "ç" Ccedil "Ç" cedil "¸" cent "¢" Chi "Χ" chi "χ" circ "ˆ" clubs "♣" cong "≅" copy "©" crarr "↵" cup "∪" curren "¤" Dagger "‡" dagger "†" darr "↓" dArr "⇓" deg "°" Delta "Δ" delta "δ" diams "♦" divide "÷" eacute "é" Eacute "É" ecirc "ê" Ecirc "Ê" egrave "è" Egrave "È" empty "∅" emsp " " ensp " " Epsilon "Ε" epsilon "ε" equiv "≡" Eta "Η" eta "η" eth "ð" ETH "Ð" euml "ë" Euml "Ë" euro "€" exist "∃" fnof "ƒ" forall "∀" frac12 "½" frac14 "¼" frac34 "¾" frasl "⁄" Gamma "Γ" gamma "γ" ge "≥" gt ">" harr "↔" hArr "⇔" hearts "♥" hellip "…" iacute "í" Iacute "Í" icirc "î" Icirc "Î" iexcl "¡" igrave "ì" Igrave "Ì" image "ℑ" infin "∞" int "∫" Iota "Ι" iota "ι" iquest "¿" isin "∈" iuml "ï" Iuml "Ï" Kappa "Κ" kappa "κ" Lambda "Λ" lambda "λ" lang "〈" laquo "«" larr "←" lArr "⇐" lceil "⌈" ldquo "“" le "≤" lfloor "⌊" lowast "∗" loz "◊" lrm "" lsaquo "‹" lsquo "‘" lt "<" macr "¯" mdash "—" micro "µ" middot "·" minus "−" Mu "Μ" mu "μ" nabla "∇" nbsp "" ndash "–" ne "≠" ni "∋" not "¬" notin "∉" nsub "⊄" ntilde "ñ" Ntilde "Ñ" Nu "Ν" nu "ν" oacute "ó" Oacute "Ó" ocirc "ô" Ocirc "Ô" OElig "Œ" oelig "œ" ograve "ò" Ograve "Ò" oline "‾" omega "ω" Omega "Ω" Omicron "Ο" omicron "ο" oplus "⊕" or "∨" ordf "ª" ordm "º" oslash "ø" Oslash "Ø" otilde "õ" Otilde "Õ" otimes "⊗" ouml "ö" Ouml "Ö" para "¶" part "∂" permil "‰" perp "⊥" Phi "Φ" phi "φ" Pi "Π" pi "π" piv "ϖ" plusmn "±" pound "£" Prime "″" prime "′" prod "∏" prop "∝" Psi "Ψ" psi "ψ" quot "\"" radic "√" rang "〉" raquo "»" rarr "→" rArr "⇒" rceil "⌉" rdquo "”" real "ℜ" reg "®" rfloor "⌋" Rho "Ρ" rho "ρ" rlm "" rsaquo "›" rsquo "’" sbquo "‚" scaron "š" Scaron "Š" sdot "⋅" sect "§" shy "" Sigma "Σ" sigma "σ" sigmaf "ς" sim "∼" spades "♠" sub "⊂" sube "⊆" sum "∑" sup "⊃" sup1 "¹" sup2 "²" sup3 "³" supe "⊇" szlig "ß" Tau "Τ" tau "τ" there4 "∴" Theta "Θ" theta "θ" thetasym "ϑ" thinsp " " thorn "þ" THORN "Þ" tilde "˜" times "×" trade "™" uacute "ú" Uacute "Ú" uarr "↑" uArr "⇑" ucirc "û" Ucirc "Û" ugrave "ù" Ugrave "Ù" uml "¨" upsih "ϒ" Upsilon "Υ" upsilon "υ" uuml "ü" Uuml "Ü" weierp "℘" Xi "Ξ" xi "ξ" yacute "ý" Yacute "Ý" yen "¥" yuml "ÿ" Yuml "Ÿ" Zeta "Ζ" zeta "ζ" zwj "" zwnj ""))
          (pubmed--html-to-unicode (lambda (s) (or (plist-get html-entities (intern (substring s 1 -1))) s))))
     (replace-regexp-in-string "&[^; ]*;" pubmed--html-to-unicode string)))
@@ -414,7 +416,7 @@
    (pubmed--html-to-unicode string)))
 
 (defun pubmed--list (entries)
-  "Populate the tabulated list mode buffer."
+  "Populate the tabulated list mode buffer with ENTRIES."
   (let ((pubmed-buffer (get-buffer-create "*PubMed*"))
 	(inhibit-read-only t))
     (with-current-buffer pubmed-buffer
@@ -426,7 +428,7 @@
 
 (defun pubmed--esearch (query)
   "Search PubMed with QUERY. Use ESearch to retrieve the UIDs and post them on the History server."
-  (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded. 
+  (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
 	 (url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
@@ -443,7 +445,10 @@
     (url-retrieve pubmed-esearch-url 'pubmed--parse-esearch)))
 
 (defun pubmed--parse-esearch (status)
-  "Parse the JSON object in the data retrieved by `pubmed--esearch'. First use ESearch to retrieve the UIDs and post them on the History server, then use multiple ESummary calls to retrieve the data in batches of 500."
+  "Check STATUS and parse the JSON object in the current buffer.
+First use ESearch to retrieve the UIDs and post them on the
+History server, then use multiple ESummary calls to retrieve the
+data in batches of 500."
   (let* ((url-error (plist-get status :error))
 	 (json (decode-coding-string (buffer-substring (1+ url-http-end-of-headers) (point-max)) 'utf-8))
 	 (json-object-type 'plist)
@@ -472,7 +477,13 @@
 	(pubmed--get-docsums querykey webenv count retstart retmax))))))
 
 (defun pubmed--get-docsums (querykey webenv count &optional retstart retmax)
-  "Use multiple ESummary calls to retrieve the document summaries (DocSums) for a set of UIDs stored on the Entrez History server in batches of 500. The QUERYKEY specifies which of the UID lists attached to the given WEBENV will be used as input to ESummary."
+  "Retrieve the document summaries (DocSums) for a set of records stored on the Entrez History server.
+Use multiple ESummary calls in batches of 500. The QUERYKEY
+specifies which of the stored sets to the given WEBENV will be
+used as input to ESummary. COUNT is the total number of records
+in the stored set. Optional argument RETSTART is the sequential
+index of the first record to be retrieved, optional argument
+RETMAX is the total number of records to be retrieved."
   (interactive)
   (let ((start (if (boundp 'retstart)
 		   retstart
@@ -483,7 +494,7 @@
 	(counter 0)
 	(pubmed-buffer (get-buffer-create "*PubMed*")))
     ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
-    (sleep-for 0.5) 
+    (sleep-for 0.5)
     (with-current-buffer pubmed-buffer
       ;; Remove previous entries from the `tabulated-list-entries' variable.
       (setq tabulated-list-entries nil))
@@ -510,7 +521,11 @@
     (message "Searching...done")))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
-  "Retrieve the document summaries (DocSums) of a set of UIDs stored on the Entrez History server."
+  "Retrieve the document summaries (DocSums) for a batch of records stored on the Entrez History server.
+The QUERYKEY specifies which of the stored sets to the given
+WEBENV will be used as input to ESummary. RETSTART is the
+sequential index of the first record to be retrieved, RETMAX is
+the total number of records to be retrieved."
   (let*((url-request-method "POST")
 	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 	(url-request-data (concat "db=" pubmed-db
@@ -524,7 +539,7 @@
     (url-retrieve pubmed-esummary-url 'pubmed--parse-esummary)))
 
 (defun pubmed--parse-esummary (status)
-  "Parse the JSON object in the data retrieved by `pubmed--esummary'."
+  "Check STATUS and parse the JSON object in the current buffer."
   (let ((url-error (plist-get status :error)))
     (cond
      (url-error
@@ -557,7 +572,8 @@
 	(pubmed--list (nreverse entries)))))))
 
 (defun pubmed--parse-efetch (status)
-  "Parse the XML object in the data retrieved by `pubmed-show-entry' and show the result in the \"*PubMed-entry*\" buffer."
+  "Check STATUS and parse the XML object in the current buffer.
+Show the result in the \"*PubMed-entry*\" buffer."
   (let ((url-error (plist-get status :error)))
     (cond
      (url-error
@@ -737,11 +753,12 @@
 	  (display-buffer pubmed-entry-buffer)))))))
 
 (defun pubmed--summary-pmid (summary)
-  "Return the PMID of the article SUMMARY"
+  "Return the PMID of the article SUMMARY."
   (esxml-query "PMID *" summary))
 
 (defun pubmed--summary-datecompleted (summary)
-  "Return the completed date of the article SUMMARY. The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  "Return the completed date of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
   (let* ((datecompleted (encode-time 0
 				     0
 				     0
@@ -751,7 +768,8 @@
     datecompleted))
 
 (defun pubmed--summary-daterevised (summary)
-  "Return the revised date value of the article SUMMARY. The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  "Return the revised date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
   (let* ((daterevised (encode-time 0
 				   0
 				   0
@@ -761,18 +779,19 @@
     daterevised))
 
 (defun pubmed--summary-pubmodel (summary)
-  "Return the publication model of the article SUMMARY"
+  "Return the publication model of the article SUMMARY."
   (esxml-node-attribute 'PubModel (esxml-query "Article" summary)))
 
 (defun pubmed--summary-issn (summary)
-  "Return a plist with the journal ISSN and ISSN type of the article SUMMARY. The plist has the form \"('issn ISSN 'type TYPE)\"."
-  "Return the ISSN of the article SUMMARY"
+  "Return a plist with the journal ISSN and ISSN type of the article SUMMARY.
+The plist has the form \"('issn ISSN 'type TYPE)\"."
   (let ((issn (esxml-query "Journal ISSN *" summary))
 	(type (esxml-node-attribute 'IssnType (esxml-query "Journal ISSN" summary))))
     (list 'issn issn 'type type)))
 
 (defun pubmed--summary-journal-issue (summary)
-  "Return a plist with the journal year, season, issue, volume, and cited medium of the article SUMMARY. The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
+  "Return a plist with the journal year, season, issue, volume, and cited medium of the article SUMMARY.
+The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
   (let* ((year (esxml-query "Journal JournalIssue Year *" summary))
 	 (season (esxml-query "Journal JournalIssue Season *" summary))
 	 (issue (esxml-query "Journal JournalIssue Issue *" summary))
@@ -818,7 +837,8 @@
   (esxml-query "Article Pagination MedlinePgn *" summary))
 
 (defun pubmed--summary-elocation (summary)
-  "Return an plist of Elocation IDs of the article SUMMARY.  The plist has the form \"('type TYPE 'id ID)\"."
+  "Return an plist of Elocation IDs of the article SUMMARY.
+The plist has the form \"('type TYPE 'id ID)\"."
   (let* ((elocationidlist (esxml-query-all "ELocationID" (esxml-query "Article" summary)))
 	 elocationids)
     (dolist (elocationid elocationidlist elocationids)
@@ -828,7 +848,8 @@
     (nreverse elocationids)))
 
 (defun pubmed--summary-abstract (summary)
-  "Return the abstract of the article SUMMARY. Return nil if no abstract is available."
+  "Return the abstract of the article SUMMARY.
+Return nil if no abstract is available."
   (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Article Abstract" summary)))
 	texts)
     (when textlist
@@ -844,7 +865,8 @@
       (s-join "\n\n" (nreverse texts)))))
 
 (defun pubmed--summary-authors (summary)
-  "Return an plist with the authors of the article SUMMARY. Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  "Return an plist with the authors of the article SUMMARY.
+Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
   (let ((authorlist (esxml-query-all "Author" (esxml-query "Article AuthorList" summary)))
 	authors)
     (dolist (author authorlist)
@@ -861,7 +883,8 @@
   (esxml-query "Article Language *" summary))
 
 (defun pubmed--summary-grant (summary)
-  "Return a list of the grants of the article SUMMARY. Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'agency AGENCY 'country COUNTRY)\"."
+  "Return a list of the grants of the article SUMMARY.
+Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'agency AGENCY 'country COUNTRY)\"."
   (let ((grantlist (esxml-query-all "Grant" (esxml-query "Article GrantList" summary)))
 	grants) ;; make sure list starts empty
     (dolist (grant grantlist)
@@ -872,7 +895,8 @@
     (nreverse grants)))
 
 (defun pubmed--summary-publicationtype (summary)
-  "Return a plist of the publication types and unique identifiers of the article SUMMARY. The plist has the form \"('type TYPE 'ui UI)\"."
+  "Return a plist of the publication types and unique identifiers of the article SUMMARY.
+The plist has the form \"('type TYPE 'ui UI)\"."
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
   (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "Article PublicationTypeList" summary)))
 	publicationtypes) ;; make sure list starts empty
@@ -885,7 +909,8 @@
     (nreverse publicationtypes)))
 
 (defun pubmed--summary-articledate (summary)
-  "Return a plist of article date and date type of the article SUMMARY. The plist has the form \"('type TYPE 'date date)\". The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  "Return a plist of article date and date type of the article SUMMARY.
+The plist has the form \"('type TYPE 'date date)\". The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
   (let ((type (esxml-node-attribute 'DateType (esxml-query "Article ArticleDate" summary)))
 	(date (encode-time 0
 			   0
@@ -896,7 +921,8 @@
     (list 'type type 'date date)))
 
 (defun pubmed--summary-medlinejournalinfo (summary)
-  "Return a plist with the country, journal title abbreviation (MedlineTA), LocatorPlus accession number (NlmUniqueID) and ISSNLinking element of the article SUMMARY. The plist has the form \"('country COUNTRY 'medlineta MEDLINETA 'nlmuniqueid NLMUNIQUEID 'issnlinking ISSNLINKING)\"."
+  "Return a plist with the country, journal title abbreviation (MedlineTA), LocatorPlus accession number (NlmUniqueID) and ISSNLinking element of the article SUMMARY.
+The plist has the form \"('country COUNTRY 'medlineta MEDLINETA 'nlmuniqueid NLMUNIQUEID 'issnlinking ISSNLINKING)\"."
   (let ((country (esxml-query "MedlineJournalInfo Country *" summary))
 	(medlineta (esxml-query "MedlineJournalInfo MedlineTA *" summary))
 	(nlmuniqueid (esxml-query "MedlineJournalInfo NlmUniqueID *" summary))
@@ -904,7 +930,8 @@
     (list 'country country 'medlineta medlineta 'nlmuniqueid nlmuniqueid 'issnlinking issnlinking)))
 
 (defun pubmed--summary-substances (summary)
-  "Return a plist of the chemical substances and unique identifiers of the article SUMMARY. Each list element corresponds to one substance, and is a plist with the form \"('registrynumber REGISTRYNUMBER 'substance SUBSTANCE 'ui UI)\"."
+  "Return a plist of the chemical substances and unique identifiers of the article SUMMARY.
+Each list element corresponds to one substance, and is a plist with the form \"('registrynumber REGISTRYNUMBER 'substance SUBSTANCE 'ui UI)\"."
   (let ((chemicallist (esxml-query-all "Chemical" (esxml-query "ChemicalList" summary)))
 	chemicals)
     (dolist (chemical chemicallist)
@@ -915,7 +942,8 @@
     (nreverse chemicals)))
 
 (defun pubmed--summary-mesh (summary)
-  "Return an list of the MeSH terms  of the article SUMMARY. Each list element corresponds to one descriptor (or subject heading) and its qualifiers (or subheadings), and is a plist with the form \"('descriptor DESCRIPTOR 'ui UI 'qualifiers (('qualifier QUALIFIER 'ui UI) ('qualifier QUALIFIER 'ui UI) (...)))\"."
+  "Return an list of the MeSH terms  of the article SUMMARY.
+Each list element corresponds to one descriptor (or subject heading) and its qualifiers (or subheadings), and is a plist with the form \"('descriptor DESCRIPTOR 'ui UI 'qualifiers (('qualifier QUALIFIER 'ui UI) ('qualifier QUALIFIER 'ui UI) (...)))\"."
   (let ((meshheadinglist (esxml-query-all "MeshHeading" (esxml-query "MeshHeadingList" summary)))
 	meshheadings)
     (dolist (meshheading meshheadinglist)
@@ -931,7 +959,8 @@
     (nreverse meshheadings)))
 
 (defun pubmed--summary-commentscorrections (summary)
-  "Return the correction of the article SUMMARY. The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
+  "Return the correction of the article SUMMARY.
+The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
   (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
 	commentscorrections)
     (dolist (commentscorrection commentscorrectionslist)
@@ -947,7 +976,8 @@
   (esxml-query "PubmedData PublicationStatus *" summary))
 
 (defun pubmed--summary-articleid (summary)
-  "Return an plist of the article IDs. The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
+  "Return an plist of the article IDs of the article SUMMARY.
+The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
   (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
 	articleids)
     (dolist (articleid articleidlist)
@@ -958,7 +988,7 @@
     (nreverse articleids)))
 
 (defun pubmed--summary-keywords (summary)
-  "Return an alist of the article keywords."
+  "Return an alist of the keywords of article SUMMARY."
   (let ((keywordlist (esxml-query-all "Keyword" (esxml-query "KeywordList" summary)))
 	keywords)
     (dolist (keyword keywordlist)
@@ -966,7 +996,8 @@
     (nreverse keywords)))
 
 (defun pubmed--summary-investigators (summary)
-  "Return an plist with the investigators of the article SUMMARY. Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
+  "Return an plist with the investigators of the article SUMMARY.
+Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
   (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
 	investigators)
     (dolist (investigator investigatorlist)
@@ -977,7 +1008,8 @@
     (nreverse investigators)))
 
 (defun pubmed--summary-references (summary)
-  "Return a plist of the references of the article SUMMARY. Each list element corresponds to one reference, The has the form \"('citation CITATION 'pubmed PMID)\"."
+  "Return a plist of the references of the article SUMMARY.
+Each list element corresponds to one reference, The has the form \"('citation CITATION 'pubmed PMID)\"."
   (let ((referencelist (esxml-query-all "Reference" (esxml-query "ReferenceList" summary)))
 	references)
     (dolist (reference referencelist)
@@ -990,7 +1022,8 @@
     (nreverse references)))
 
 (defun pubmed--fulltext (uid)
-  "Try to fetch the fulltext PDF of UID, using multiple methods. The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
+  "Try to fetch the fulltext PDF of UID, using multiple methods.
+The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
   (let ((i 0))
     (deferred:$
       (deferred:next
