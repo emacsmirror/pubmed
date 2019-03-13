@@ -188,6 +188,7 @@
 
 ;;;;; Commands
 
+;;;###autoload
 (defun pubmed-show-bibtex (&optional entries)
   "In PubMed, show the BibTeX references of the marked entries or current entry. If optional argument ENTRIES is a list of UIDs, show the BibTeX references of the entries."
   (interactive "P")
@@ -235,6 +236,7 @@
      (t
       (error "No entry selected")))))
 
+;;;###autoload
 (defun pubmed-write-bibtex (&optional file entries)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive
@@ -245,6 +247,7 @@
 	(pubmed--write-bibtex file entries)
       (pubmed--write-bibtex file))))
 
+;;;###autoload
 (defun pubmed-append-bibtex (&optional file entries)
   "In PubMed, append the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive "FAppend to BibTeX file: ")

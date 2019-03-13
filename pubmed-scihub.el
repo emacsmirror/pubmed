@@ -39,6 +39,7 @@
 
 ;;;; Commands
 
+;;;###autoload
 (defun pubmed-get-scihub (&optional entries)
   "In PubMed, try to fetch the fulltext PDF of the marked entries or current entry."
   ;; TODO: optional argument NOQUERY non-nil means do not ask the user

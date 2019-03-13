@@ -180,6 +180,8 @@
   (tabulated-list-init-header))
 
 ;;;;; Commands
+
+;;;###autoload
 (defun pubmed-show-mode ()
   "Mode for displaying PubMed entries."
   (interactive)
@@ -189,6 +191,7 @@
         buffer-read-only t)
   (buffer-disable-undo))
 
+;;;###autoload
 (defun pubmed-search (query)
   "Search PubMed with QUERY."
   (interactive

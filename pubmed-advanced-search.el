@@ -113,6 +113,7 @@
       (when (eq (widget-type sibling) widget-type)
 	(setq match sibling)))))
 
+;;;###autoload
 (defun pubmed-advanced-search ()
   (interactive)
   (switch-to-buffer "*PubMed Advanced Search Builder*")

@@ -48,6 +48,7 @@
   "Local keymap for `pubmed-history-mode'.")
 
 ;;;; Mode
+
 ;;;###autoload
 (define-derived-mode pubmed-history-mode tabulated-list-mode "pubmed-history"
   "Major mode for PubMed History."
@@ -64,6 +65,9 @@
   (setq tabulated-list-sort-key nil)
   (tabulated-list-init-header))
 
+;;;;; Commands
+
+;;;###autoload
 (defun pubmed-show-history ()
   "Populate the tabulated list mode buffer."
   (interactive)
@@ -75,6 +79,7 @@
     (save-selected-window
       (display-buffer pubmed-history-buffer))))
 
+;;;###autoload
 (defun pubmed-add-to-history (query)
   "Add QUERY to PUBMED-HISTORY."
   (interactive)
@@ -115,6 +120,16 @@
     (push entry pubmed-history)
     (pubmed-show-history)))
 
+;;;###autoload
+(defun pubmed-clear-history ()
+  "Clear PUBMED-HISTORY."
+  (interactive)
+  (setq pubmed-history-counter 0
+	pubmed-history nil)
+  (pubmed-show-history))
+
+;;;; Functions
+
 (defun pubmed--get-count (query)
   "Search PubMed with QUERY. Use ESearch to post the UIDs on the Entrez History server. Return a plist with the count, querykey and webenv."
   (interactive)
@@ -139,13 +154,6 @@
 	 (webenv (plist-get esearchresult :webenv)))
     (setq pubmed-webenv webenv)
     (list :count count :querykey querykey :webenv webenv)))
-
-(defun pubmed-clear-history ()
-  "Clear PUBMED-HISTORY."
-  (interactive)
-  (setq pubmed-history-counter 0
-	pubmed-history nil)
-  (pubmed-show-history))
 
 ;;;; Footer
 

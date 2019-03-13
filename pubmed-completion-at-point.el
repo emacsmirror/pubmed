@@ -52,6 +52,7 @@
 
 ;;;;; Commands
 
+;;;###autoload
 (defun pubmed-complete (&optional _predicate)
   "Perform completion using PubMed suggestions preceding point."
   (interactive)
@@ -63,6 +64,7 @@
         (completion-in-region (nth 0 data) (nth 1 data) (nth 2 data)
                               (plist-get plist :predicate))))))
 
+;;;###autoload
 (defun pubmed-author-complete (&optional _predicate)
   "Perform completion using PubMed suggestions preceding point."
   (interactive)
@@ -74,6 +76,7 @@
 	(completion-in-region (nth 0 data) (nth 1 data) (nth 2 data)
                               (plist-get plist :predicate))))))
 
+;;;###autoload
 (defun pubmed-journal-complete (&optional _predicate)
   "Perform completion using PubMed suggestions preceding point."
   (interactive)
@@ -85,6 +88,7 @@
         (completion-in-region (nth 0 data) (nth 1 data) (nth 2 data)
                               (plist-get plist :predicate))))))
 
+;;;###autoload
 (defun pubmed-completion-at-point ()
   "Function used for `completion-at-point-functions'"
   ;; FIXME: integration with company-mode
@@ -99,6 +103,7 @@
 	     (pubmed--completion-candidates text)))
 	  :exclusive 'no)))
 
+;;;###autoload
 (defun pubmed-author-completion-at-point ()
   "Function used for `completion-at-point-functions'"
   ;; FIXME: integration with company-mode
@@ -113,6 +118,7 @@
 	     (pubmed--author-completion-candidates text)))
 	  :exclusive 'no)))
 
+;;;###autoload
 (defun pubmed-journal-completion-at-point ()
   "Function used for `completion-at-point-functions'"
   ;; FIXME: integration with company-mode
