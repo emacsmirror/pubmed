@@ -36,85 +36,15 @@
 (require 's)
 (require 'widget)
 
-(defvar pubmed-query ""
+;;;; Variables
+
+(defvar pubmed-advanced-search-query ""
   "The PubMed search query.")
 
-(defvar pubmed-widget-lookup-table nil
+(defvar pubmed-advanced-search--widget-lookup-table nil
   "A table for lookup markers created in current buffer.")
 
-(defun pubmed-widget-create (id widget)
-  "Store ID and WIDGET in `pubmed-widget-lookup-table'."
-  (if (assoc id widget-demo-form)
-      (error "Identifier %S is used!" id)
-    (push (cons id widget) pubmed-widget-lookup-table)))
-
-(defun pubmed-widget-add (id widget)
-  "Store ID and WIDGET in `pubmed-widget-lookup-table', and replace ID if it is in use already."
-  (let ((old (assoc id pubmed-widget-lookup-table)))
-    (if old
-        (setcdr old widget)
-      (push (cons id widget) pubmed-widget-lookup-table))))
-
-(defun pubmed-widget-get (id)
-  "Look up the widget by ID in `pubmed-widget-lookup-table'."
-  (cdr (assoc id pubmed-widget-lookup-table)))
-
-(defun pubmed-widget-set-point ()
-  "Set point to the last editable-field widget of the \"search-builder\"."
-  (interactive)
-    (goto-char (point-max))
-    (widget-move -5))
-
-(defun pubmed-widget-build-search ()
-  "Build the search and return PUBMED-QUERY."
-  (interactive)
-  ;; Get values of the child widgets of the "search-builder"
-  (let ((search-list (widget-editable-list-value-get (pubmed-widget-get 'search-builder))))
-    (if (eq search-list nil)
-	(setq pubmed-query "")
-      (dolist (element search-list)
-	(let ((boolean (nth 0 element))
-	      (field (nth 1 element))
-	      (text (nth 2 element)))
-	  ;; Construct PUBMED-QUERY
-	  ;; Use only the elements with text in the editable field
-	  (when (not (string-empty-p text))
-	    ;; If the element is the first in SEARCH-LIST and BOOLEAN is "AND", ignore BOOLEAN
-	    (if (and (eq element (nth 0 search-list)) (equal boolean "AND"))
-		(progn
-		  (setq pubmed-query (s-concat text field)))
-	      ;; Else wrap the previous query in parentheses and append the query BOOLEAN TEXT[FIELD]
-	      (progn
-		(setq pubmed-query (s-append (s-concat " " boolean " " text field) (s-wrap pubmed-query "(" ")")))))))))
-    ;; Show PUBMED-QUERY in the "searchbox" widget
-    (save-excursion
-      (pubmed-widget-change-text (pubmed-widget-get 'searchbox) pubmed-query))
-    pubmed-query))
-
-(defun pubmed-widget-change-text (widget value)
-  "Set editable text field WIDGET to VALUE."
-  (save-excursion
-    (goto-char (widget-field-start widget))
-    (delete-region (point) (widget-field-end widget))
-    (insert value)))
-
-(defun pubmed-add-to-builder (query &optional boolean)
-  "Add BOOLEAN and QUERY from the history to the \"search-builder\"."
-  (interactive)
-  (with-current-buffer "*PubMed Advanced Search Builder*"
-    (let* ((old-value (widget-editable-list-value-get (pubmed-widget-get 'search-builder)))
-	   (new-value (append old-value (list `(,boolean "" ,query)))))
-      (widget-value-set (pubmed-widget-get 'search-builder) new-value)
-      (widget-setup)
-      (pubmed-widget-build-search))))
-
-(defun pubmed-widget-get-sibling (widget widget-type)
-  "Get the sibling of WIDGET with type WIDGET-TYPE."
-  (let ((siblings (widget-get (widget-get widget :parent) :children))
-	match)
-    (dolist (sibling siblings match)
-      (when (eq (widget-type sibling) widget-type)
-	(setq match sibling)))))
+;;;;; Commands
 
 ;;;###autoload
 (defun pubmed-advanced-search ()
@@ -128,7 +58,7 @@
   (remove-overlays)
   (widget-insert "PubMed Advanced Search Builder\n\n")
 
-  (pubmed-widget-add 'searchbox
+  (pubmed-advanced-search--widget-add 'searchbox
 		     (widget-create 'editable-field
 				    "Use the builder below to create your search"))
   (widget-create 'push-button
@@ -141,7 +71,7 @@
   (widget-insert "Builder\n\n")
   
   (setq pubmed-search-builder
-	(pubmed-widget-add 'search-builder
+	(pubmed-advanced-search--widget-add 'search-builder
 			   (widget-create 'editable-list
   					  ;; for each entry in the list, insert the [INS] button, the [DEL] button and the "group" widget.
 					  :entry-format "%i %d %v"
@@ -151,14 +81,14 @@
 					  :list-length 2
 					  ;; update the :list-length property when the "editable-list" is changed
 					  :notify (lambda (widget &rest ignore)
-						    (pubmed-widget-build-search))
+						    (pubmed-advanced-search-build-search))
 					  '(group
 		       			    (menu-choice
 		 			     :format "%[%v%]"
 					     :value "AND"
 					     :help-echo "Select Boolean operator"
 					     :notify (lambda (widget &rest ignore)
-						       (pubmed-widget-build-search))
+						       (pubmed-advanced-search-build-search))
 					     (item "AND")
 					     (item "OR")
 					     (item "NOT"))
@@ -168,9 +98,9 @@
 					     :value ""
 					     :help-echo "Select Field"
 					     :notify (lambda (widget &rest ignore)
-					     	       (pubmed-widget-build-search)
+					     	       (pubmed-advanced-search-build-search)
 						       (let ((value (widget-get widget :value))
-							     (sibling (pubmed-widget-get-sibling widget 'editable-field)))
+							     (sibling (pubmed-advanced-search--widget-get-sibling widget 'editable-field)))
 							 (cond
 							  ((equal value "")
 							   (widget-put sibling :complete-function #'pubmed-complete))
@@ -227,23 +157,23 @@
 					    (editable-field
 					     :action (lambda (widget &rest ignore)
 						       ;; Insert a new group when <RET> is hit
-						       (widget-apply (pubmed-widget-get 'search-builder) :insert-before (widget-get (pubmed-widget-get 'search-builder) :widget))
+						       (widget-apply (pubmed-advanced-search--widget-get 'search-builder) :insert-before (widget-get (pubmed-advanced-search--widget-get 'search-builder) :widget))
 						       (widget-move 5))
 					     :notify (lambda (widget &rest ignore)
-						       (pubmed-widget-build-search))
+						       (pubmed-advanced-search-build-search))
 					     :complete-function pubmed-complete
 					     "")))))
   
   (widget-insert "\n")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-search pubmed-query)
+			   (pubmed-search pubmed-advanced-search-query)
 			   (pubmed-advanced-search))
 		 "Search")
   (widget-insert " or ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-add-to-history pubmed-query)
+			   (pubmed-add-to-history pubmed-advanced-search-query)
 			   (pubmed-advanced-search))
 		 "Add to history")
   (widget-insert "\n\n")
@@ -262,7 +192,83 @@
   (use-local-map widget-keymap)
   
   (widget-setup)
-  (pubmed-widget-set-point))
+  (pubmed-advanced-search--widget-set-point))
+
+(defun pubmed-advanced-search-build-search ()
+  "Build the search and return PUBMED-ADVANCED-SEARCH-QUERY."
+  (interactive)
+  ;; Get values of the child widgets of the "search-builder"
+  (let ((search-list (widget-editable-list-value-get (pubmed-advanced-search--widget-get 'search-builder))))
+    (if (eq search-list nil)
+	(setq pubmed-advanced-search-query "")
+      (dolist (element search-list)
+	(let ((boolean (nth 0 element))
+	      (field (nth 1 element))
+	      (text (nth 2 element)))
+	  ;; Construct PUBMED-ADVANCED-SEARCH-QUERY
+	  ;; Use only the elements with text in the editable field
+	  (when (not (string-empty-p text))
+	    ;; If the element is the first in SEARCH-LIST and BOOLEAN is "AND", ignore BOOLEAN
+	    (if (and (eq element (nth 0 search-list)) (equal boolean "AND"))
+		(progn
+		  (setq pubmed-advanced-search-query (s-concat text field)))
+	      ;; Else wrap the previous query in parentheses and append the query BOOLEAN TEXT[FIELD]
+	      (progn
+		(setq pubmed-advanced-search-query (s-append (s-concat " " boolean " " text field) (s-wrap pubmed-advanced-search-query "(" ")")))))))))
+    ;; Show PUBMED-ADVANCED-SEARCH-QUERY in the "searchbox" widget
+    (save-excursion
+      (pubmed-advanced-search--widget-change-text (pubmed-advanced-search--widget-get 'searchbox) pubmed-advanced-search-query))
+    pubmed-advanced-search-query))
+
+(defun pubmed-advanced-search-add-to-builder (query &optional boolean)
+  "Add BOOLEAN and QUERY from the history to the \"search-builder\"."
+  (interactive)
+  (with-current-buffer "*PubMed Advanced Search Builder*"
+    (let* ((old-value (widget-editable-list-value-get (pubmed-advanced-search--widget-get 'search-builder)))
+	   (new-value (append old-value (list `(,boolean "" ,query)))))
+      (widget-value-set (pubmed-advanced-search--widget-get 'search-builder) new-value)
+      (widget-setup)
+      (pubmed-advanced-search-build-search))))
+
+;;;; Functions
+
+(defun pubmed-advanced-search--widget-create (id widget)
+  "Store ID and WIDGET in `pubmed-advanced-search--widget-lookup-table'."
+  (if (assoc id pubmed-advanced-search--widget-lookup-table)
+      (error "Identifier %S is used!" id)
+    (push (cons id widget) pubmed-advanced-search--widget-lookup-table)))
+
+(defun pubmed-advanced-search--widget-add (id widget)
+  "Store ID and WIDGET in `pubmed-advanced-search--widget-lookup-table', and replace ID if it is in use already."
+  (let ((old (assoc id pubmed-advanced-search--widget-lookup-table)))
+    (if old
+        (setcdr old widget)
+      (push (cons id widget) pubmed-advanced-search--widget-lookup-table))))
+
+(defun pubmed-advanced-search--widget-get (id)
+  "Look up the widget by ID in `pubmed-advanced-search--widget-lookup-table'."
+  (cdr (assoc id pubmed-advanced-search--widget-lookup-table)))
+
+(defun pubmed-advanced-search--widget-get-sibling (widget widget-type)
+  "Get the sibling of WIDGET with type WIDGET-TYPE."
+  (let ((siblings (widget-get (widget-get widget :parent) :children))
+	match)
+    (dolist (sibling siblings match)
+      (when (eq (widget-type sibling) widget-type)
+	(setq match sibling)))))
+
+(defun pubmed-advanced-search--widget-change-text (widget value)
+  "Set editable text field WIDGET to VALUE."
+  (save-excursion
+    (goto-char (widget-field-start widget))
+    (delete-region (point) (widget-field-end widget))
+    (insert value)))
+
+(defun pubmed-advanced-search--widget-set-point ()
+  "Set point to the last editable-field widget of the \"search-builder\"."
+  (interactive)
+    (goto-char (point-max))
+    (widget-move -5))
 
 ;;;; Footer
 
