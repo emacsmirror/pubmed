@@ -39,7 +39,7 @@
 
 (defvar pubmed-history-counter 0)
 
-(defvar pubmed-mode-map
+(defvar pubmed-history-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "q") #'quit-window)
@@ -68,7 +68,7 @@
 ;;;;; Commands
 
 ;;;###autoload
-(defun pubmed-show-history ()
+(defun pubmed-history-show ()
   "Populate the tabulated list mode buffer."
   (interactive)
   (let ((pubmed-history-buffer (get-buffer-create "*PubMed History*")))
@@ -80,11 +80,11 @@
       (display-buffer pubmed-history-buffer))))
 
 ;;;###autoload
-(defun pubmed-add-to-history (query)
+(defun pubmed-history-add (query)
   "Add QUERY to PUBMED-HISTORY."
   (interactive)
   (setq pubmed-history-counter (1+ pubmed-history-counter))
-  (let* ((result (pubmed--get-count query))
+  (let* ((result (pubmed-history--get-count query))
 	 (count (plist-get result :count))
 	 (querykey (plist-get result :querykey))
 	 (webenv (plist-get result :webenv))
@@ -96,41 +96,41 @@
 		  (cons "AND" `(help-echo "AND in builder" action (lambda (button)
 								    (progn
 								      (with-current-buffer "*PubMed Advanced Search Builder*"
-									(pubmed-widget-build-search))
-								      (pubmed-add-to-builder ,query "AND")))))
+									(pubmed-advanced-search-build-search))
+								      (pubmed-advanced-search-add-to-builder ,query "AND")))))
 		  (cons "OR" `(help-echo "OR in builder" action (lambda (button)
 								  (progn
 								    (with-current-buffer "*PubMed Advanced Search Builder*"
-								      (pubmed-widget-build-search))
-								    (pubmed-add-to-builder ,query "OR")))))
+								      (pubmed-advanced-search-build-search))
+								    (pubmed-advanced-search-add-to-builder ,query "OR")))))
 		  (cons "NOT" `(help-echo "NOT in builder" action (lambda (button)
 								    (progn
 								      (with-current-buffer "*PubMed Advanced Search Builder*"
-									(pubmed-widget-build-search))
-								      (pubmed-add-to-builder ,query "NOT")))))
+									(pubmed-advanced-search-build-search))
+								      (pubmed-advanced-search-add-to-builder ,query "NOT")))))
 		  (cons "Del" `(help-echo "Delete from history" action
 					  (lambda (button)
 					    (when (y-or-n-p (concat "Are you sure you want to delete query #" ,querykey "?"))
 					      (setq pubmed-history (delq (assoc (tabulated-list-get-id) pubmed-history) pubmed-history))
-					      (pubmed-show-history)))))
+					      (pubmed-history-show)))))
 		  query
 		  (cons count `(help-echo "Show search results" action (lambda (button)
 									 (funcall #'pubmed--get-docsums ,querykey ,webenv (string-to-number ,count)))))
 		  time))))
     (push entry pubmed-history)
-    (pubmed-show-history)))
+    (pubmed-history-show)))
 
 ;;;###autoload
-(defun pubmed-clear-history ()
+(defun pubmed-history-clear ()
   "Clear PUBMED-HISTORY."
   (interactive)
   (setq pubmed-history-counter 0
 	pubmed-history nil)
-  (pubmed-show-history))
+  (pubmed-history-show))
 
 ;;;; Functions
 
-(defun pubmed--get-count (query)
+(defun pubmed-history--get-count (query)
   "Search PubMed with QUERY. Use ESearch to post the UIDs on the Entrez History server. Return a plist with the count, querykey and webenv."
   (interactive)
   (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.

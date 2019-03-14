@@ -178,19 +178,19 @@
   (widget-insert " or ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-add-to-history pubmed-advanced-search-query)
+			   (pubmed-history-add pubmed-advanced-search-query)
 			   (pubmed-advanced-search))
 		 "Add to history")
   (widget-insert "\n\n")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (pubmed-show-history))
+			   (pubmed-history-show))
 		 "Show history")
   (widget-insert " or ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
 			   (when (y-or-n-p "Your entire search history is about to be cleared. Are you sure? ")
-			     (pubmed-clear-history)
+			     (pubmed-history-clear)
 			     (pubmed-advanced-search)))
 		 "Clear history")
 
