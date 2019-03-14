@@ -856,7 +856,7 @@ Return nil if no abstract is available."
       ;; Iterate through AbstractText nodes, where structure is like: (AbstractText ((Label . "LABEL") (NlmCategory . "CATEGORY")) "ABSTRACTTEXT")
       (dolist (text textlist)
 	(let ((label (esxml-node-attribute 'Label text))
-	      (nlmcategory (esxml-node-attribute 'NlmCategory text)) ; NlmCategory attribute is ignored
+	      ;; (nlmcategory (esxml-node-attribute 'NlmCategory text)) ; NlmCategory attribute is ignored
 	      (abstracttext (car (esxml-node-children text))))
 	  (if
 	      (and label abstracttext)
