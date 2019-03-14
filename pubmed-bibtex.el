@@ -70,9 +70,9 @@
 
 ;; If you have a master BibTeX file, e.g. bibliography.bib, and want
 ;; it to serve as the default file to append or write the BibTeX
-;; reference to, you can set PUBMED-DEFAULT-BIBTEX-FILE in your
-;; init.el or .emacs: (setq pubmed-default-bibtex-file
-;; "/path/to/bibliography.bib") `pubmed-default-bibtex-file'
+;; reference to, you can set PUBMED-BIBTEX-DEFAULT-FILE in your
+;; init.el or .emacs: (setq pubmed-bibtex-default-file
+;; "/path/to/bibliography.bib") `pubmed-bibtex-default-file'
 
 ;;; Code:
 
@@ -83,7 +83,7 @@
 
 ;;;; Variables
 
-(defvar pubmed-default-bibtex-file nil
+(defvar pubmed-bibtex-default-file nil
   "Default BibTeX file.")
 
 (defvar pubmed-bibtex-citation-key "pmid"
@@ -188,7 +188,7 @@ author's surname followed by the year of publication is used.")
 ;;;;; Commands
 
 ;;;###autoload
-(defun pubmed-show-bibtex (&optional entries)
+(defun pubmed-bibtex-show (&optional entries)
   "In PubMed, show the BibTeX references of the marked entries or current entry. If optional argument ENTRIES is a list of UIDs, show the BibTeX references of the entries."
   (interactive "P")
   (pubmed--guard)
@@ -208,7 +208,7 @@ author's surname followed by the year of publication is used.")
       (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
-	  (mapc (lambda (x) (pubmed--bibtex x)) entries)
+	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
 	  (bibtex-mode)
 	  (goto-char (point-min)))
 	(save-selected-window
@@ -217,7 +217,7 @@ author's surname followed by the year of publication is used.")
       (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
-	  (mapc (lambda (x) (pubmed--bibtex x)) mark-list)
+	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
 	  (bibtex-mode)
 	  (goto-char (point-min)))
 	(save-selected-window
@@ -227,7 +227,7 @@ author's surname followed by the year of publication is used.")
 	    (pubmed-uid (tabulated-list-get-id)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
-	  (pubmed--bibtex pubmed-uid)
+	  (pubmed-bibtex--insert pubmed-uid)
 	  (bibtex-mode)
 	  (goto-char (point-min)))
 	(save-selected-window
@@ -236,27 +236,27 @@ author's surname followed by the year of publication is used.")
       (error "No entry selected")))))
 
 ;;;###autoload
-(defun pubmed-write-bibtex (&optional file entries)
+(defun pubmed-bibtex-write (&optional file entries)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive
-   (list (read-file-name "Write to BibTeX file: " nil pubmed-default-bibtex-file nil pubmed-default-bibtex-file)))
+   (list (read-file-name "Write to BibTeX file: " nil pubmed-bibtex-default-file nil pubmed-bibtex-default-file)))
   (pubmed--guard)
   (if (not (file-writable-p file)) (error "Output file not writable")
     (if entries
-	(pubmed--write-bibtex file entries)
-      (pubmed--write-bibtex file))))
+	(pubmed-bibtex--write file entries)
+      (pubmed-bibtex--write file))))
 
 ;;;###autoload
-(defun pubmed-append-bibtex (&optional file entries)
+(defun pubmed-bibtex-append (&optional file entries)
   "In PubMed, append the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (interactive "FAppend to BibTeX file: ")
   (pubmed--guard)
   (if (not (file-writable-p file)) (error "Output file not writable")
     (if entries
-	(pubmed--write-bibtex file entries append)
-      (pubmed--write-bibtex file nil append))))
+	(pubmed-bibtex--write file entries append)
+      (pubmed-bibtex--write file nil append))))
 
-(defun pubmed--list-citation-keys (string)
+(defun pubmed-bibtex--list-citation-keys (string)
   "Return a list of all BibTeX citation keys in STRING."
   (let ((regexp "\\(@article\\|@book\\|@incollection\\){\\([[:alnum:]]+\\),$")
 	(pos 0)
@@ -267,7 +267,7 @@ author's surname followed by the year of publication is used.")
     (matches (reverse matches))
     matches))
 
-(defun pubmed--write-bibtex (file &optional entries append)
+(defun pubmed-bibtex--write (file &optional entries append)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries. If optional argument APPEND is non-nil, append the BibTeX references to a BibTeX database."
   (let (mark
 	mark-list
@@ -285,7 +285,7 @@ author's surname followed by the year of publication is used.")
       (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
      	(with-current-buffer bibtex-entry-buffer
      	  (erase-buffer)
-     	  (mapc (lambda (x) (pubmed--bibtex x)) entries)
+     	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
      	  (bibtex-mode)
      	  (goto-char (point-min)))
      	(switch-to-buffer-other-window bibtex-entry-buffer)))
@@ -293,14 +293,14 @@ author's surname followed by the year of publication is used.")
       (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
-	  (mapc (lambda (x) (pubmed--bibtex x)) mark-list)
+	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
 	  (bibtex-mode)
 	  (goto-char (point-min)))))
      ((tabulated-list-get-id)
       (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
-	  (pubmed--bibtex pubmed-uid)
+	  (pubmed-bibtex--insert pubmed-uid)
 	  (bibtex-mode)
 	  (goto-char (point-min)))))
      (t
@@ -308,7 +308,7 @@ author's surname followed by the year of publication is used.")
     (with-current-buffer (get-buffer pubmed-bibtex-entry-buffer-name)
       (write-region nil nil file append))))
 
-(defun pubmed--bibtex (uid)
+(defun pubmed-bibtex--insert (uid)
   "Insert the BibTeX reference of UID in the current buffer."
   ;; TODO: Ensure unique citation keys by appending letters to multiple papers from the same author and year when using the "authoryear" naming scheme
   ;; TODO: Correct incorrectly capitalized authors, e.g. uid 21026888

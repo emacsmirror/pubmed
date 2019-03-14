@@ -145,7 +145,7 @@
 (defvar pubmed-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "a") #'pubmed-append-bibtex)
+    (define-key map (kbd "a") #'pubmed-bibtex-append)
     (define-key map (kbd "RET") #'pubmed-show-current-entry)
     (define-key map (kbd "g") #'pubmed-get-fulltext)
     (define-key map (kbd "m") #'pubmed-mark)
@@ -155,8 +155,8 @@
     (define-key map (kbd "s") #'pubmed-search)
     (define-key map (kbd "u") #'pubmed-unmark)
     (define-key map (kbd "U") #'pubmed-unmark-all)
-    (define-key map (kbd "w") #'pubmed-write-bibtex)
-    (define-key map (kbd "TAB") #'pubmed-show-bibtex)
+    (define-key map (kbd "w") #'pubmed-bibtex-write)
+    (define-key map (kbd "TAB") #'pubmed-bibtex-show)
     map)
   "Local keymap for `pubmed-mode'.")
 
