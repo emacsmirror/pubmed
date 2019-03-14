@@ -78,7 +78,6 @@
 
 ;;;; Requirements
 
-(require 'cl-lib)
 (require 'json)
 (require 's)
 
