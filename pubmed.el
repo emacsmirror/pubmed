@@ -262,25 +262,19 @@
   ;; TODO: mark all entries in active region
   (interactive "p")
   (pubmed--guard)
-  (let (mark-list
-	pubmed-uid)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(setq pubmed-uid (tabulated-list-get-id))
-        (push pubmed-uid mark-list)
-        (tabulated-list-put-tag "*" t)))))
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (tabulated-list-put-tag "*" t))))
 
 (defun pubmed-unmark-all (&optional _num)
   "Unmark all entries."
   (interactive "p")
   (pubmed--guard)
-  (let (mark-list)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(tabulated-list-put-tag " " t)))
-    (setq mark-list nil)))
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (tabulated-list-put-tag " " t))))
 
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
