@@ -62,9 +62,9 @@
 (defvar pubmed-esummary-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
   "ESummary base URL.")
 
-;; Web environment string returned from a previous ESearch, EPost or ELink call. When provided, ESearch will post the results of the search operation to this pre-existing WebEnv, thereby appending the results to the existing environment. In addition, providing WebEnv allows query keys to be used in term so that previous search sets can be combined or limited. As described above, if WebEnv is used, usehistory must be set to "y".
+;; Web environment string returned from a previous ESearch, EPost or ELink call. When provided, ESearch will post the results of the search operation to this pre-existing WebEnv, thereby appending the results to the existing environment. In addition, providing WebEnv allows query keys to be used in term so that previous search sets can be combined or limited."
 (defvar pubmed-webenv ""
-  "WebEnv; only present if PUBMED-USEHISTORY is \"y\".")
+  "Web environment string.")
 
 (defvar pubmed-uid nil
   "The UID of the entry currently selected in the PubMed buffer.")
