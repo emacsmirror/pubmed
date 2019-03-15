@@ -49,20 +49,6 @@
 (require 'url)
 
 ;;;; Variables
-(defvar pubmed-search-completion t
-  "When non-NIL use completion using PubMed suggestions.")
-
-(defvar pubmed-history-list nil
-  "The PubMed history list.")
-
-(defvar pubmed-api-key ""
-  "E-utilities API key.")
-
-(defvar pubmed-limit-with-api-key 10
-  "Maximum amount of E-utilities requests/second with API key.")
-
-(defvar pubmed-limit-without-api-key 3
-  "Maximum amount of E-utilities requests/second without API key.")
 
 (defvar pubmed-efetch-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
   "EFetch base URL.")
@@ -80,47 +66,38 @@
 (defvar pubmed-webenv ""
   "WebEnv; only present if PUBMED-USEHISTORY is \"y\".")
 
-;; Sequential index of the first record to be retrieved (default=0, corresponding to the first record of the entire set). This parameter can be used in conjunction with retmax to download an arbitrary subset of records from the input set.
-(defvar pubmed-retstart 0
-  "Sequential index of the first UID; default=0.")
-
-;; Total number of UIDs from the retrieved set to be shown in the output. If PUBMED-USEHISTORY is set to "y", the remainder of the retrieved set will be stored on the History server; otherwise these UIDs are lost. Increasing retmax allows more of the retrieved UIDs to be included in the output, up to a maximum of 100,000 records. To retrieve more than 100,000 UIDs, submit multiple esearch requests while incrementing the value of retstart.
-(defvar pubmed-retmax 500
-  "Number of UIDs returned; default=500.")
-
-;; Specifies the method used to sort UIDs in the ESearch output. If PUBMED-USEHISTORY is set to "y", the UIDs are loaded onto the History Server in the specified sort order and will be retrieved in that order by ESummary or EFetch. For PubMed, the default sort order is "most+recent". Valid sort values include:
-;; "journal": Records are sorted alphabetically by journal title, and then by publication date.
-;; "pub+date": Records are sorted chronologically by publication date (with most recent first), and then alphabetically by journal title.
-;; "most+recent": Records are sorted chronologically by date added to PubMed (with the most recent additions first).
-;; "relevance": Records are sorted based on relevance to your search. For more information about PubMed's relevance ranking, see the PubMed Help section on Computation of Weighted Relevance Order in PubMed.
-;; "title": Records are sorted alphabetically by article title.
-;; "author": Records are sorted alphabetically by author name, and then by publication date.
-(defvar pubmed-sort ""
-  "Method used to sort UIDs in the ESearch output.")
-
-(defvar pubmed-time-format-string "%Y-%m-%d"
-  "The format-string that is used by `format-time-string' to convert time values. Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\".")
+(defvar pubmed-uid nil
+  "The UID of the entry currently selected in the PubMed buffer.")
 
 (defvar pubmed-entries nil
   "The plist of citations retrieved by the last PubMed search.")
 
-(defvar pubmed-uid nil
-  "The UID of the entry currently selected in the PubMed buffer.")
+(defvar pubmed-history-list nil
+  "The PubMed history list.")
 
 (defvar pubmed-entry-timer nil
   "The timer that is set to delay EFetch calls.")
 
 (defvar pubmed-entry-delay 0.5
-  "Delay in seconds before fetching the PubMed entry; default=0.5. Seconds may be an integer or floating point number. Purpose of the delay is to prevent frequent EFetch calls and exceeding the E-utilities rate limit when walking fast through the PubMed entries.")
+  "Delay in seconds before fetching the PubMed entry; default=0.5.
+Seconds may be an integer or floating point number. Purpose of the delay is to prevent frequent EFetch calls and exceeding the E-utilities rate limit when walking fast through the PubMed entries.")
+
+(defvar pubmed-limit-with-api-key 10
+  "Maximum amount of E-utilities requests/second with API key.")
+
+(defvar pubmed-limit-without-api-key 3
+  "Maximum amount of E-utilities requests/second without API key.")
+
+;; Sequential index of the first record to be retrieved (default=0, corresponding to the first record of the entire set). This parameter can be used in conjunction with retmax to download an arbitrary subset of records from the input set.
+(defvar pubmed-retstart 0
+  "Sequential index of the first record; default=0.")
+
+;; Total number of records from the retrieved set to be shown in the output. The remainder of the retrieved set will be stored on the History server. Increasing retmax allows more of the retrieved records to be included in the output, up to a maximum of 100,000 records. To retrieve more than 100,000 records, submit multiple esearch requests while incrementing the value of retstart.
+(defvar pubmed-retmax 500
+  "Number of records returned; default=500.")
 
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
-
-(defvar pubmed-fulltext-functions '(pubmed-pmc)
-  "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles. To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list.")
-
-(defvar pubmed-temp-prefix "pubmed"
-  "Prefix for temporary files created by pubmed.")
 
 ;;;; Keymap
 
@@ -147,6 +124,57 @@
     (define-key map (kbd "TAB") #'completion-at-point)
     map)
   "Local keymap for `pubmed-search-mode'.")
+
+;;;;; Customization
+
+(defgroup pubmed nil
+  "Interface to PubMed."
+  :group 'external)
+
+(defcustom pubmed-api-key ""
+  "E-utilities API key."
+  :group 'pubmed
+  :type 'string)
+
+(defcustom pubmed-search-completion t
+  "If non-nil, use completion using PubMed suggestions."
+  :group 'pubmed
+  :type 'boolean)
+
+(defcustom pubmed-sort "most+recent"
+  "Method used to sort records in the ESearch output.
+The records are loaded onto the History Server in the specified sort order and will be retrieved in that order by ESummary or EFetch. The default sort order is \"most+recent\".
+
+Valid sort values include:
+\"journal\": Records are sorted alphabetically by journal title, and then by publication date.
+\"pub+date\": Records are sorted chronologically by publication date (with most recent first), and then alphabetically by journal title.
+\"most+recent\": Records are sorted chronologically by date added to PubMed (with the most recent additions first).
+\"relevance\": Records are sorted based on relevance to your search. For more information about PubMed's relevance ranking, see the PubMed Help section on Computation of Weighted Relevance Order in PubMed.
+\"title\": Records are sorted alphabetically by article title.
+\"author\": Records are sorted alphabetically by author name, and then by publication date."
+  :group 'pubmed
+  :type 'string)
+
+(defcustom pubmed-time-format-string "%Y-%m-%d"
+  "The format-string that is used by `format-time-string' to convert time values.
+Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\"."
+  :link '(info-link "(elisp) Time Parsing")
+  :group 'pubmed
+  :type 'string)
+
+(defcustom pubmed-fulltext-functions '(pubmed-pmc)
+  "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles.
+To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list. Each function should accept no arguments, and return a string or nil."
+  :group 'pubmed
+  :type '(repeat function)
+  :options '(pubmed-pmc
+	     pubmed-unpaywall
+	     pubmed-scihub))
+
+(defcustom pubmed-temp-prefix "pubmed-"
+  "Prefix for temporary files created by pubmed."
+  :group 'pubmed
+  :type 'string)
 
 ;;;; Mode
 
