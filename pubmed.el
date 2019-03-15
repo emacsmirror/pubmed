@@ -76,16 +76,6 @@
 (defvar pubmed-esummary-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
   "ESummary base URL.")
 
-(defvar pubmed-db "pubmed"
-  "Entrez database.")
-
-(defvar pubmed-usehistory "y"
-  "Store search results on the Entrez history server for later use.")
-
-;; Integer query key returned by a previous ESearch call. When provided, ESearch will find the intersection of the set specified by query_key and the set retrieved by the query in term (i.e. joins the two with AND). For query_key to function, WebEnv must be assigned an existing WebEnv string and PUBMED-USE-HISTORY must be set to "y".
-(defvar pubmed-query_key ""
-  "QueryKey, only present if PUBMED-USEHISTORY is \"y\".")
-
 ;; Web environment string returned from a previous ESearch, EPost or ELink call. When provided, ESearch will post the results of the search operation to this pre-existing WebEnv, thereby appending the results to the existing environment. In addition, providing WebEnv allows query keys to be used in term so that previous search sets can be combined or limited. As described above, if WebEnv is used, usehistory must be set to "y".
 (defvar pubmed-webenv ""
   "WebEnv; only present if PUBMED-USEHISTORY is \"y\".")
@@ -107,14 +97,6 @@
 ;; "author": Records are sorted alphabetically by author name, and then by publication date.
 (defvar pubmed-sort ""
   "Method used to sort UIDs in the ESearch output.")
-
-;; There are two allowed values for ESearch: "uilist" (default), which displays the standard output, and "count", which displays only the <Count> tag.
-(defvar pubmed-rettype "uilist"
-  "Retrieval type.")
-
-;; Determines the format of the returned output. The default value for the E-Utilities is "xml" for ESearch XML, but "json" is also supported to return output in JSON format. Emacs-pubmed uses JSON for Esearch and Esummary calls, but XML for EFetch calls because it doesn't support JSON.
-(defvar pubmed-retmode "json"
-  "Retrieval mode.")
 
 (defvar pubmed-time-format-string "%Y-%m-%d"
   "The format-string that is used by `format-time-string' to convert time values. Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\".")
@@ -209,7 +191,7 @@
   ;; TODO: Only the summary of the first UID is returned. Consider returning multiple summaries at once when multiple UIDs are passed as argument.
   (let ((url-request-method "POST")
 	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	(url-request-data (concat "db=" pubmed-db
+	(url-request-data (concat "db=pubmed"
 				  "&retmode=xml"
 				  "&rettype=abstract"
 				  "&id=" uid
@@ -426,11 +408,11 @@
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
 	 (url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	 (url-request-data (concat "db=" pubmed-db
+	 (url-request-data (concat "db=pubmed"
 				   "&retmode=json"
 				   "&sort=" pubmed-sort
 				   "&term=" encoded-query
-				   "&usehistory=" pubmed-usehistory
+				   "&usehistory=y"
 				   (when (not (string-empty-p pubmed-webenv))
 				     (concat "&webenv=" pubmed-webenv))
 				   (when (not (string-empty-p pubmed-api-key))
@@ -522,8 +504,8 @@ sequential index of the first record to be retrieved, RETMAX is
 the total number of records to be retrieved."
   (let*((url-request-method "POST")
 	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	(url-request-data (concat "db=" pubmed-db
-				  "&retmode=" pubmed-retmode
+	(url-request-data (concat "db=pubmed"
+				  "&retmode=uilist"
 				  "&retstart=" (number-to-string retstart)
 				  "&retmax=" (number-to-string retmax)
 				  "&query_key=" querykey
