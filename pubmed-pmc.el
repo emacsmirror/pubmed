@@ -138,9 +138,7 @@
 	  (let* ((dom (with-current-buffer buffer (libxml-parse-html-region (point-min) (point-max))))
 		 (url (esxml-node-attribute 'content (esxml-query "meta[name=citation_pdf_url]" dom))))
 	    (if url
-	    	(progn
-	    	  (message "URL for PDF: %s" url)
-    	    	  url)
+    	    	  url
 	      (error "PMC found no fulltext article")))))
 
       (deferred:nextc it
