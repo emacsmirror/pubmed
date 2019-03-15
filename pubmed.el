@@ -1028,7 +1028,7 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
 (defun pubmed--view-pdf (buffer)
   "Create a temporary pdf file containing BUFFER and open it with the default pdf viewer."
   (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	(tempfile (make-nearby-temp-file "pubmed-" nil ".pdf")))
+	(tempfile (make-nearby-temp-file pubmed-temp-prefix nil ".pdf")))
     (with-temp-file tempfile
       (set-buffer-file-coding-system 'binary)
       (insert data))
