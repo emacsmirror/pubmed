@@ -210,6 +210,11 @@ author's surname followed by the year of publication is used.")
 	  (erase-buffer)
 	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
 	  (bibtex-mode)
+	  ;; Call `bibtex-set-dialect' to set `bibtex-entry-head', or
+	  ;; `bibtex-parse-buffers-stealthily' will throw an error
+	  ;; because the buffer is not associated with an existing
+	  ;; file
+	  (bibtex-set-dialect)
 	  (goto-char (point-min)))
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
@@ -219,6 +224,7 @@ author's surname followed by the year of publication is used.")
 	  (erase-buffer)
 	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
 	  (bibtex-mode)
+	  (bibtex-set-dialect)
 	  (goto-char (point-min)))
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
@@ -229,6 +235,7 @@ author's surname followed by the year of publication is used.")
 	  (erase-buffer)
 	  (pubmed-bibtex--insert pubmed-uid)
 	  (bibtex-mode)
+	  (bibtex-set-dialect)
 	  (goto-char (point-min)))
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
