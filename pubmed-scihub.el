@@ -26,6 +26,8 @@
 
 ;; Download fulltext PDFs of articles using the Sci-Hub database. You need to provide a Sci-Hub url by setting the value of SCIHUB-URL in your .init.el or .emacs file: (setq scihub-url "http://url-of-sci-hub.com/")
 
+;; Sci-Hub doesn't provide an API, so the PDF is found by parsing the HTML. This is probably more subject to change than an API, so expect this to be broken easily.
+
 ;;; Code:
 
 ;;;; Requirements
