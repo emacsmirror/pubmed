@@ -41,6 +41,9 @@
 (defvar unpaywall-url "https://api.unpaywall.org"
   "Unpaywall URL.")
 
+(defvar pubmed-unpaywall-timeout 10000
+  "Unpaywall timeout in milliseconds.")
+
 ;; The current version of the API is Version 2, and this is the only version supported.
 (defvar unpaywall-version "v2"
   "Unpaywall API version.")
@@ -109,7 +112,7 @@
 
 	(deferred:nextc it
 	  (lambda (doi)
-	    (deferred:timeout 10000 "Time-out"
+	    (deferred:timeout pubmed-unpaywall-timeout (error "Timeout")
 	      (let* ((url (concat unpaywall-url "/" unpaywall-version "/" doi))
 		     (parameters (list (cons "email" unpaywall-email))))
 		(if doi
@@ -180,7 +183,7 @@
 
 	(deferred:nextc it
 	  (lambda (url)
-	    (deferred:timeout 10000 "Time-out"
+	    (deferred:timeout pubmed-unpaywall-timeout (error "Timeout")
 	      (deferred:url-retrieve url))))
 	
 	(deferred:nextc it

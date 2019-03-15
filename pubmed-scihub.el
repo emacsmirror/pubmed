@@ -39,8 +39,11 @@
 
 ;;;; Variables
 
-(defvar scihub-url ""
+(defvar pubmed-scihub-url ""
   "Sci-Hub URL.")
+
+(defvar pubmed-scihub-timeout 10000
+  "Sci-Hub timeout in milliseconds.")
 
 ;;;; Commands
 
@@ -95,14 +98,14 @@
       ;; try
       (deferred:$
 
-	(deferred:timeout 10000 "Time-out"
+	(deferred:timeout pubmed-scihub-timeout (error "Timeout")
 	  ;; Sci-Hub provides academic papers for direct download. The Sci-Hub website accepts HTTP POST requests with a key-value pair, where the key is `request' and the value can be one of:
 	  ;; - a search string
 	  ;; - an URL of a scholarly article
 	  ;; - a DOI
 	  ;; - a PMID
 	  (let ((parameters (list (cons "request" uid))))
-	    (deferred:url-post scihub-url parameters)))
+	    (deferred:url-post pubmed-scihub-url parameters)))
 
 	(deferred:nextc it
 	  (lambda (buffer)
@@ -129,7 +132,7 @@
 	  (lambda (url)
 	    "Retrieve the URL of the iframe."
 	    (setq iframe-url url)
-	    (deferred:timeout 10000 "Time-out"
+	    (deferred:timeout pubmed-scihub-timeout (error "Timeout")
 	      (deferred:url-retrieve iframe-url))))
 
 	(deferred:nextc it
@@ -184,7 +187,7 @@
 		    (deferred:nextc it
 		      (lambda (answer)
 			"Send the answer to the CAPTCHA in an HTTP POST request to IFRAME-URL"
-			(deferred:timeout 10000 "Time-out"
+			(deferred:timeout pubmed-scihub-timeout (error "Timeout")
 			  (let ((url-request-method "POST")
 				(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 				(url-request-data (concat "id=" captcha-id "&answer=" answer)))
@@ -193,7 +196,7 @@
 		    (deferred:nextc it
 		      (lambda (buffer)
 			"After the postback, retrieve the URL again with HTTP GET."
-			(deferred:timeout 10000 "Time-out"
+			(deferred:timeout pubmed-scihub-timeout (error "Timeout")
 	  		  (deferred:url-retrieve iframe-url))))
 
 		    ;; Return the deferred to parse the HTML object again

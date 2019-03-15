@@ -35,6 +35,9 @@
 (defvar pubmed-elink-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
   "ELink base URL.")
 
+(defvar pubmed-elink-timeout 10000
+  "ELink timeout in milliseconds.")
+
 ;;;; Commands
 
 ;;;###autoload
@@ -123,7 +126,7 @@
       
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout 10000 "Time-out"
+	  (deferred:timeout pubmed-elink-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it
@@ -142,7 +145,7 @@
 
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout 10000 "Time-out"
+	  (deferred:timeout pubmed-elink-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it
