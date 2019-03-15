@@ -95,9 +95,6 @@ author's surname followed by the year of publication is used.")
 
 (defvar pubmed-bibtex-citation-keys nil)
 
-(defconst pubmed-bibtex-entry-buffer-name "*BibTeX entry*"
-  "Buffer name for BibTeX entry.")
-
 (defvar pubmed-bibtex-article-volume t
   "If non-nil, include the optional \"volume\" field name in the \"@article\" reference type.")
 
@@ -205,7 +202,7 @@ author's surname followed by the year of publication is used.")
 	(forward-line)))
     (cond
      (entries
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
@@ -219,7 +216,7 @@ author's surname followed by the year of publication is used.")
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
      (mark-list
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
@@ -229,7 +226,7 @@ author's surname followed by the year of publication is used.")
 	(save-selected-window
 	  (display-buffer bibtex-entry-buffer))))
      ((tabulated-list-get-id)
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*"))
 	    (pubmed-uid (tabulated-list-get-id)))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
@@ -289,7 +286,7 @@ author's surname followed by the year of publication is used.")
 	(forward-line)))
     (cond
      (entries
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
      	(with-current-buffer bibtex-entry-buffer
      	  (erase-buffer)
      	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
@@ -297,14 +294,14 @@ author's surname followed by the year of publication is used.")
      	  (goto-char (point-min)))
      	(switch-to-buffer-other-window bibtex-entry-buffer)))
      (mark-list
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
 	  (bibtex-mode)
 	  (goto-char (point-min)))))
      ((tabulated-list-get-id)
-      (let ((bibtex-entry-buffer (get-buffer-create pubmed-bibtex-entry-buffer-name)))
+      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (pubmed-bibtex--insert pubmed-uid)
@@ -312,7 +309,7 @@ author's surname followed by the year of publication is used.")
 	  (goto-char (point-min)))))
      (t
       (error "No entry selected")))
-    (with-current-buffer (get-buffer pubmed-bibtex-entry-buffer-name)
+    (with-current-buffer (get-buffer "*BibTeX entry*")
       (write-region nil nil file append))))
 
 (defun pubmed-bibtex--insert (uid)
