@@ -4,7 +4,7 @@
     (deferred "0.5.1")
     (esxml "20171129.807")
     (s "1.12.0"))
-  :keywords '("pubmed")
+  :keywords '("pubmed" "hypermedia")
   :authors '(("Folkert van der Beek" . "folkertvanderbeek@gmail.com"))
   :maintainer '("Folkert van der Beek" . "folkertvanderbeek@gmail.com")
   :url "https://gitlab.com/fvdbeek/emacs-pubmed")
