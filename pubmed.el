@@ -24,19 +24,34 @@
 
 ;;; Commentary:
 
-;; This is a GNU Emacs interface to the PubMed database of references on life sciences and biomedical topics.
+;; This is a GNU Emacs interface to the PubMed database of references on life
+;; sciences and biomedical topics.
 
-;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API key. See <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>. If you don't have an API key, E-utilities will still work, but you may be limited to fewer requests than allowed with an API key. Any computer (IP address) that submits more than three E-utility requests per second will receive an error message. This limit applies to any combination of requests to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery.
+;; Since May 1, 2018, NCBI limits access to the E-utilities unless you have an
+;; API key. See
+;; <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>.
+;; If you don't have an API key, E-utilities will still work, but you may be
+;; limited to fewer requests than allowed with an API key. Any computer (IP
+;; address) that submits more than three E-utility requests per second will
+;; receive an error message. This limit applies to any combination of requests
+;; to EInfo, ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery.
 
-;; First, you will need an NCBI account. If you don't have one already, register at <https://www.ncbi.nlm.nih.gov/account/>.
+;; First, you will need an NCBI account. If you don't have one already, register
+;; at <https://www.ncbi.nlm.nih.gov/account/>.
 
-;; To create the key, go to the "Settings" page of your NCBI account. (Hint: after signing in, simply click on your NCBI username in the upper right corner of any NCBI page.) You'll see a new "API Key Management" area. Click the "Create an API Key" button, and copy the resulting key.
+;; To create the key, go to the "Settings" page of your NCBI account. (Hint:
+;; after signing in, simply click on your NCBI username in the upper right
+;; corner of any NCBI page.) You'll see a new "API Key Management" area. Click
+;; the "Create an API Key" button, and copy the resulting key.
 
-;; Use the key by setting the value of PUBMED-API-KEY in your .emacs: (setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
+;; Use the key by customizing the variable `pubmed-api-key` or setting the value
+;; in your `init.el` or `.emacs` file:
+;; (setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 
 ;; Autocompleting using PubMed suggestions
 
-;; `pubmed-search' provides context aware completion via the complete-symbol command, bound to C-M-i by default. In order for it to do something useful, completion-at-point-functions has to be set up. The API completion at point function can be found in the documentation of `completion-at-point-functions'. The completion functions look for word at point (the library thingatpt is used to find the bounds of word) and completes it using PubMed suggestions.
+;; `pubmed-search' provides context aware completion via the complete-symbol
+;; command, bound to TAB and C-M-i by default.
 
 ;;; Code:
 
@@ -924,7 +939,8 @@ The plist has the form \"('issn ISSN 'type TYPE)\"."
 
 (defun pubmed--summary-journal-issue (summary)
   "Return a plist with the journal year, season, issue, volume, and cited medium of the article SUMMARY.
-The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
+The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
+'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
   (let* ((year (esxml-query "Journal JournalIssue Year *" summary))
 	 (season (esxml-query "Journal JournalIssue Season *" summary))
 	 (issue (esxml-query "Journal JournalIssue Issue *" summary))
@@ -1043,7 +1059,9 @@ The plist has the form \"('type TYPE 'ui UI)\"."
 
 (defun pubmed--summary-articledate (summary)
   "Return a plist of article date and date type of the article SUMMARY.
-The plist has the form \"('type TYPE 'date date)\". The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+The plist has the form \"('type TYPE 'date date)\". The time
+value of the date can be converted by `format-time-string' to a
+string according to FORMAT-STRING."
   (let ((type (esxml-node-attribute 'DateType (esxml-query "Article ArticleDate" summary)))
 	(date (encode-time 0
 			   0
@@ -1055,7 +1073,8 @@ The plist has the form \"('type TYPE 'date date)\". The time value of the date c
 
 (defun pubmed--summary-medlinejournalinfo (summary)
   "Return a plist with the country, journal title abbreviation (MedlineTA), LocatorPlus accession number (NlmUniqueID) and ISSNLinking element of the article SUMMARY.
-The plist has the form \"('country COUNTRY 'medlineta MEDLINETA 'nlmuniqueid NLMUNIQUEID 'issnlinking ISSNLINKING)\"."
+The plist has the form \"('country COUNTRY 'medlineta MEDLINETA
+'nlmuniqueid NLMUNIQUEID 'issnlinking ISSNLINKING)\"."
   (let ((country (esxml-query "MedlineJournalInfo Country *" summary))
 	(medlineta (esxml-query "MedlineJournalInfo MedlineTA *" summary))
 	(nlmuniqueid (esxml-query "MedlineJournalInfo NlmUniqueID *" summary))
@@ -1064,7 +1083,9 @@ The plist has the form \"('country COUNTRY 'medlineta MEDLINETA 'nlmuniqueid NLM
 
 (defun pubmed--summary-substances (summary)
   "Return a plist of the chemical substances and unique identifiers of the article SUMMARY.
-Each list element corresponds to one substance, and is a plist with the form \"('registrynumber REGISTRYNUMBER 'substance SUBSTANCE 'ui UI)\"."
+Each list element corresponds to one substance, and is a plist
+with the form \"('registrynumber REGISTRYNUMBER 'substance
+SUBSTANCE 'ui UI)\"."
   (let ((chemicallist (esxml-query-all "Chemical" (esxml-query "ChemicalList" summary)))
 	chemicals)
     (dolist (chemical chemicallist)
