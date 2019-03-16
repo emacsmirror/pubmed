@@ -74,7 +74,12 @@
 (defvar pubmed-journal-completion-url
   "https://www.ncbi.nlm.nih.gov/portal/utils/autocomp.fcgi?dict=jrz&q=%s")
 
-;; Web environment string returned from a previous ESearch, EPost or ELink call. When provided, ESearch will post the results of the search operation to this pre-existing WebEnv, thereby appending the results to the existing environment. In addition, providing WebEnv allows query keys to be used in term so that previous search sets can be combined or limited."
+;; Web environment string returned from a previous ESearch, EPost or
+;; ELink call. When provided, ESearch will post the results of the
+;; search operation to this pre-existing WebEnv, thereby appending the
+;; results to the existing environment. In addition, providing WebEnv
+;; allows query keys to be used in term so that previous search sets
+;; can be combined or limited."
 (defvar pubmed-webenv ""
   "Web environment string.")
 
@@ -92,7 +97,10 @@
 
 (defvar pubmed-entry-delay 0.5
   "Delay in seconds before fetching the PubMed entry; default=0.5.
-Seconds may be an integer or floating point number. Purpose of the delay is to prevent frequent EFetch calls and exceeding the E-utilities rate limit when walking fast through the PubMed entries.")
+Seconds may be an integer or floating point number. Purpose of
+the delay is to prevent frequent EFetch calls and exceeding the
+E-utilities rate limit when walking fast through the PubMed
+entries.")
 
 (defvar pubmed-limit-with-api-key 10
   "Maximum amount of E-utilities requests/second with API key.")
@@ -100,11 +108,19 @@ Seconds may be an integer or floating point number. Purpose of the delay is to p
 (defvar pubmed-limit-without-api-key 3
   "Maximum amount of E-utilities requests/second without API key.")
 
-;; Sequential index of the first record to be retrieved (default=0, corresponding to the first record of the entire set). This parameter can be used in conjunction with retmax to download an arbitrary subset of records from the input set.
+;; Sequential index of the first record to be retrieved (default=0,
+;; corresponding to the first record of the entire set). This
+;; parameter can be used in conjunction with retmax to download an
+;; arbitrary subset of records from the input set.
 (defvar pubmed-retstart 0
   "Sequential index of the first record; default=0.")
 
-;; Total number of records from the retrieved set to be shown in the output. The remainder of the retrieved set will be stored on the History server. Increasing retmax allows more of the retrieved records to be included in the output, up to a maximum of 100,000 records. To retrieve more than 100,000 records, submit multiple esearch requests while incrementing the value of retstart.
+;; Total number of records from the retrieved set to be shown in the
+;; output. The remainder of the retrieved set will be stored on the
+;; History server. Increasing retmax allows more of the retrieved
+;; records to be included in the output, up to a maximum of 100,000
+;; records. To retrieve more than 100,000 records, submit multiple
+;; esearch requests while incrementing the value of retstart.
 (defvar pubmed-retmax 500
   "Number of records returned; default=500.")
 
@@ -155,21 +171,30 @@ Seconds may be an integer or floating point number. Purpose of the delay is to p
 
 (defcustom pubmed-max-results 10000
   "Maximum number of search results.
-A warning is issued if the count of search results exceeds this number."
+A warning is issued if the count of search results exceeds this
+  number."
   :group 'pubmed
   :type 'integer)
 
 (defcustom pubmed-sort "most+recent"
   "Method used to sort records in the ESearch output.
-The records are loaded onto the History Server in the specified sort order and will be retrieved in that order by ESummary or EFetch. The default sort order is \"most+recent\".
+The records are loaded onto the History Server in the specified
+sort order and will be retrieved in that order by ESummary or
+EFetch. The default sort order is \"most+recent\".
 
-Valid sort values include:
-\"journal\": Records are sorted alphabetically by journal title, and then by publication date.
-\"pub+date\": Records are sorted chronologically by publication date (with most recent first), and then alphabetically by journal title.
-\"most+recent\": Records are sorted chronologically by date added to PubMed (with the most recent additions first).
-\"relevance\": Records are sorted based on relevance to your search. For more information about PubMed's relevance ranking, see the PubMed Help section on Computation of Weighted Relevance Order in PubMed.
-\"title\": Records are sorted alphabetically by article title.
-\"author\": Records are sorted alphabetically by author name, and then by publication date."
+Valid sort values include: \"journal\": Records are sorted
+alphabetically by journal title, and then by publication date.
+
+\"pub+date\": Records are sorted chronologically by publication
+date \(with most recent first\), and then alphabetically by
+journal title. \"most+recent\": Records are sorted
+chronologically by date added to PubMed \(with the most recent
+additions first\). \"relevance\": Records are sorted based on
+relevance to your search. For more information about PubMed's
+relevance ranking, see the PubMed Help section on Computation of
+Weighted Relevance Order in PubMed. \"title\": Records are sorted
+alphabetically by article title. \"author\": Records are sorted
+alphabetically by author name, and then by publication date."
   :group 'pubmed
   :type 'string)
 
@@ -182,7 +207,9 @@ Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\"."
 
 (defcustom pubmed-fulltext-functions '(pubmed-pmc)
   "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles.
-To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of, or insert functions in this list. Each function should accept no arguments, and return a string or nil."
+To change the behavior of ‘pubmed-get-fulltext’, remove, change
+  the order of, or insert functions in this list. Each function
+  should accept no arguments, and return a string or nil."
   :group 'pubmed
   :type '(repeat function)
   :options '(pubmed-pmc
