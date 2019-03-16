@@ -99,7 +99,7 @@
 	(lambda ()
 	  (let ((url-request-method "GET")
 		(arguments (concat "?"
-				   "dbfrom=" pubmed-db
+				   "dbfrom=pubmed"
 				   "&cmd=prlinks"
 				   "&retmode=ref"
 				   "&id=" uid
