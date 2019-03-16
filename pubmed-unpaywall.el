@@ -110,7 +110,6 @@ Requests must include your email as a parameter at the end of the
 	    (let* ((keyword (intern (concat ":" uid)))
 		   (value (plist-get pubmed-entries keyword))
 		   (articleids (plist-get value :articleids))
-		   articleid
 		   doi)
 	      (dolist (articleid articleids doi)
 		(when (equal (plist-get articleid :idtype) "doi")
