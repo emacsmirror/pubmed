@@ -41,11 +41,15 @@
 
 ;;;; Variables
 
-(defvar pubmed-scihub-url ""
-  "Sci-Hub URL.")
-
 (defvar pubmed-scihub-timeout 10000
   "Sci-Hub timeout in milliseconds.")
+
+;;;; Customization
+
+(defcustom pubmed-scihub-url ""
+  "Sci-Hub URL."
+  :group 'pubmed
+  :type 'string)
 
 ;;;; Commands
 

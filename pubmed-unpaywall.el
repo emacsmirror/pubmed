@@ -38,19 +38,19 @@
 
 ;;;; Variables
 
-(defvar unpaywall-url "https://api.unpaywall.org"
-  "Unpaywall URL.")
-
 (defvar pubmed-unpaywall-timeout 10000
   "Unpaywall timeout in milliseconds.")
 
-;; The current version of the API is Version 2, and this is the only version supported.
-(defvar unpaywall-version "v2"
-  "Unpaywall API version.")
+(defvar unpaywall-url "https://api.unpaywall.org"
+  "Unpaywall URL.")
 
 ;; Requests must include your email as a parameter at the end of the URL, like this: api.unpaywall.org/my/request?email=YOUR_EMAIL.
 (defvar unpaywall-email ""
   "E-mail address to authenticate Unpaywall requests.")
+
+;; The current version of the API is Version 2, and this is the only version supported.
+(defvar unpaywall-version "v2"
+  "Unpaywall API version.")
 
 ;;;; Commands
 
