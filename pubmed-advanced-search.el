@@ -368,7 +368,7 @@
 								      (pubmed-advanced-search--add-to-builder ,query "NOT")))))
 		  (cons "Del" `(help-echo "Delete from history" action
 					  (lambda (button)
-					    (when (y-or-n-p (concat "Are you sure you want to delete query #" ,querykey "?"))
+					    (when (y-or-n-p (concat "Are you sure you want to delete query #" ,querykey "? "))
 					      (setq pubmed-advanced-search-history (delq (assoc (tabulated-list-get-id) pubmed-advanced-search-history) pubmed-advanced-search-history))
 					      (pubmed-advanced-search--history-show)))))
 		  query
