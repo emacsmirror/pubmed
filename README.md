@@ -54,7 +54,7 @@ The following keybindings are available:
 - <kbd>a</kbd>: Append the BibTeX references of the marked entries or current
   entry to file.
 - <kbd>RET</kbd>: Show the summary of the current entry.
-- <kbd>g</kbd>: Try to fetch the fulltext PDF of the current entry.
+- <kbd>f</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
 - <kbd>n</kbd>: Show the summary of the next entry.
 - <kbd>p</kbd>: Show the summary of the previous entry.
@@ -135,7 +135,7 @@ file:
 (setq pubmed-scihub-url "http://url-of-sci-hub.com/")
 ```
 
-- The command `M-x pubmed-get-fulltext` (or <kbd>g</kbd>) tries to fetch the
+- The command `M-x pubmed-get-fulltext` (or <kbd>f</kbd>) tries to fetch the
   fulltext PDF of the marked entries or current entry, using multiple methods.
   The functions in `pubmed-fulltext-functions` are tried in order, until a
   fulltext PDF is found.
