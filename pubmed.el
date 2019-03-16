@@ -628,7 +628,6 @@ used as input to ESummary. COUNT is the total number of records
 in the stored set. Optional argument RETSTART is the sequential
 index of the first record to be retrieved, optional argument
 RETMAX is the total number of records to be retrieved."
-  (interactive)
   (catch 'cancel
     (when (> count pubmed-max-results)
       (unless (y-or-n-p (format "There are %i results. Are you sure you want to continue? " count))
