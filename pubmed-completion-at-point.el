@@ -1,4 +1,4 @@
-;;; pubmed-competion-at-point.el --- Completion-at-point-functions for PubMed autocompletion  -*- lexical-binding: t; -*-
+;;; pubmed-completion-at-point.el --- completion-functions for PubMed autocompletion  -*- lexical-binding: t; -*-
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
 
