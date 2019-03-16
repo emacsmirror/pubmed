@@ -327,8 +327,8 @@ author's surname followed by the year of publication is used."
   (pubmed--guard)
   (if (not (file-writable-p file)) (error "Output file not writable")
     (if entries
-	(pubmed-bibtex--write file entries append)
-      (pubmed-bibtex--write file nil append))))
+	(pubmed-bibtex--write file entries t)
+      (pubmed-bibtex--write file nil t))))
 
 (defun pubmed-bibtex--list-citation-keys (string)
   "Return a list of all BibTeX citation keys in STRING."
