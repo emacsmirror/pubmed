@@ -24,7 +24,11 @@
 
 ;;; Commentary:
 
-;; Download fulltext PDFs of Open Access articles using Unpaywall <https://unpaywall.org/products/api>. Using Unpaywall is legal and requires you to provide your email address by setting the value of UNPAYWALL-EMAIL in your .init.el or .emacs file: (setq unpaywall-email "your_email@example.com")
+;; Download fulltext PDFs of Open Access articles using Unpaywall
+;; <https://unpaywall.org/products/api>. Using Unpaywall is legal and requires
+;; you to provide your email address by customizing `pubmed-unpaywall-email' or
+;; setting the value in your .init.el or .emacs file: (setq
+;; pubmed-unpaywall-email "your_email@example.com")
 
 ;;; Code:
 
@@ -38,19 +42,26 @@
 
 ;;;; Variables
 
-(defvar pubmed-unpaywall-timeout 5000
-  "Unpaywall timeout in milliseconds.")
-
-(defvar unpaywall-url "https://api.unpaywall.org"
+(defvar pubmed-unpaywall-url "https://api.unpaywall.org/v2/"
   "Unpaywall URL.")
 
-;; Requests must include your email as a parameter at the end of the URL, like this: api.unpaywall.org/my/request?email=YOUR_EMAIL.
-(defvar unpaywall-email ""
-  "E-mail address to authenticate Unpaywall requests.")
+;;;; Customization
 
-;; The current version of the API is Version 2, and this is the only version supported.
-(defvar unpaywall-version "v2"
-  "Unpaywall API version.")
+(defgroup pubmed-unpaywall nil
+  "Fetch fulltext PDFs from Unpaywall."
+  :group 'pubmed)
+
+(defcustom pubmed-unpaywall-email ""
+  "Email address to authenticate Unpaywall requests.
+Requests must include your email as a parameter at the end of the
+  URL, like this: api.unpaywall.org/my/request?email=YOUR_EMAIL."
+  :group 'pubmed-unpaywall
+  :type 'string)
+
+(defcustom pubmed-unpaywall-timeout 5000
+  "Unpaywall timeout in milliseconds."
+  :group 'pubmed-unpaywall
+  :type 'integer)
 
 ;;;; Commands
 
@@ -113,8 +124,8 @@
 	(deferred:nextc it
 	  (lambda (doi)
 	    (deferred:timeout pubmed-unpaywall-timeout (error "Timeout")
-	      (let* ((url (concat unpaywall-url "/" unpaywall-version "/" doi))
-		     (parameters (list (cons "email" unpaywall-email))))
+	      (let* ((url (concat pubmed-unpaywall-url doi))
+		     (parameters (list (cons "email" pubmed-unpaywall-email))))
 		(if doi
 		    (deferred:url-get url parameters)
 		  (error "Article has no doi"))))))

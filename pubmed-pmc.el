@@ -19,7 +19,10 @@
 
 ;;; Commentary:
 
-;; Download fulltext PDFs of Open Access articles using PubMed Central® (PMC) <https://www.ncbi.nlm.nih.gov/pmc/>. PubMed Central® (PMC) is a free full-text archive of biomedical and life sciences journal literature at the U.S. National Institutes of Health's National Library of Medicine (NIH/NLM).
+;; Download fulltext PDFs of Open Access articles using PubMed Central® (PMC)
+;; <https://www.ncbi.nlm.nih.gov/pmc/>. PubMed Central® (PMC) is a free
+;; full-text archive of biomedical and life sciences journal literature at the
+;; U.S. National Institutes of Health's National Library of Medicine (NIH/NLM).
 
 ;;; Code:
 
@@ -32,11 +35,19 @@
 (require 'url)
 
 ;;;; Variables
-(defvar pubmed-elink-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
-  "ELink base URL.")
+(defvar pubmed-pmc-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
+  "PMC base URL.")
 
-(defvar pubmed-elink-timeout 5000
-  "ELink timeout in milliseconds.")
+;;;; Customization
+
+(defgroup pubmed-pmc nil
+  "Fetch fulltext PDFs from PubMed Central (PMC)."
+  :group 'pubmed)
+
+(defvar pubmed-pmc-timeout 5000
+  "PMC timeout in milliseconds."
+  :group 'pubmed-pmc
+  :type 'integer)
 
 ;;;; Commands
 
@@ -94,7 +105,7 @@
 				   "&id=" uid
 				   (when (not (string-empty-p pubmed-api-key))
 				     (concat "&api_key=" pubmed-api-key)))))
-	    (concat pubmed-elink-url arguments))))
+	    (concat pubmed-pmc-url arguments))))
 
       (deferred:nextc it
         (lambda (url)
@@ -126,7 +137,7 @@
       
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout pubmed-elink-timeout (error "Timeout")
+	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it
@@ -143,7 +154,7 @@
 
       (deferred:nextc it
 	(lambda (url)
-	  (deferred:timeout pubmed-elink-timeout (error "Timeout")
+	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
       
       (deferred:nextc it

@@ -24,9 +24,14 @@
 
 ;;; Commentary:
 
-;; Download fulltext PDFs of articles using the Sci-Hub database. You need to provide a Sci-Hub url by setting the value of PUBMED-SCIHUB-URL in your .init.el or .emacs file: (setq pubmed-scihub-url "http://url-of-sci-hub.com/")
+;; Download fulltext PDFs of articles using the Sci-Hub database. You need to
+;; provide a Sci-Hub URL by customizing the variable `pubmed-scihub-url' or
+;; setting the value in your .init.el or .emacs file: (setq pubmed-scihub-url
+;; "http://url-of-sci-hub.com/")
 
-;; Sci-Hub doesn't provide an API, so the PDF is found by parsing the HTML. This is probably more subject to change than an API, so expect this to be broken easily.
+;; Sci-Hub doesn't provide an API, so the PDF is found by parsing the HTML. This
+;; is probably more subject to change than an API, so expect this to be broken
+;; easily.
 
 ;;; Code:
 
@@ -39,16 +44,21 @@
 (require 'eww)
 (require 'url)
 
-;;;; Variables
-
-(defvar pubmed-scihub-timeout 5000
-  "Sci-Hub timeout in milliseconds.")
-
 ;;;; Customization
 
+(defgroup pubmed-scihub nil
+  "Fetch fulltext PDFs from Sci-Hub."
+  :group 'pubmed)
+
+(defcustom pubmed-scihub-timeout 5000
+  "Unpaywall timeout in milliseconds."
+  :group 'pubmed-scihub
+  :type 'integer)
+
 (defcustom pubmed-scihub-url ""
-  "Sci-Hub URL."
-  :group 'pubmed
+  "Sci-Hub URL.
+You need to provide a an URL to use the Sci-Hub database."
+  :group 'pubmed-scihub
   :type 'string)
 
 ;;;; Commands
