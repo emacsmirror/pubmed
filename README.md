@@ -1,7 +1,6 @@
 # Emacs PubMed
 
-Emacs-pubmed is a GNU Emacs interface to the PubMed database. I started the
-development to be able to search PubMed in my favorite environment. It is in an
+Emacs-pubmed is a GNU Emacs interface to the PubMed database. It is in an
 early state of development and far from complete, but already usable.
 Emacs-pubmed uses the [NCBI
 E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/) to query the PubMed
@@ -101,11 +100,11 @@ signing in, simply click on your NCBI username in the upper right corner of any
 NCBI page.) You'll see a new "API Key Management" area. Click the "Create an API
 Key" button, and copy the resulting key.
 
-Use the key by setting the value of PUBMED-API_KEY in your `init.el` or `.emacs`
-file:
+Use the key by customizing the variable `pubmed-api-key` or setting the
+value in your `init.el` or `.emacs` file:
 
 ```lisp
-(setq pubmed-api_key "1234567890abcdefghijklmnopqrstuvwxyz")
+(setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 ```
 
 **Full text PDFs**
@@ -121,19 +120,21 @@ Full text PDFs can be found by using [PubMed Central®
 
 - The Unpaywall fulltext function is invoked by `M-x pubmed-get-unpaywall`.
   Using Unpaywall is legal and requires you to provide your email address by
-  setting the value of `unpaywall-email` in your `init.el` or `.emacs` file:
+  customizing the variable `pubmed-unpaywall-email` or setting the value in your
+  `init.el` or `.emacs` file:
 
 ```lisp
-(setq unpaywall-email "your_email@example.com")
+(setq pubmed-unpaywall-email "your_email@example.com")
 ```
 
 - The Sci-Hub fulltext function is invoked by `M-x pubmed-get-scihub`. Using
-Sci-Hub may not be legal and requires you to provide the url by setting the
-value of `scihub-url` in your `init.el` or `.emacs` file:
+Sci-Hub may not be legal and requires you to provide the url by customizing the
+variable `pubmed-scihub-url` or setting the value in your `init.el` or `.emacs`
+file:
 
 ```lisp
 (require 'pubmed-scihub)
-(setq scihub-url "http://url-of-sci-hub.com/")
+(setq pubmed-scihub-url "http://url-of-sci-hub.com/")
 ```
 
 - The command `M-x pubmed-get-fulltext` (or <kbd>g</kbd>) tries to fetch the
@@ -149,8 +150,9 @@ value of `scihub-url` in your `init.el` or `.emacs` file:
   without any argument. Each function should return nil if it is unable to find
   a fulltext article of the entry at point. Otherwise it should return the
   buffer of the PDF and show the PDF in a new frame as a side effect. By
-  default, only `pubmed-pmc` is used. To add other fulltext functions, set the
-  value of `pubmed-fulltext-functions` in your `init.el` or `.emacs` file:
+  default, only `pubmed-pmc` is used. To add other fulltext functions, customize
+  the variable `pubmed-fulltext-functions` or set the value in your `init.el` or
+  `.emacs` file:
 
 ```lisp
 (setq pubmed-fulltext-functions '(pubmed-pmc pubmed-unpaywall pubmed-scihub))
@@ -168,8 +170,8 @@ or
 The PubMed document summaries (DocSums) can be exported to BibTeX references.
 
 - The command `M-x pubmed-show-bibtex` (or <kbd>TAB</kbd>) opens a new frame
-  with the BibTeX references of the marked entries, or if there are none, the
-  current entry in `bibtex-mode`.
+  with the BibTeX references of the marked entries, or if there are none marked,
+  the current entry in `bibtex-mode`.
 
 - The command `M-x pubmed-write-bibtex` (or <kbd>w</kbd>) writes the BibTeX
   references to a file.
@@ -202,8 +204,9 @@ for later use. Besides the required and optional fields, the following
 non-standard fields can be included in the BibTeX entries: issn, pubmed, pii,
 doi, url.
 
-The optional and non-standard fields can be included by setting the values of
-the corresponding variables in your `init.el` or `.emacs`, e.g.
+The optional and non-standard fields can be included by customizing the
+corresponding variables or setting the values in your `init.el` or `.emacs`,
+e.g.
 
 ```lisp
 (setq pubmed-bibtex-article-number t)
@@ -211,20 +214,23 @@ the corresponding variables in your `init.el` or `.emacs`, e.g.
 
 ***Choosing BibTeX citation key***
 
-The first key of a BibTeX entry the citation key, or the BibTeX key. This key
-must be unique for all entries in your bibliography. It is this identifier that
-you will use within your document to cross-reference it to this entry (i.e., the
-identifier you use in the \cite{} command in your LaTeX file). By default the
-key is composed of a the PMID prefixed with the string "pmid". Alternatively,
-you could use the "authoryear" citation style, that follow the loose standard in
-which the author's surname followed by the year of publication is used. This
-could be more convenient, because it enables you to guess the key from looking
-at the reference. This protects you from accidentally duplicating a reference in
-the BibTeX file and referring to it under two different keys. However, multiple
-papers from the same author and year will have duplicate citation keys. Untill
-this is fixed, you have to correct this manually. To change the default citation
-style to the "authoryear" scheme, you can set the value of
-`pubmed-bibtex-citation-key` in your `init.el` or `.emacs`:
+The first key of a BibTeX entry the citation key, or the BibTeX key.
+This key must be unique for all entries in your bibliography. It is
+this identifier that you will use within your document to
+cross-reference it to this entry (i.e., the identifier you use in the
+\cite{} command in your LaTeX file). By default the key is composed of
+a the PMID prefixed with the string "pmid". Alternatively, you could
+use the "authoryear" citation style, that follow the loose standard in
+which the author's surname followed by the year of publication is
+used. This could be more convenient, because it enables you to guess
+the key from looking at the reference. This protects you from
+accidentally duplicating a reference in the BibTeX file and referring
+to it under two different keys. However, multiple papers from the same
+author and year will have duplicate citation keys. Untill this is
+fixed, you have to correct this manually. To change the default
+citation style to the "authoryear" scheme, you can customize of the
+variable `pubmed-bibtex-citation-key` or set the value in your
+`init.el` or `.emacs`:
 
 ```lisp
 (setq pubmed-bibtex-citation-key "authoryear")
@@ -232,9 +238,10 @@ style to the "authoryear" scheme, you can set the value of
 
 ***Configuring default BibTeX file***
 
-If you have a master BibTeX file, e.g. bibliography.bib, and want it to serve as
-the default file to append or write the BibTeX reference to, you can set
-`pubmed-default-bibtex-file` in your `init.el` or `.emacs`:
+If you have a master BibTeX file, e.g. bibliography.bib, and want it
+to serve as the default file to append or write the BibTeX reference
+to, you can customize the variable `pubmed-default-bibtex-file` or set
+the value in your `init.el` or `.emacs`:
 
 ```lisp
 (setq pubmed-default-bibtex-file "/path/to/bibliography.bib")
