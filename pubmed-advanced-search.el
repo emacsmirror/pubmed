@@ -37,7 +37,6 @@
 
 (require 'pubmed)
 (require 'pubmed-history)
-(require 'pubmed-completion-at-point)
 (require 's)
 (require 'widget)
 
