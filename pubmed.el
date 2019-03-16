@@ -153,6 +153,12 @@ Seconds may be an integer or floating point number. Purpose of the delay is to p
   :group 'pubmed
   :type 'boolean)
 
+(defcustom pubmed-max-results 10000
+  "Maximum number of search results.
+A warning is issued if the count of search results exceeds this number."
+  :group 'pubmed
+  :type 'integer)
+
 (defcustom pubmed-sort "most+recent"
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified sort order and will be retrieved in that order by ESummary or EFetch. The default sort order is \"most+recent\".
@@ -580,40 +586,45 @@ in the stored set. Optional argument RETSTART is the sequential
 index of the first record to be retrieved, optional argument
 RETMAX is the total number of records to be retrieved."
   (interactive)
-  (let ((start (if (boundp 'retstart)
-		   retstart
-		 pubmed-retstart))
-	(max (if (boundp 'retmax)
-		 retmax
-	       pubmed-retmax))
-	(counter 0)
-	(pubmed-buffer (get-buffer-create "*PubMed*")))
-    ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
-    (sleep-for 0.5)
-    (with-current-buffer pubmed-buffer
-      ;; Remove previous entries from the `tabulated-list-entries' variable.
-      (setq tabulated-list-entries nil))
-    (while (< start count)
-      ;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
-      (if (string-empty-p pubmed-api-key)
+  (catch 'cancel
+    (when (> count pubmed-max-results)
+      (unless (y-or-n-p (format "There are %i results. Are you sure you want to continue? " count))
+	(message "Searching...cancelled")
+	(throw 'cancel t)))
+    (let ((start (if (boundp 'retstart)
+		     retstart
+		   pubmed-retstart))
+	  (max (if (boundp 'retmax)
+		   retmax
+		 pubmed-retmax))
+	  (counter 0)
+	  (pubmed-buffer (get-buffer-create "*PubMed*")))
+      ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
+      (sleep-for 0.5)
+      (with-current-buffer pubmed-buffer
+	;; Remove previous entries from the `tabulated-list-entries' variable.
+	(setq tabulated-list-entries nil))
+      (while (< start count)
+	;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
+	(if (string-empty-p pubmed-api-key)
+	    (progn
+	      (if (<= counter pubmed-limit-without-api-key)
+		  (progn
+		    (pubmed--esummary querykey webenv start max)
+		    (setq counter (1+ counter)))
+		(progn
+		  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
+		  (setq counter 0))))
 	  (progn
-	    (if (<= counter pubmed-limit-without-api-key)
+	    (if (<= counter pubmed-limit-with-api-key)
 		(progn
 		  (pubmed--esummary querykey webenv start max)
 		  (setq counter (1+ counter)))
 	      (progn
 		(run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-		(setq counter 0))))
-	(progn
-	  (if (<= counter pubmed-limit-with-api-key)
-	      (progn
-		(pubmed--esummary querykey webenv start max)
-		(setq counter (1+ counter)))
-	    (progn
-	      (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-	      (setq counter 0)))))
-      (setq start (+ start max)))
-    (message "Searching...done")))
+		(setq counter 0)))))
+	(setq start (+ start max)))
+      (message "Searching...done"))))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
   "Retrieve the document summaries (DocSums) for a batch of records stored on the Entrez History server.
