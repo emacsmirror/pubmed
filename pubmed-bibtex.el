@@ -57,7 +57,7 @@
 ;; It is this identifier that you will use within your document to
 ;; cross-reference it to this entry (i.e., the identifier you use in
 ;; the \cite{} command in your LaTeX file). By default the key is
-;; composed of a the PMID prefixed with the string "pmid".
+;; composed of the `pmid' prefixed with the string "pmid".
 ;; Alternatively, you could use the author-year citation style, that
 ;; follow the loose standard in which the author's surname followed by
 ;; the year of publication is used. This could be more convenient,
@@ -70,9 +70,9 @@
 
 ;; If you have a master BibTeX file, e.g. bibliography.bib, and want
 ;; it to serve as the default file to append or write the BibTeX
-;; reference to, you can set PUBMED-BIBTEX-DEFAULT-FILE in your
+;; reference to, you can set `pubmed-bibtex-default-file' in your
 ;; init.el or .emacs: (setq pubmed-bibtex-default-file
-;; "/path/to/bibliography.bib") `pubmed-bibtex-default-file'
+;; "/path/to/bibliography.bib")
 
 ;;; Code:
 
