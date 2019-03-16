@@ -4,8 +4,8 @@ Emacs-pubmed is a GNU Emacs interface to the PubMed database. It is in an
 early state of development and far from complete, but already usable.
 Emacs-pubmed uses the [NCBI
 E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/) to query the PubMed
-database. The most powerful feature probably is the easy access to full text
-PDFs of most articles.
+database. The most powerful feature probably is the easy access to fulltext
+PDFs of many articles.
 
 ## Installation
 
@@ -45,7 +45,7 @@ Then use `M-x pubmed-search` or `M-x pubmed-advanced-search` to search PubMed:
 - `M-x pubmed-advanced-search` Advanced Search Builder with history modelled
 after <https://www.ncbi.nlm.nih.gov/pubmed/advanced>.
 
-Entries are shown in a tabulated list in `PubMed mode'.
+Entries are shown in a tabulated list in `pubmed-mode`.
 
 **Keybindings**
 
@@ -53,11 +53,11 @@ The following keybindings are available:
 
 - <kbd>a</kbd>: Append the BibTeX references of the marked entries or current
   entry to file.
-- <kbd>RET</kbd>: Show the current entry.
+- <kbd>RET</kbd>: Show the summary of the current entry.
 - <kbd>g</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
-- <kbd>n</kbd>: Show the next entry.
-- <kbd>p</kbd>: Show the previous entry.
+- <kbd>n</kbd>: Show the summary of the next entry.
+- <kbd>p</kbd>: Show the summary of the previous entry.
 - <kbd>q</kbd>: Quit window.
 - <kbd>s</kbd>: Search PubMed.
 - <kbd>u</kbd>: Unmark the current entry.
@@ -69,9 +69,8 @@ The following keybindings are available:
 
 **Completion**
 
-If pubmed-search-completion is set to non-nil, the `pubmed-search` function
-includes completion for PubMed suggestions. The default key to invoke completion
-is `<TAB>`.
+The `pubmed-search` function includes completion for PubMed suggestions. The
+default key to invoke completion is the `C-M-i` or `<TAB>` command.
 
 In `pubmed-advanced-search`, the "All Fields", "Author" and "Journal" search
 boxes include completion for PubMed suggestions. The default key to invoke
@@ -79,7 +78,6 @@ completion is the `C-M-i` or `M-<TAB>` command, bound to `completion-at-point`.
 On graphical displays, the `M-<TAB>` key is usually reserved by the window
 manager for switching graphical windows, so you should type `C-M-i` or `<ESC>
 <TAB>` instead.
-
 
 **NCBI API key**
 
@@ -92,8 +90,8 @@ address) that submits more than three E-utility requests per second will receive
 an error message. This limit applies to any combination of requests to EInfo,
 ESearch, ESummary, EFetch, ELink, EPost, ESpell, and EGquery.
 
-First, you will need an NCBI account. If you don't have one already, register at
-<https://www.ncbi.nlm.nih.gov/account/>.
+To obtain an API key, you will need an NCBI account. If you don't have one
+already, register at <https://www.ncbi.nlm.nih.gov/account/>.
 
 To create the key, go to the "Settings" page of your NCBI account. (Hint: after
 signing in, simply click on your NCBI username in the upper right corner of any
