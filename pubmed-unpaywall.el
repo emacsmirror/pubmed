@@ -207,7 +207,7 @@ Requests must include your email as a parameter at the end of the
       (deferred:error it
 	(lambda (deferred-error)
 	  "Catch any errors that occur during the deferred chain and return nil."
-	  (message "%S: %S" (car deferred-error) (cdr deferred-error))
+	  (message "%s" (cadr deferred-error))
 	  nil))
       
       ;; finally

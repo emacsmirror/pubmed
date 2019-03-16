@@ -223,7 +223,7 @@ You need to provide a an URL to use the Sci-Hub database."
       (deferred:error it
 	(lambda (deferred-error)
 	  "Catch any errors that occur during the deferred chain and return nil."
-	  (message "%S: %S" (car deferred-error) (cdr deferred-error))
+	  (message "%s" (cadr deferred-error))
 	  nil))
       
       ;; finally
