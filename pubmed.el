@@ -36,14 +36,7 @@
 
 ;; Autocompleting using PubMed suggestions
 
-;; Emacs provides context aware completion via the complete-symbol command, bound to C-M-i by default. In order for it to do something useful, completion-at-point-functions has to be set up. The API completion at point function can be found in the documentation of `completion-at-point-functions'. The completion functions look for word at point (the library thingatpt is used to find the bounds of word) and completes it using PubMed suggestions.
-
-;; Integration with company-mode
-
-;; Company mode integrates very well with completion-at-point-functions using the company-capf backend, so it should work out of the box for you, but you can enhance the completions offered by company by returning additional props in the result of capf function. The props currently supported are:
-;; :company-doc-buffer - Used by company to display metadata for current candidate
-;; :company-docsig - Used by company to echo metadata about the candidate in the minibuffer
-;; :company-location - Used by company to jump to the location of current candidate
+;; `pubmed-search' provides context aware completion via the complete-symbol command, bound to C-M-i by default. In order for it to do something useful, completion-at-point-functions has to be set up. The API completion at point function can be found in the documentation of `completion-at-point-functions'. The completion functions look for word at point (the library thingatpt is used to find the bounds of word) and completes it using PubMed suggestions.
 
 ;;; Code:
 
