@@ -218,7 +218,8 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of
 (defun pubmed-search (query)
   "Search PubMed with QUERY."
   (interactive
-   (let* ((minibuffer-setup-hook (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t)))
+   (let* ((minibuffer-setup-hook (when (eq pubmed-search-completion t)
+				   (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t))))
 	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil 'pubmed-history-list)))
      (list query)))
   (setq pubmed-entries nil)
