@@ -214,14 +214,14 @@ alphabetically by author name, and then by publication date."
   :type 'string)
 
 (defcustom pubmed-time-format-string "%Y-%m-%d"
-  "The format-string that is used by `format-time-string' to convert time values.
+  "The format-string to convert time values.
 Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\"."
   :link '(info-link "(elisp) Time Parsing")
   :group 'pubmed
   :type 'string)
 
 (defcustom pubmed-fulltext-functions '(pubmed-pmc)
-  "The list of functions tried in order by `pubmed-fulltext' to fetch fulltext articles.
+  "The list of functions tried in order by `pubmed-fulltext'.
 To change the behavior of ‘pubmed-get-fulltext’, remove, change
   the order of, or insert functions in this list. Each function
   should accept no arguments, and return a string or nil."
@@ -454,12 +454,12 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 ;;;; Functions
 
 (defun pubmed--guard ()
-  "Signal an error when the current buffer is not in pubmed-mode."
+  "Signal an error when the current buffer is not in `pubmed-mode'."
   (unless (eq major-mode 'pubmed-mode)
     (error "The current buffer is not in PubMed mode")))
 
 (defun pubmed--get-url-error (status)
-  "Given a HTTP STATUS code, return a human readable response. Return nil if none is found."
+  "Convert integer STATUS to a human readable response. Return nil if none is found."
   (case status
     ;; 1xx Informational response
     ((100) "Continue")
@@ -530,7 +530,8 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
     ((511) "Network Authentication Required (RFC 6585)")))
 
 (defun pubmed--parse-time-string (time-string)
-  "Convert TIME-STRING to a string formatted according to PUBMED-TIME-FORMAT-STRING. TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
+  "Format TIME-STRING according to `pubmed-time-format-string'.
+TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
   (let* ((regexp "\\([0-9][0-9][0-9][0-9]\\)/\\([0-9][0-9]\\)/\\([0-9][0-9]\\) \\([0-9][0-9]\\):\\([0-9][0-9]\\)")
 	 (parsed-time (string-match regexp time-string))
 	 (sec 0)
@@ -620,7 +621,7 @@ data in batches of 500."
 	(pubmed--get-docsums querykey webenv count retstart retmax))))))
 
 (defun pubmed--get-docsums (querykey webenv count &optional retstart retmax)
-  "Retrieve the document summaries (DocSums) for a set of records stored on the Entrez History server.
+  "Retrieve the document summaries (DocSums) from the Entrez History server.
 Use multiple ESummary calls in batches of 500. The QUERYKEY
 specifies which of the stored sets to the given WEBENV will be
 used as input to ESummary. COUNT is the total number of records
@@ -669,7 +670,7 @@ RETMAX is the total number of records to be retrieved."
       (message "Searching...done"))))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
-  "Retrieve the document summaries (DocSums) for a batch of records stored on the Entrez History server.
+  "Retrieve the document summaries (DocSums) from the Entrez History server.
 The QUERYKEY specifies which of the stored sets to the given
 WEBENV will be used as input to ESummary. RETSTART is the
 sequential index of the first record to be retrieved, RETMAX is
@@ -931,14 +932,14 @@ The time value of the date can be converted by `format-time-string' to a string 
   (esxml-node-attribute 'PubModel (esxml-query "Article" summary)))
 
 (defun pubmed--summary-issn (summary)
-  "Return a plist with the journal ISSN and ISSN type of the article SUMMARY.
+  "Return a plist with the journal ISSN of the article SUMMARY.
 The plist has the form \"('issn ISSN 'type TYPE)\"."
   (let ((issn (esxml-query "Journal ISSN *" summary))
 	(type (esxml-node-attribute 'IssnType (esxml-query "Journal ISSN" summary))))
     (list 'issn issn 'type type)))
 
 (defun pubmed--summary-journal-issue (summary)
-  "Return a plist with the journal year, season, issue, volume, and cited medium of the article SUMMARY.
+  "Return a plist of the journal issue of the article SUMMARY.
 The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
   (let* ((year (esxml-query "Journal JournalIssue Year *" summary))
@@ -1044,7 +1045,7 @@ Each list element corresponds to one grant, and is a plist with the form \"('gra
     (nreverse grants)))
 
 (defun pubmed--summary-publicationtype (summary)
-  "Return a plist of the publication types and unique identifiers of the article SUMMARY.
+  "Return a plist of the publication types of the article SUMMARY.
 The plist has the form \"('type TYPE 'ui UI)\"."
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
   (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "Article PublicationTypeList" summary)))
@@ -1058,7 +1059,7 @@ The plist has the form \"('type TYPE 'ui UI)\"."
     (nreverse publicationtypes)))
 
 (defun pubmed--summary-articledate (summary)
-  "Return a plist of article date and date type of the article SUMMARY.
+  "Return a plist of article date of the article SUMMARY.
 The plist has the form \"('type TYPE 'date date)\". The time
 value of the date can be converted by `format-time-string' to a
 string according to FORMAT-STRING."
@@ -1072,7 +1073,7 @@ string according to FORMAT-STRING."
     (list 'type type 'date date)))
 
 (defun pubmed--summary-medlinejournalinfo (summary)
-  "Return a plist with the country, journal title abbreviation (MedlineTA), LocatorPlus accession number (NlmUniqueID) and ISSNLinking element of the article SUMMARY.
+  "Return a plist with Medline journal info of the article SUMMARY.
 The plist has the form \"('country COUNTRY 'medlineta MEDLINETA
 'nlmuniqueid NLMUNIQUEID 'issnlinking ISSNLINKING)\"."
   (let ((country (esxml-query "MedlineJournalInfo Country *" summary))
@@ -1082,7 +1083,7 @@ The plist has the form \"('country COUNTRY 'medlineta MEDLINETA
     (list 'country country 'medlineta medlineta 'nlmuniqueid nlmuniqueid 'issnlinking issnlinking)))
 
 (defun pubmed--summary-substances (summary)
-  "Return a plist of the chemical substances and unique identifiers of the article SUMMARY.
+  "Return a plist of the chemical substances of the article SUMMARY.
 Each list element corresponds to one substance, and is a plist
 with the form \"('registrynumber REGISTRYNUMBER 'substance
 SUBSTANCE 'ui UI)\"."
