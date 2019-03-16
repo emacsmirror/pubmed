@@ -363,7 +363,6 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of
 ;;;###autoload
 (defun pubmed-completion-at-point ()
   "Function used for `completion-at-point-functions'."
-  ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))
 	 (end (line-end-position))
@@ -378,7 +377,6 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of
 ;;;###autoload
 (defun pubmed-author-completion-at-point ()
   "Function used for `completion-at-point-functions'."
-  ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))
 	 (end (line-end-position))
@@ -393,7 +391,6 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of
 ;;;###autoload
 (defun pubmed-journal-completion-at-point ()
   "Function used for `completion-at-point-functions'."
-  ;; FIXME: integration with company-mode
   (interactive)
   (let* ((start (line-beginning-position))
 	 (end (line-end-position))
