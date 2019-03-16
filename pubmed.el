@@ -125,7 +125,7 @@ Seconds may be an integer or floating point number. Purpose of the delay is to p
     map)
   "Local keymap for `pubmed-search-mode'.")
 
-;;;;; Customization
+;;;; Customization
 
 (defgroup pubmed nil
   "Interface to PubMed."
@@ -190,7 +190,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change the order of
   (setq tabulated-list-sort-key nil)
   (tabulated-list-init-header))
 
-;;;;; Commands
+;;;; Commands
 
 ;;;###autoload
 (defun pubmed-show-mode ()

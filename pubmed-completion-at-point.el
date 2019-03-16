@@ -50,7 +50,7 @@
 (defvar pubmed-journal-completion-url
   "https://www.ncbi.nlm.nih.gov/portal/utils/autocomp.fcgi?dict=jrz&q=%s")
 
-;;;;; Commands
+;;;; Commands
 
 ;;;###autoload
 (defun pubmed-complete (&optional _predicate)

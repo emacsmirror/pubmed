@@ -49,7 +49,7 @@
 (defvar pubmed-advanced-search--widget-lookup-table nil
   "A table for lookup markers created in current buffer.")
 
-;;;;; Commands
+;;;; Commands
 
 ;;;###autoload
 (defun pubmed-advanced-search ()

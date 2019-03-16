@@ -70,7 +70,7 @@
   (setq tabulated-list-sort-key nil)
   (tabulated-list-init-header))
 
-;;;;; Commands
+;;;; Commands
 
 ;;;###autoload
 (defun pubmed-history-show ()

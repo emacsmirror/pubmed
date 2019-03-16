@@ -81,12 +81,12 @@
 (require 'json)
 (require 's)
 
-;;;;; Variables
+;;;; Variables
 
 (defvar pubmed-bibtex-citation-keys nil
   "List of citation keys.")
 
-;;;;; Customization
+;;;; Customization
 
 (defcustom pubmed-bibtex-default-file nil
   "Default BibTeX file."
@@ -247,7 +247,7 @@ author's surname followed by the year of publication is used."
   :group 'pubmed
   :type 'boolean)
 
-;;;;; Commands
+;;;; Commands
 
 ;;;###autoload
 (defun pubmed-bibtex-show (&optional entries)
