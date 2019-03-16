@@ -624,7 +624,7 @@ the total number of records to be retrieved."
   (let*((url-request-method "POST")
 	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 	(url-request-data (concat "db=pubmed"
-				  "&retmode=uilist"
+				  "&retmode=json"
 				  "&retstart=" (number-to-string retstart)
 				  "&retmax=" (number-to-string retmax)
 				  "&query_key=" querykey
