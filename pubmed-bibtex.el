@@ -338,7 +338,7 @@ author's surname followed by the year of publication is used."
     (while (string-match regexp string pos)
       (push (match-string 2 string) matches)
       (setq pos (match-end 0)))
-    (matches (reverse matches))
+    (setq matches (reverse matches))
     matches))
 
 (defun pubmed-bibtex--write (file &optional entries append)
