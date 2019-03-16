@@ -1,6 +1,6 @@
 ;;; pubmed.el --- Interface to PubMed -*- lexical-binding: t; -*-
 
-;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
+;; Author: Folkert van der Beek <folkertvanderbeek@gmail.com>
 ;; Created: 2018-05-23
 ;; Version: 0.1
 ;; Keywords: pubmed, hypermedia

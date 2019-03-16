@@ -1,6 +1,6 @@
 ;;; pubmed-bibtex.el --- Export BibTex from PubMed -*- lexical-binding: t; -*-
 
-;; Author: Folkert van der Beek <folkertvanderbeek@xs4all.nl>
+;; Author: Folkert van der Beek <folkertvanderbeek@gmail.com>
 
 ;; This file is NOT part of GNU Emacs.
 

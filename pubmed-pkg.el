@@ -5,6 +5,6 @@
     (esxml "20171129.807")
     (s "20180406.808"))
   :keywords '("pubmed")
-  :authors '(("Folkert van der Beek" . "folkertvanderbeek@xs4all.nl"))
-  :maintainer '("Folkert van der Beek" . "folkertvanderbeek@xs4all.nl")
+  :authors '(("Folkert van der Beek" . "folkertvanderbeek@gmail.com"))
+  :maintainer '("Folkert van der Beek" . "folkertvanderbeek@gmail.com")
   :url "https://gitlab.com/fvdbeek/emacs-pubmed")
