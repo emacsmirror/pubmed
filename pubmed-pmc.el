@@ -44,7 +44,7 @@
   "Fetch fulltext PDFs from PubMed Central (PMC)."
   :group 'pubmed)
 
-(defvar pubmed-pmc-timeout 5000
+(defcustom pubmed-pmc-timeout 5000
   "PMC timeout in milliseconds."
   :group 'pubmed-pmc
   :type 'integer)
