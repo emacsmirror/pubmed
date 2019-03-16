@@ -205,7 +205,7 @@ You need to provide a an URL to use the Sci-Hub database."
 			    (deferred:url-retrieve iframe-url)))))
 
 		    (deferred:nextc it
-		      (lambda (buffer)
+		      (lambda ()
 			"After the postback, retrieve the URL again with HTTP GET."
 			(deferred:timeout pubmed-scihub-timeout (error "Timeout")
 	  		  (deferred:url-retrieve iframe-url))))
