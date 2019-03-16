@@ -44,8 +44,8 @@
 ;; corner of any NCBI page.) You'll see a new "API Key Management" area. Click
 ;; the "Create an API Key" button, and copy the resulting key.
 
-;; Use the key by customizing the variable `pubmed-api-key` or setting the value
-;; in your `init.el` or `.emacs` file:
+;; Use the key by customizing the variable `pubmed-api-key' or setting the value
+;; in your init.el or .emacs file:
 ;; (setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 
 ;; Autocompleting using PubMed suggestions
