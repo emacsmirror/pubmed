@@ -41,7 +41,7 @@
 
 ;;;; Variables
 
-(defvar pubmed-scihub-timeout 10000
+(defvar pubmed-scihub-timeout 5000
   "Sci-Hub timeout in milliseconds.")
 
 ;;;; Customization

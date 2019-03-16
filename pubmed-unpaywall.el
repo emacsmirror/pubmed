@@ -38,7 +38,7 @@
 
 ;;;; Variables
 
-(defvar pubmed-unpaywall-timeout 10000
+(defvar pubmed-unpaywall-timeout 5000
   "Unpaywall timeout in milliseconds.")
 
 (defvar unpaywall-url "https://api.unpaywall.org"

@@ -35,7 +35,7 @@
 (defvar pubmed-elink-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
   "ELink base URL.")
 
-(defvar pubmed-elink-timeout 10000
+(defvar pubmed-elink-timeout 5000
   "ELink timeout in milliseconds.")
 
 ;;;; Commands
