@@ -78,6 +78,7 @@
 
 ;;;; Requirements
 
+(require 'bibtex)
 (require 'json)
 (require 's)
 
