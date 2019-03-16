@@ -88,9 +88,13 @@
 
 ;;;; Customization
 
-(defcustom pubmed-bibtex-default-file nil
+(defgroup pubmed-bibtex nil
+  "Export PubMed entries to BibTeX."
+  :group 'pubmed)
+
+(defcustom pubmed-bibtex-default-file (concat (file-name-as-directory default-directory) "pubmed.bib")
   "Default BibTeX file."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'file)
 
 (defcustom pubmed-bibtex-citation-key "pmid"
@@ -99,152 +103,152 @@ Default is \"pmid\", in which \"pmid\" followed by the PMID of
 the publication is used. Alternatively, you could use
 \"authoryear\", to follow the loose standard in which the
 author's surname followed by the year of publication is used."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'string)
 
 (defcustom pubmed-bibtex-article-volume t
   "If non-nil, include the optional \"volume\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-number nil
   "If non-nil, include the optional \"number\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-pages t
   "If non-nil, include the optional \"pages\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-month nil
   "If non-nil, include the optional \"month\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-note nil
   "If non-nil, include the optional \"note\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-issn nil
   "If non-nil, include the non-standard \"issn\" name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-pubmed nil
   "If non-nil, include the non-standard \"pubmed\" name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-pii nil
   "If non-nil, include the non-standard \"pii\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-doi t
   "If non-nil, include the non-standard \"doi\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-article-url nil
   "If non-nil, include the non-standard \"url\" field name in the \"@article\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-volume t
   "If non-nil, include the optional \"volume\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-number nil
   "If non-nil, include the optional \"number\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-address t
   "If non-nil, include the optional \"address\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-edition t
   "If non-nil, include the optional \"edition\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-month nil
   "If non-nil, include the optional \"month\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-note nil
   "If non-nil, include the optional \"note\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-pubmed nil
   "If non-nil, include the non-standard \"pubmed\" name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-book-url nil
   "If non-nil, include the non-standard \"url\" field name in the \"@book\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-editor t
   "If non-nil, include the optional \"editor\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-volume nil
   "If non-nil, include the optional \"volume\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-number nil
   "If non-nil, include the optional \"number\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-chapter nil
   "If non-nil, include the optional \"chapter\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-pages t
   "If non-nil, include the optional \"pages\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-address t
   "If non-nil, include the optional \"address\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-edition t
   "If non-nil, include the optional \"edition\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-month nil
   "If non-nil, include the optional \"month\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-note nil
   "If non-nil, include the optional \"note\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-pubmed nil
   "If non-nil, include the non-standard \"pubmed\" name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 (defcustom pubmed-bibtex-incollection-url nil
   "If non-nil, include the non-standard \"url\" field name in the \"@incollection\" reference type."
-  :group 'pubmed
+  :group 'pubmed-bibtex
   :type 'boolean)
 
 ;;;; Commands
