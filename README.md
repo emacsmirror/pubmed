@@ -161,9 +161,9 @@ file:
   without any argument. Each function should return nil if it is unable to find
   a fulltext article of the entry at point. Otherwise it should return the
   buffer of the PDF and show the PDF in a new frame as a side effect. By
-  default, only `pubmed-pmc` is used. To add other fulltext functions, customize
-  the variable `pubmed-fulltext-functions` or set the value in your `init.el` or
-  `.emacs` file:
+  default, only `pubmed-pmc` and `pubmed-openaccessbutton` are used. To add
+  other fulltext functions, customize the variable `pubmed-fulltext-functions`
+  or set the value in your `init.el` or `.emacs` file:
 
 ```lisp
 (setq pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton pubmed-unpaywall pubmed-scihub))
@@ -173,7 +173,6 @@ or
 
 ```lisp
 (add-to-list 'pubmed-fulltext-functions 'pubmed-unpaywall t)
-(add-to-list 'pubmed-fulltext-functions 'pubmed-openaccessbutton t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```
 
