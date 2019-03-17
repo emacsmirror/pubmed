@@ -101,7 +101,7 @@ Although Open Access Button API doesn't require authorisation, it is encouraged 
 
 (defun pubmed-openaccessbutton (uid)
   "Deferred chain to retrieve the fulltext PDF of the UID."
-  (let ((pdf-url))
+  (let (pdf-url)
     (deferred:$
       ;; try
       (deferred:$
