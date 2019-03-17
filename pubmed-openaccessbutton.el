@@ -90,7 +90,7 @@ Although Open Access Button API doesn't require authorisation, it is encouraged 
 ;;;; Functions
 
 (defun pubmed--get-openaccessbutton (uid)
-  "Try to fetch the fulltext PDF of UID, using OPENACCESSBUTTON."
+  "Try to fetch the fulltext PDF of UID, using Open Access Button."
   (deferred:$
     (deferred:call #'pubmed-openaccessbutton uid)
 
