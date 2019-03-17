@@ -58,6 +58,7 @@
 ;;;; Requirements
 
 (require 'pubmed-bibtex)
+(require 'pubmed-openaccessbutton)
 (require 'pubmed-pmc)
 (require 'esxml)
 (require 'esxml-query)
@@ -220,7 +221,7 @@ Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\"."
   :group 'pubmed
   :type 'string)
 
-(defcustom pubmed-fulltext-functions '(pubmed-pmc)
+(defcustom pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton)
   "The list of functions tried in order by `pubmed-fulltext'.
 To change the behavior of ‘pubmed-get-fulltext’, remove, change
   the order of, or insert functions in this list. Each function
@@ -228,6 +229,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
   :group 'pubmed
   :type '(repeat function)
   :options '(pubmed-pmc
+	     pubmed-openaccessbutton
 	     pubmed-unpaywall
 	     pubmed-scihub))
 
