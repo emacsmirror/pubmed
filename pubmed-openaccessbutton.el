@@ -19,12 +19,17 @@
 
 ;;; Commentary:
 
-;; Download fulltext PDFs of Open Access articles using Open Access Button <https://openaccessbutton.org/api>. Using Open Access Button is legal.
+;; Download fulltext PDFs of Open Access articles using Open Access Button
+;; <https://openaccessbutton.org/api>. Using Open Access Button is legal.
 
-;; There are no enforced rate limits, but requests should be limited to a maximum of one request per second. Although most API operations do not require authorisation, obtaining your own API key is encouraged. To create the key, register at <https://openaccessbutton.org/account?next=/api>.
+;; There are no enforced rate limits, but requests should be limited to a
+;; maximum of one request per second. Although most API operations do not
+;; require authorisation, obtaining your own API key is encouraged. To create
+;; the key, register at <https://openaccessbutton.org/account?next=/api>.
 
-;; Use the key by customizing the variable `pubmed-openaccessbutton-api-key' or setting the value in your .emacs:
-;; (setq pubmed-openaccessbutton-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
+;; Use the key by customizing the variable `pubmed-openaccessbutton-api-key' or
+;; setting the value in your .emacs: (setq pubmed-openaccessbutton-api-key
+;; "1234567890abcdefghijklmnopqrstuvwxyz")
 
 ;;; Code:
 
@@ -49,10 +54,12 @@
 
 (defcustom pubmed-openaccessbutton-api-key ""
   "Open Access Button API key.
-Although Open Access Button API doesn't require authorisation, it is encouraged to obtain your own API key. To create the key, register at <https://openaccessbutton.org/account?next=/api>."
-  :link '(url-link "https://openaccessbutton.org/account?next=/api")
-  :group 'pubmed-openaccessbutton
-  :type 'string)
+Although Open Access Button API doesn't require authorisation, it
+  is encouraged to obtain your own API key. To create the key,
+  register at <https://openaccessbutton.org/account?next=/api>."
+  :link
+  '(url-link "https://openaccessbutton.org/account?next=/api")
+  :group 'pubmed-openaccessbutton :type 'string)
 
 (defcustom pubmed-openaccessbutton-timeout 5000
   "Open Access Button timeout in milliseconds."
@@ -62,8 +69,10 @@ Although Open Access Button API doesn't require authorisation, it is encouraged 
 ;;;; Commands
 
 (defun pubmed-get-openaccessbutton (&optional entries)
-  "In PubMed, try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
-  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
+  "In PubMed, try to fetch the fulltext PDF of the marked
+entries, the current entry or the optional argument ENTRIES."
+  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to
+  ;; confirm.
   (interactive "P")
   (pubmed--guard)
   (let (mark
@@ -111,7 +120,8 @@ Although Open Access Button API doesn't require authorisation, it is encouraged 
 
 	(deferred:nextc it
 	  (lambda (buffer)
-	    "Parse the JSON object in BUFFER. Return the url of the Open Access fulltext article or nil if none is found."
+	    "Parse the JSON object in BUFFER. Return the url of
+the Open Access fulltext article or nil if none is found."
 	    (let* ((json (with-current-buffer buffer (decode-coding-string (buffer-string) 'utf-8)))
 		   (json-object-type 'plist)
 		   (json-array-type 'list)
@@ -122,7 +132,8 @@ Although Open Access Button API doesn't require authorisation, it is encouraged 
 		   (type (plist-get (car availability) :type))
 		   (url (plist-get (car availability) :url)))
 	      (cond
-	       ;; Workaround of bug in Open Access Button service, where any article that isn't available returns the same wrong url
+	       ;; Workaround of bug in Open Access Button service, where any
+	       ;; article that isn't available returns the same wrong url
 	       ((and (equal type "article") (equal url "https://core.ac.uk/download/pdf/38142439.pdf"))
 		(error "Open Access Button found no fulltext article"))
 	       ((and url (equal type "article"))
