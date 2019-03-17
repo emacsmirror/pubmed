@@ -108,13 +108,26 @@ value in your `init.el` or `.emacs` file:
 **Full text PDFs**
 
 Full text PDFs can be found by using [PubMed Central®
-(PMC)](https://www.ncbi.nlm.nih.gov/pmc/),
+(PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
+Button](https://openaccessbutton.org/api)
 [Unpaywall](https://unpaywall.org/products/api) or Sci-Hub:
 
 - The PMC fulltext function is invoked by `M-x pubmed-get-pmc`. PubMed Central®
   (PMC) is a free full-text archive of biomedical and life sciences journal
   literature at the U.S. National Institutes of Health's National Library of
   Medicine (NIH/NLM).
+
+- The Open Access Button fulltext function is invoked by `M-x
+  pubmed-get-openaccessbutton`. Using Open Access Button is legal. Although most
+  API operations do not require authorisation, obtaining your own API key is
+  encouraged. To create the key, register at
+  <https://openaccessbutton.org/account?next=/api>. Provide your API key by
+  customizing the variable `pubmed-openaccessbutton-api-key` or setting the value
+  in your `init.el` or `.emacs` file:
+
+  ```lisp
+  (setq pubmed-openaccessbutton-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
+  ```
 
 - The Unpaywall fulltext function is invoked by `M-x pubmed-get-unpaywall`.
   Using Unpaywall is legal and requires you to provide your email address by
@@ -153,13 +166,14 @@ file:
   `.emacs` file:
 
 ```lisp
-(setq pubmed-fulltext-functions '(pubmed-pmc pubmed-unpaywall pubmed-scihub))
+(setq pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton pubmed-unpaywall pubmed-scihub))
 ```
 
 or
 
 ```lisp
 (add-to-list 'pubmed-fulltext-functions 'pubmed-unpaywall t)
+(add-to-list 'pubmed-fulltext-functions 'pubmed-openaccessbutton t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```
 
