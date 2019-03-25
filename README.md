@@ -11,7 +11,7 @@ PDFs of many articles.
 
 **MELPA**
 
-Emacs-pubmed is not yet available from MELPA.
+Emacs-pubmed is now available from [MELPA](https://melpa.org/).
 
 **Development Version**
 
