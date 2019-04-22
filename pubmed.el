@@ -981,6 +981,10 @@ The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
   "Return the title of the article SUMMARY."
   (esxml-query "ArticleTitle *" summary))
 
+(defun pubmed--summary-book-title (summary)
+  "Return the title of the book SUMMARY."
+  (esxml-query "BookTitle *" summary))
+
 (defun pubmed--summary-pagination (summary)
   "Return the pagination of the article SUMMARY."
   (cond
@@ -1181,6 +1185,69 @@ Each list element corresponds to one investigator, and is a plist with the form 
     	    (initials (esxml-query "Initials *" investigator)))
     	(push (list 'lastname lastname 'forename forename 'initials initials) investigators)))
     (nreverse investigators)))
+
+(defun pubmed--summary-chapter (summary)
+  "Return a string with the chapter of book SUMMARY."
+  (esxml-query "LocationLabel[Type=chapter] *" summary))
+
+(defun pubmed--summary-publisher (summary)
+  "Return a plist of the publisher of book SUMMARY.
+The plist has the form \"('name NAME 'location LOCATION)\"."
+  (let ((name (esxml-query "Publisher PublisherName *" summary))
+	(location (esxml-query "Publisher PublisherLocation *" summary)))
+    (list 'name name 'location location)))
+
+(defun pubmed--summary-book-authors (summary)
+  "Return an plist with the authors of the article SUMMARY.
+Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  (let ((authorlist (esxml-query-all "Author" (esxml-query "AuthorList[Type=authors]" summary)))
+	authors)
+    (dolist (author authorlist)
+      (let ((lastname (esxml-query "LastName *" author))
+	    (forename (esxml-query "ForeName *" author))
+    	    (initials (esxml-query "Initials *" author))
+	    (affiliationinfo (esxml-query "AffiliationInfo Affiliation *" author))
+    	    (collectivename (esxml-query "CollectiveName *" author)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) authors)))
+    (nreverse authors)))
+
+(defun pubmed--summary-book-editors (summary)
+  "Return an plist with the editors of SUMMARY.
+Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  (let ((editorlist (esxml-query-all "Author" (esxml-query "AuthorList[Type=editors]" summary)))
+	editors)
+    (dolist (editor editorlist)
+      (let ((lastname (esxml-query "LastName *" editor))
+	    (forename (esxml-query "ForeName *" editor))
+    	    (initials (esxml-query "Initials *" editor))
+	    (affiliationinfo (esxml-query "AffiliationInfo Affiliation *" editor))
+    	    (collectivename (esxml-query "CollectiveName *" editor)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) editors)))
+    (nreverse editors)))
+
+(defun pubmed--summary-book-edition (summary)
+  "Return a string with the edition of SUMMARY."
+  (esxml-query "Edition *" summary))
+
+(defun pubmed--summary-book-collectiontitle (summary)
+  "Return a string with the collection title of SUMMARY."
+  (esxml-query "CollectionTitle *" summary))
+
+(defun pubmed--summary-book-isbn (summary)
+  "Return a string with the isbn of SUMMARY."
+  (esxml-query "Isbn *" summary))
+
+(defun pubmed--summary-book-medium (summary)
+  "Return a string with the medium of SUMMARY."
+  (esxml-query "Medium *" summary))
+
+(defun pubmed--summary-sections (summary)
+  "Return a plist of the sections of the book SUMMARY."
+  (let ((sectionlist (esxml-query-all "Section" (esxml-query "Sections" summary)))
+	sections)
+    (dolist (section sectionlist)
+      (push (esxml-query "SectionTitle *" section) sections))
+    (nreverse sections)))
 
 (defun pubmed--fulltext (uid)
   "Try to fetch the fulltext PDF of UID, using multiple methods.
