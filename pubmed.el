@@ -1096,6 +1096,19 @@ SUBSTANCE 'ui UI)\"."
 	(push (list 'registrynumber registrynumber 'substance substance 'ui ui) chemicals)))
     (nreverse chemicals)))
 
+(defun pubmed--summary-commentscorrections (summary)
+  "Return the correction of the article SUMMARY.
+The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
+  (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
+	commentscorrections)
+    (dolist (commentscorrection commentscorrectionslist)
+      (let ((reftype (esxml-node-attribute 'RefType commentscorrection))
+	    (refsource (esxml-query "RefSource *" commentscorrection))
+	    (pmid (esxml-query "PMID *" commentscorrection)))
+	;; For each `commentscorrection' push the reftype, refsource and pmid to the list `commentscorrections'
+    	(push (list 'reftype reftype 'refsource refsource 'pmid pmid) commentscorrections)))
+    (nreverse commentscorrections)))
+
 (defun pubmed--summary-mesh (summary)
   "Return an list of the MeSH terms  of the article SUMMARY.
 Each list element corresponds to one descriptor (or subject heading) and its qualifiers (or subheadings), and is a plist with the form \"('descriptor DESCRIPTOR 'ui UI 'qualifiers (('qualifier QUALIFIER 'ui UI) ('qualifier QUALIFIER 'ui UI) (...)))\"."
@@ -1113,18 +1126,13 @@ Each list element corresponds to one descriptor (or subject heading) and its qua
 	(push (list 'descriptor descriptorname 'ui descriptorui 'qualifiers qualifiers) meshheadings)))
     (nreverse meshheadings)))
 
-(defun pubmed--summary-commentscorrections (summary)
-  "Return the correction of the article SUMMARY.
-The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
-  (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
-	commentscorrections)
-    (dolist (commentscorrection commentscorrectionslist)
-      (let ((reftype (esxml-node-attribute 'RefType commentscorrection))
-	    (refsource (esxml-query "RefSource *" commentscorrection))
-	    (pmid (esxml-query "PMID *" commentscorrection)))
-	;; For each `commentscorrection' push the reftype, refsource and pmid to the list `commentscorrections'
-    	(push (list 'reftype reftype 'refsource refsource 'pmid pmid) commentscorrections)))
-    (nreverse commentscorrections)))
+(defun pubmed--summary-keywords (summary)
+  "Return an alist of the keywords of article SUMMARY."
+  (let ((keywordlist (esxml-query-all "Keyword" (esxml-query "KeywordList" summary)))
+	keywords)
+    (dolist (keyword keywordlist)
+      (push (car (esxml-node-children keyword)) keywords))
+    (nreverse keywords)))
 
 (defun pubmed--summary-publicationstatus (summary)
   "Return the publication status of article SUMMARY."
@@ -1142,26 +1150,6 @@ The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\".
 	(push id articleids)))
     (nreverse articleids)))
 
-(defun pubmed--summary-keywords (summary)
-  "Return an alist of the keywords of article SUMMARY."
-  (let ((keywordlist (esxml-query-all "Keyword" (esxml-query "KeywordList" summary)))
-	keywords)
-    (dolist (keyword keywordlist)
-      (push (car (esxml-node-children keyword)) keywords))
-    (nreverse keywords)))
-
-(defun pubmed--summary-investigators (summary)
-  "Return an plist with the investigators of the article SUMMARY.
-Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
-  (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
-	investigators)
-    (dolist (investigator investigatorlist)
-      (let ((lastname (esxml-query "LastName *" investigator))
-	    (forename (esxml-query "ForeName *" investigator))
-    	    (initials (esxml-query "Initials *" investigator)))
-    	(push (list 'lastname lastname 'forename forename 'initials initials) investigators)))
-    (nreverse investigators)))
-
 (defun pubmed--summary-references (summary)
   "Return a plist of the references of the article SUMMARY.
 Each list element corresponds to one reference, The has the form \"('citation CITATION 'pubmed PMID)\"."
@@ -1175,6 +1163,18 @@ Each list element corresponds to one reference, The has the form \"('citation CI
 		(id (car (esxml-node-children articleid))))
 	    (push (list 'citation citation idtype id) references)))))
     (nreverse references)))
+
+(defun pubmed--summary-investigators (summary)
+  "Return an plist with the investigators of the article SUMMARY.
+Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
+  (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
+	investigators)
+    (dolist (investigator investigatorlist)
+      (let ((lastname (esxml-query "LastName *" investigator))
+	    (forename (esxml-query "ForeName *" investigator))
+    	    (initials (esxml-query "Initials *" investigator)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials) investigators)))
+    (nreverse investigators)))
 
 (defun pubmed--fulltext (uid)
   "Try to fetch the fulltext PDF of UID, using multiple methods.
