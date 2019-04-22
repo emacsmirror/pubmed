@@ -1279,6 +1279,17 @@ Each list element corresponds to one author, and is a plist with the form \"('la
       (push (esxml-query "SectionTitle *" section) sections))
     (nreverse sections)))
 
+(defun pubmed--summary-contributiondate (summary)
+  "Return the contribution date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  (let* ((contributiondate (encode-time 0
+					0
+					0
+					(string-to-number (esxml-query "ContributionDate Day *" summary))
+					(string-to-number (esxml-query "ContributionDate Month *" summary))
+					(string-to-number (esxml-query "ContributionDate Year *" summary)))))
+    contributiondate))
+
 (defun pubmed--fulltext (uid)
   "Try to fetch the fulltext PDF of UID, using multiple methods.
 The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
