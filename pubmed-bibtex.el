@@ -59,14 +59,15 @@
 ;; cross-reference it to this entry (i.e., the identifier you use in
 ;; the \cite{} command in your LaTeX file).
 
-;; By default the key is composed of the `pmid' prefixed with the
-;; string "pmid". Alternatively, you could use the author-year
-;; citation style, that follow the loose standard in which the
-;; author's surname followed by the year of publication is used. This
-;; could be more convenient, because it enables you to guess the key
-;; from looking at the reference. This protects you from accidentally
-;; duplicating a reference in the Bibtex file and referring to it
-;; under two different keys.
+;; By default, the author-year citation style is used that follows the
+;; loose standard in which the author's surname is followed by the
+;; year of publication.
+
+;; A formatter pattern language is provided that mostly follows the
+;; JabRef key formatting syntax. The default author-year citation
+;; style is produced by the [auth][year] key pattern. If the key is
+;; not unique in the current database, it is made unique by adding one
+;; of the letters a-z until a unique key is found.
 
 ;; Configuring default BibTeX file
 
