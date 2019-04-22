@@ -35,7 +35,6 @@
 
 ;;;; Requirements
 
-(require 'pubmed)
 (require 'deferred)
 (require 'eww)
 (require 'json)
