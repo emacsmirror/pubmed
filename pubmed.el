@@ -743,7 +743,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	      (if (s-suffix-p "." (pubmed--summary-journal-isoabbreviation summary))
 		  (insert " ")
 		(insert ". "))
-	      (insert (pubmed--summary-journal-pubdate summary))
+	      (insert (pubmed--summary-pubdate summary))
 
 	      (if (equal (pubmed--summary-publicationstatus summary) "aheadofprint")
 		  (progn
