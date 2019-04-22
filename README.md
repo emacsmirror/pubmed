@@ -333,7 +333,7 @@ auth in the above codes. For example, [pureauth], or [pureauthors3].
 
 Note: the functions above all have the clean filter automatically applied to
 them. If you want more control, you can disable this by configuring the
-`pubmed-bibtex-apply-clean' variable.
+`pubmed-bibtex-apply-clean` variable.
 
 ***** Filters
 
