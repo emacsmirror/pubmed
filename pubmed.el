@@ -1148,6 +1148,21 @@ Each list element corresponds to one descriptor (or subject heading) and its qua
   "Return a string with the conflict of interest statement of article SUMMARY."
   (esxml-query "CoiStatement *" summary))
 
+(defun pubmed--summary-history (summary)
+  "Return a plist of the history of article SUMMARY.
+The plist contains the dates indicating the history of the article's publication, i.e. when it was received, accepted, revised, or retracted. The plist has the form \"('pubstatus PUBSTATUS 'year YEAR 'month MONTH 'day DAY)\"."
+  (let ((pubdatelist (esxml-query-all "PubMedPubDate" (esxml-query "History" summary)))
+	pubdates)
+    (dolist (pubdate pubdatelist)
+      (let ((pubstatus (esxml-node-attribute 'PubStatus pubdate))
+	     (year (esxml-query "Year *" pubdate))
+	 (month (esxml-query "Month *" pubdate))
+	 (day (esxml-query "Day *" pubdate))
+	 (hour (esxml-query "Hour *" pubdate))
+	 (minute (esxml-query "Minute *" pubdate)))
+	    (push (list 'pubstatus pubstatus 'year year 'month month 'day day) pubdates)))
+    (nreverse pubdates)))
+
 (defun pubmed--summary-publicationstatus (summary)
   "Return the publication status of article SUMMARY."
   (esxml-query "PublicationStatus *" summary))
