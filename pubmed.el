@@ -941,19 +941,19 @@ The plist has the form \"('issn ISSN 'type TYPE)\"."
   "Return a plist of the journal issue of the article SUMMARY.
 The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
-  (let* ((year (esxml-query "Journal JournalIssue Year *" summary))
-	 (season (esxml-query "Journal JournalIssue Season *" summary))
-	 (issue (esxml-query "Journal JournalIssue Issue *" summary))
-	 (volume (esxml-query "Journal JournalIssue Volume *" summary))
-	 (citedmedium (esxml-node-attribute 'CitedMedium (esxml-query "Journal JournalIssue" summary))))
+  (let* ((year (esxml-query "JournalIssue Year *" summary))
+	 (season (esxml-query "JournalIssue Season *" summary))
+	 (issue (esxml-query "JournalIssue Issue *" summary))
+	 (volume (esxml-query "JournalIssue Volume *" summary))
+	 (citedmedium (esxml-node-attribute 'CitedMedium (esxml-query "JournalIssue" summary))))
     (list 'year year 'season season 'issue issue 'volume volume 'citedmedium citedmedium)))
 
-(defun pubmed--summary-journal-pubdate (summary)
-  "Return a string with the journal publication date of the article SUMMARY."
-  (let* ((day (esxml-query "Article Journal JournalIssue PubDate Day *" summary))
-	 (month (esxml-query "Article Journal JournalIssue PubDate Month *" summary))
-	 (year (esxml-query "Article Journal JournalIssue PubDate Year *" summary))
-	 (medlinedate (esxml-query "Article Journal JournalIssue PubDate MedlineDate *" summary)))
+(defun pubmed--summary-pubdate (summary)
+  "Return a string with the publication date of the article SUMMARY."
+  (let* ((day (esxml-query "PubDate Day *" summary))
+	 (month (esxml-query "PubDate Month *" summary))
+	 (year (esxml-query "PubDate Year *" summary))
+	 (medlinedate (esxml-query "PubDate MedlineDate *" summary)))
     ;; If MONTH is a number
     (when (and month (string-match "[[:digit:]]+" month))
       ;; Convert the month number to the abbreviated month name
@@ -979,7 +979,7 @@ The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 
 (defun pubmed--summary-article-title (summary)
   "Return the title of the article SUMMARY."
-  (esxml-query "Article ArticleTitle *" summary))
+  (esxml-query "ArticleTitle *" summary))
 
 (defun pubmed--summary-pagination (summary)
   "Return the pagination of the article SUMMARY."
@@ -999,7 +999,7 @@ The plist has the form \"('type TYPE 'id ID)\"."
 (defun pubmed--summary-abstract (summary)
   "Return the abstract of the article SUMMARY.
 Return nil if no abstract is available."
-  (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Article Abstract" summary)))
+  (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Abstract" summary)))
 	texts)
     (when textlist
       ;; Iterate through AbstractText nodes, where structure is like: (AbstractText ((Label . "LABEL") (NlmCategory . "CATEGORY")) "ABSTRACTTEXT")
@@ -1016,7 +1016,7 @@ Return nil if no abstract is available."
 (defun pubmed--summary-authors (summary)
   "Return an plist with the authors of the article SUMMARY.
 Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
-  (let ((authorlist (esxml-query-all "Author" (esxml-query "Article AuthorList" summary)))
+  (let ((authorlist (esxml-query-all "Author" (esxml-query "AuthorList" summary)))
 	authors)
     (dolist (author authorlist)
       (let ((lastname (esxml-query "LastName *" author))
@@ -1029,25 +1029,26 @@ Each list element corresponds to one author, and is a plist with the form \"('la
 
 (defun pubmed--summary-language (summary)
   "Return the language of the article SUMMARY."
-  (esxml-query "Article Language *" summary))
+  (esxml-query "Language *" summary))
 
 (defun pubmed--summary-grant (summary)
   "Return a list of the grants of the article SUMMARY.
-Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'agency AGENCY 'country COUNTRY)\"."
+Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'acronym ACRONYM 'agency AGENCY 'country COUNTRY)\"."
   (let ((grantlist (esxml-query-all "Grant" (esxml-query "Article GrantList" summary)))
 	grants) ;; make sure list starts empty
     (dolist (grant grantlist)
       (let ((grantid (esxml-query "GrantID *" grant))
+	    (acronym (esxml-query "Acronym *" grant))
 	    (agency (esxml-query "Agency *" grant))
 	    (country (esxml-query "Country *" grant)))
-	(push (list 'grantid grantid 'agency agency 'country country) grants)))
+	(push (list 'grantid grantid 'acronym acronym 'agency agency 'country country) grants)))
     (nreverse grants)))
 
 (defun pubmed--summary-publicationtype (summary)
   "Return a plist of the publication types of the article SUMMARY.
 The plist has the form \"('type TYPE 'ui UI)\"."
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
-  (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "Article PublicationTypeList" summary)))
+  (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "PublicationTypeList" summary)))
 	publicationtypes) ;; make sure list starts empty
     (dolist (publicationtype publicationtypelist)
       (let ((type (car (esxml-node-children publicationtype)))
@@ -1062,13 +1063,13 @@ The plist has the form \"('type TYPE 'ui UI)\"."
 The plist has the form \"('type TYPE 'date date)\". The time
 value of the date can be converted by `format-time-string' to a
 string according to FORMAT-STRING."
-  (let ((type (esxml-node-attribute 'DateType (esxml-query "Article ArticleDate" summary)))
+  (let ((type (esxml-node-attribute 'DateType (esxml-query "ArticleDate" summary)))
 	(date (encode-time 0
 			   0
 			   0
-			   (string-to-number (esxml-query "Article ArticleDate Day *" summary))
-			   (string-to-number  (esxml-query "Article ArticleDate Month *" summary))
-			   (string-to-number (esxml-query "Article ArticleDate Year *" summary)))))
+			   (string-to-number (esxml-query "ArticleDate Day *" summary))
+			   (string-to-number  (esxml-query "ArticleDate Month *" summary))
+			   (string-to-number (esxml-query "ArticleDate Year *" summary)))))
     (list 'type type 'date date)))
 
 (defun pubmed--summary-medlinejournalinfo (summary)
@@ -1126,13 +1127,13 @@ The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
     (nreverse commentscorrections)))
 
 (defun pubmed--summary-publicationstatus (summary)
-  "Return the publication status of the article SUMMARY."
-  (esxml-query "PubmedData PublicationStatus *" summary))
+  "Return the publication status of article SUMMARY."
+  (esxml-query "PublicationStatus *" summary))
 
 (defun pubmed--summary-articleid (summary)
   "Return an plist of the article IDs of the article SUMMARY.
 The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
-  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
+  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "ArticleIdList" summary)))
 	articleids)
     (dolist (articleid articleidlist)
       (let ((idtype (intern (esxml-node-attribute 'IdType articleid)))
