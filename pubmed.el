@@ -1216,6 +1216,17 @@ The plist has the form \"('name NAME 'location LOCATION)\"."
 	(location (esxml-query "Publisher PublisherLocation *" summary)))
     (list 'name name 'location location)))
 
+(defun pubmed--summary-beginningdate (summary)
+  "Return the beginning date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  (let* ((beginningdate (encode-time 0
+				     0
+				     0
+				     (string-to-number (esxml-query "BeginningDate Day *" summary))
+				     (string-to-number (esxml-query "BeginningDate Month *" summary))
+				     (string-to-number (esxml-query "BeginningDate Year *" summary)))))
+    beginningdate))
+
 (defun pubmed--summary-book-authors (summary)
   "Return an plist with the authors of the article SUMMARY.
 Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
