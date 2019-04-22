@@ -745,156 +745,157 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	      (if (s-suffix-p "." (pubmed--summary-journal-isoabbreviation summary))
 		  (insert " ")
 		(insert ". "))
-	      (insert (pubmed--summary-journal-pubdate summary))
+	      (insert (pubmed--summary-pubdate summary))
 
 	      (if (equal (pubmed--summary-publicationstatus summary) "aheadofprint")
-		  (progn
-		    (when (pubmed--summary-elocation summary)
-      		      (let ((elocationlist (pubmed--summary-elocation summary))
-      			    elocations)
-      			(dolist (elocation elocationlist)
-      			  (push (concat (plist-get elocation 'type) ": " (plist-get elocation 'id)) elocations))
-			(insert ". ")
-      			(insert (s-join ". " (nreverse elocations)))
-			(insert ". ")))
-		    (insert "[Epub ahead of print]"))
-		(when (plist-get (pubmed--summary-journal-issue summary) 'volume)
-		  (insert ";")
-		  (insert (plist-get (pubmed--summary-journal-issue summary) 'volume)))
-		(when (plist-get (pubmed--summary-journal-issue summary) 'issue)
-      		  (insert "(" (plist-get (pubmed--summary-journal-issue summary) 'issue) ")" ))
-		(when (pubmed--summary-pagination summary)
-		  (insert ":")
-		  (insert (pubmed--summary-pagination summary))
-		  (insert ". ")))
+	      	  (progn
+	      	    (when (pubmed--summary-elocation summary)
+      	      	      (let ((elocationlist (pubmed--summary-elocation summary))
+      	      		    elocations)
+      	      		(dolist (elocation elocationlist)
+      	      		  (push (concat (plist-get elocation 'type) ": " (plist-get elocation 'id)) elocations))
+	      		(insert ". ")
+      	      		(insert (s-join ". " (nreverse elocations)))
+	      		(insert ". ")))
+	      	    (insert "[Epub ahead of print]"))
+	      	(when (plist-get (pubmed--summary-journal-issue summary) 'volume)
+	      	  (insert ";")
+	      	  (insert (plist-get (pubmed--summary-journal-issue summary) 'volume)))
+	      	(when (plist-get (pubmed--summary-journal-issue summary) 'issue)
+      	      	  (insert "(" (plist-get (pubmed--summary-journal-issue summary) 'issue) ")" ))
+	      	(when (pubmed--summary-pagination summary)
+	      	  (insert ":")
+	      	  (insert (pubmed--summary-pagination summary))
+	      	  (insert ". ")))
 	      (insert "\n\n")
 	      (let ((article-title (pubmed--summary-article-title summary)))
-		(put-text-property 0 (length article-title) 'face 'bold article-title)
-		(insert article-title))
+	      	(put-text-property 0 (length article-title) 'face 'bold article-title)
+	      	(insert article-title))
 	      (insert "\n")
 	      (when (pubmed--summary-authors summary)
-      		(let ((authorlist (pubmed--summary-authors summary))
-      		      authors)
-      		  (dolist (author authorlist)
-      		    (cond
-      		     ((and (plist-get author 'lastname) (plist-get author 'initials))
-      		      (push (concat (plist-get author 'lastname) " " (plist-get author 'initials)) authors))
-      		     ((plist-get author 'collectivename)
-      		      (push (plist-get author 'collectivename) authors))))
-      		  (insert (s-join ", " (nreverse authors)))
-      		  (insert "\n\n")))
+      	      	(let ((authorlist (pubmed--summary-authors summary))
+      	      	      authors)
+      	      	  (dolist (author authorlist)
+      	      	    (cond
+      	      	     ((and (plist-get author 'lastname) (plist-get author 'initials))
+      	      	      (push (concat (plist-get author 'lastname) " " (plist-get author 'initials)) authors))
+      	      	     ((plist-get author 'collectivename)
+      	      	      (push (plist-get author 'collectivename) authors))))
+      	      	  (insert (s-join ", " (nreverse authors)))
+      	      	  (insert "\n\n")))
 	      (when (pubmed--summary-investigators summary)
-      		(let ((investigatorlist (pubmed--summary-investigators summary))
-      		      investigators)
-      		  (dolist (investigator investigatorlist)
-      		    (push (concat (plist-get investigator 'lastname) " " (plist-get investigator 'initials)) investigators))
-      		  (insert "Collaborators (" (number-to-string (length investigatorlist)) ")\n")
-      		  (insert (s-join ", " (nreverse investigators)))
-      		  (insert "\n\n")))
+      	      	(let ((investigatorlist (pubmed--summary-investigators summary))
+      	      	      investigators)
+      	      	  (dolist (investigator investigatorlist)
+      	      	    (push (concat (plist-get investigator 'lastname) " " (plist-get investigator 'initials)) investigators))
+      	      	  (insert "Collaborators (" (number-to-string (length investigatorlist)) ")\n")
+      	      	  (insert (s-join ", " (nreverse investigators)))
+      	      	  (insert "\n\n")))
 	      (when (pubmed--summary-abstract summary)
-		(let ((heading "ABSTRACT"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(insert (pubmed--summary-abstract summary))
-      		(insert "\n\n"))
+	      	(let ((heading "ABSTRACT"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(insert (pubmed--summary-abstract summary))
+      	      	(insert "\n\n"))
 	      (when (pubmed--summary-keywords summary)
-      		(insert "\n")
-		(let ((heading "KEYWORDS: "))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert (s-join "; " (pubmed--summary-keywords summary)))
-      		(insert "\n\n"))
-	      (when  (plist-get (pubmed--summary-articleid summary) 'pubmed)
-		(let ((heading "PMID: "))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert (plist-get (pubmed--summary-articleid summary) 'pubmed) "\n"))
+      	      	(insert "\n")
+	      	(let ((heading "KEYWORDS: "))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert (s-join "; " (pubmed--summary-keywords summary)))
+      	      	(insert "\n\n"))
+	      (when (plist-get (pubmed--summary-articleid summary) 'pubmed)
+	      	(let ((heading "PMID: "))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert (plist-get (pubmed--summary-articleid summary) 'pubmed) "\n"))
 	      (when (plist-get (pubmed--summary-articleid summary) 'doi)
-		(let ((heading "DOI: "))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert (plist-get (pubmed--summary-articleid summary) 'doi) "\n"))
+	      	(let ((heading "DOI: "))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert (plist-get (pubmed--summary-articleid summary) 'doi) "\n"))
 	      ;; (when (plist-get (pubmed--summary-articleid summary) 'pii)
 	      ;; 	(insert "PII: " (plist-get (pubmed--summary-articleid summary) 'pii) "\n"))
 	      (when (plist-get (pubmed--summary-articleid summary) 'pmc)
-		(let ((heading "PMCID: "))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert (plist-get (pubmed--summary-articleid summary) 'pmc) "\n"))
+	      	(let ((heading "PMCID: "))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert (plist-get (pubmed--summary-articleid summary) 'pmc) "\n"))
 	      (when (pubmed--summary-commentscorrections summary)
-      		(insert "\n")
-		(let ((heading "Comment in:"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(let ((commentslist (pubmed--summary-commentscorrections summary)))
-      		  (dolist (comment commentslist)
-      		    ;; (insert (plist-get comment 'reftype))
-      		    (insert (plist-get comment 'refsource))
-      		    ;; TODO: make refsource a link
-      		    ;; (insert (plist-get comment 'pmid))
-      		    (insert "\n"))))
+      	      	(insert "\n")
+	      	(let ((heading "Comment in:"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(let ((commentslist (pubmed--summary-commentscorrections summary)))
+      	      	  (dolist (comment commentslist)
+      	      	    ;; (insert (plist-get comment 'reftype))
+      	      	    (insert (plist-get comment 'refsource))
+      	      	    ;; TODO: make refsource a link
+      	      	    ;; (insert (plist-get comment 'pmid))
+      	      	    (insert "\n"))))
 	      (when (pubmed--summary-references summary)
-      		(insert "\n")
-		(let ((heading "References in:"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(let ((referencelist (pubmed--summary-references summary)))
-      		  (dolist (reference referencelist)
-      		    (insert (plist-get reference 'citation))
-      		    ;; TODO: make reference a link
-      		    ;; (insert (plist-get reference 'pubmed))
-      		    (insert "\n"))))
+      	      	(insert "\n")
+	      	(let ((heading "References in:"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(let ((referencelist (pubmed--summary-references summary)))
+      	      	  (dolist (reference referencelist)
+      	      	    (insert (plist-get reference 'citation))
+      	      	    ;; TODO: make reference a link
+      	      	    ;; (insert (plist-get reference 'pubmed))
+      	      	    (insert "\n"))))
 	      (when (pubmed--summary-publicationtype summary)
-      		(insert "\n")
-		(let ((heading "Publication types:"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(let ((publicationtypelist (pubmed--summary-publicationtype summary)))
-      		  (dolist (publicationtype publicationtypelist)
-      		    (insert (plist-get publicationtype 'type))
-      		    (insert "\n"))))
+      	      	(insert "\n")
+	      	(let ((heading "Publication types:"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(let ((publicationtypelist (pubmed--summary-publicationtype summary)))
+      	      	  (dolist (publicationtype publicationtypelist)
+      	      	    (insert (plist-get publicationtype 'type))
+      	      	    (insert "\n"))))
 	      (when (pubmed--summary-mesh summary)
-      		(insert "\n")
-		(let ((heading "MeSH terms:"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(let ((meshheadinglist (pubmed--summary-mesh summary)))
-      		  ;; Iterate over the meshheadings
-      		  (dolist (meshheading meshheadinglist)
-      		    (let ((qualifiers (plist-get meshheading 'qualifiers)))
-      		      ;; If the descriptor (or subject heading) has qualifiers (or subheadings)
-      		      (if qualifiers
-      			  ;; Iterate over the qualifiers
-      			  (dolist (qualifier qualifiers)
-      			    ;; Insert "descriptor/qualifier"
-      			    (insert (plist-get meshheading 'descriptor))
-      			    (insert "/")
-      			    (insert (plist-get qualifier 'qualifier))
-      			    (insert "\n"))
-      			;; If the descriptor (or subject heading) has no qualifiers (or subheadings)
-      			;; Insert "descriptor"
-      			(insert (plist-get meshheading 'descriptor))
-      			(insert "\n"))))))
+      	      	(insert "\n")
+	      	(let ((heading "MeSH terms:"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(let ((meshheadinglist (pubmed--summary-mesh summary)))
+      	      	  ;; Iterate over the meshheadings
+      	      	  (dolist (meshheading meshheadinglist)
+      	      	    (let ((qualifiers (plist-get meshheading 'qualifiers)))
+      	      	      ;; If the descriptor (or subject heading) has qualifiers (or subheadings)
+      	      	      (if qualifiers
+      	      		  ;; Iterate over the qualifiers
+      	      		  (dolist (qualifier qualifiers)
+      	      		    ;; Insert "descriptor/qualifier"
+      	      		    (insert (plist-get meshheading 'descriptor))
+      	      		    (insert "/")
+      	      		    (insert (plist-get qualifier 'qualifier))
+      	      		    (insert "\n"))
+      	      		;; If the descriptor (or subject heading) has no qualifiers (or subheadings)
+      	      		;; Insert "descriptor"
+      	      		(insert (plist-get meshheading 'descriptor))
+      	      		(insert "\n"))))))
 	      (when (pubmed--summary-grant summary)
-      		(insert "\n")
-		(let ((heading "Grant support:"))
-		  (put-text-property 0 (length heading) 'face 'bold heading)
-		  (insert heading))
-      		(insert "\n")
-      		(let ((grantlist (pubmed--summary-grant summary)))
-      		  (dolist (grant grantlist)
-      		    (insert (plist-get grant 'grantid))
-      		    (insert "/")
-      		    (insert (plist-get grant 'agency))
-		    (when (plist-get grant 'country)
-      		      (insert "/")
-      		      (insert (plist-get grant 'country)))
-      		    (insert "\n"))))
+      	      	(insert "\n")
+	      	(let ((heading "Grant support:"))
+	      	  (put-text-property 0 (length heading) 'face 'bold heading)
+	      	  (insert heading))
+      	      	(insert "\n")
+      	      	(let ((grantlist (pubmed--summary-grant summary)))
+      	      	  (dolist (grant grantlist)
+		    (when (plist-get grant 'grantid)
+      	      	      (insert (plist-get grant 'grantid))
+      	      	      (insert "/"))
+      	      	    (insert (plist-get grant 'agency))
+	      	    (when (plist-get grant 'country)
+      	      	      (insert "/")
+      	      	      (insert (plist-get grant 'country)))
+      	      	    (insert "\n"))))
 	      (goto-char (point-min))))
 	   (t
 	    ;; FIXME: add support for books
@@ -943,19 +944,19 @@ The plist has the form \"('issn ISSN 'type TYPE)\"."
   "Return a plist of the journal issue of the article SUMMARY.
 The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 'volume VOLUME 'citedmedium CITEDMEDIUM)\"."
-  (let* ((year (esxml-query "Journal JournalIssue Year *" summary))
-	 (season (esxml-query "Journal JournalIssue Season *" summary))
-	 (issue (esxml-query "Journal JournalIssue Issue *" summary))
-	 (volume (esxml-query "Journal JournalIssue Volume *" summary))
-	 (citedmedium (esxml-node-attribute 'CitedMedium (esxml-query "Journal JournalIssue" summary))))
+  (let* ((year (esxml-query "JournalIssue Year *" summary))
+	 (season (esxml-query "JournalIssue Season *" summary))
+	 (issue (esxml-query "JournalIssue Issue *" summary))
+	 (volume (esxml-query "JournalIssue Volume *" summary))
+	 (citedmedium (esxml-node-attribute 'CitedMedium (esxml-query "JournalIssue" summary))))
     (list 'year year 'season season 'issue issue 'volume volume 'citedmedium citedmedium)))
 
-(defun pubmed--summary-journal-pubdate (summary)
-  "Return a string with the journal publication date of the article SUMMARY."
-  (let* ((day (esxml-query "Article Journal JournalIssue PubDate Day *" summary))
-	 (month (esxml-query "Article Journal JournalIssue PubDate Month *" summary))
-	 (year (esxml-query "Article Journal JournalIssue PubDate Year *" summary))
-	 (medlinedate (esxml-query "Article Journal JournalIssue PubDate MedlineDate *" summary)))
+(defun pubmed--summary-pubdate (summary)
+  "Return a string with the publication date of the article SUMMARY."
+  (let* ((day (esxml-query "PubDate Day *" summary))
+	 (month (esxml-query "PubDate Month *" summary))
+	 (year (esxml-query "PubDate Year *" summary))
+	 (medlinedate (esxml-query "PubDate MedlineDate *" summary)))
     ;; If MONTH is a number
     (when (and month (string-match "[[:digit:]]+" month))
       ;; Convert the month number to the abbreviated month name
@@ -981,11 +982,21 @@ The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 
 (defun pubmed--summary-article-title (summary)
   "Return the title of the article SUMMARY."
-  (esxml-query "Article ArticleTitle *" summary))
+  (esxml-query "ArticleTitle *" summary))
+
+(defun pubmed--summary-book-title (summary)
+  "Return the title of the book SUMMARY."
+  (esxml-query "BookTitle *" summary))
 
 (defun pubmed--summary-pagination (summary)
   "Return the pagination of the article SUMMARY."
-  (esxml-query "Article Pagination MedlinePgn *" summary))
+  (cond
+   ((and (esxml-query "Pagination StartPage *" summary) (esxml-query "Pagination EndPage *" summary))
+    (concat (esxml-query "Pagination StartPage *" summary) "--" (esxml-query "Pagination EndPage *" summary)))
+   ((esxml-query "Pagination MedlinePgn *" summary)
+    (esxml-query "Pagination MedlinePgn *" summary))
+   (t
+    nil)))
 
 (defun pubmed--summary-elocation (summary)
   "Return an plist of Elocation IDs of the article SUMMARY.
@@ -1001,7 +1012,7 @@ The plist has the form \"('type TYPE 'id ID)\"."
 (defun pubmed--summary-abstract (summary)
   "Return the abstract of the article SUMMARY.
 Return nil if no abstract is available."
-  (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Article Abstract" summary)))
+  (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Abstract" summary)))
 	texts)
     (when textlist
       ;; Iterate through AbstractText nodes, where structure is like: (AbstractText ((Label . "LABEL") (NlmCategory . "CATEGORY")) "ABSTRACTTEXT")
@@ -1018,7 +1029,7 @@ Return nil if no abstract is available."
 (defun pubmed--summary-authors (summary)
   "Return an plist with the authors of the article SUMMARY.
 Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
-  (let ((authorlist (esxml-query-all "Author" (esxml-query "Article AuthorList" summary)))
+  (let ((authorlist (esxml-query-all "Author" (esxml-query "AuthorList" summary)))
 	authors)
     (dolist (author authorlist)
       (let ((lastname (esxml-query "LastName *" author))
@@ -1031,25 +1042,26 @@ Each list element corresponds to one author, and is a plist with the form \"('la
 
 (defun pubmed--summary-language (summary)
   "Return the language of the article SUMMARY."
-  (esxml-query "Article Language *" summary))
+  (esxml-query "Language *" summary))
 
 (defun pubmed--summary-grant (summary)
   "Return a list of the grants of the article SUMMARY.
-Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'agency AGENCY 'country COUNTRY)\"."
+Each list element corresponds to one grant, and is a plist with the form \"('grantid GRANTID 'acronym ACRONYM 'agency AGENCY 'country COUNTRY)\"."
   (let ((grantlist (esxml-query-all "Grant" (esxml-query "Article GrantList" summary)))
 	grants) ;; make sure list starts empty
     (dolist (grant grantlist)
       (let ((grantid (esxml-query "GrantID *" grant))
+	    (acronym (esxml-query "Acronym *" grant))
 	    (agency (esxml-query "Agency *" grant))
 	    (country (esxml-query "Country *" grant)))
-	(push (list 'grantid grantid 'agency agency 'country country) grants)))
+	(push (list 'grantid grantid 'acronym acronym 'agency agency 'country country) grants)))
     (nreverse grants)))
 
 (defun pubmed--summary-publicationtype (summary)
   "Return a plist of the publication types of the article SUMMARY.
 The plist has the form \"('type TYPE 'ui UI)\"."
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
-  (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "Article PublicationTypeList" summary)))
+  (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "PublicationTypeList" summary)))
 	publicationtypes) ;; make sure list starts empty
     (dolist (publicationtype publicationtypelist)
       (let ((type (car (esxml-node-children publicationtype)))
@@ -1064,13 +1076,13 @@ The plist has the form \"('type TYPE 'ui UI)\"."
 The plist has the form \"('type TYPE 'date date)\". The time
 value of the date can be converted by `format-time-string' to a
 string according to FORMAT-STRING."
-  (let ((type (esxml-node-attribute 'DateType (esxml-query "Article ArticleDate" summary)))
+  (let ((type (esxml-node-attribute 'DateType (esxml-query "ArticleDate" summary)))
 	(date (encode-time 0
 			   0
 			   0
-			   (string-to-number (esxml-query "Article ArticleDate Day *" summary))
-			   (string-to-number  (esxml-query "Article ArticleDate Month *" summary))
-			   (string-to-number (esxml-query "Article ArticleDate Year *" summary)))))
+			   (string-to-number (esxml-query "ArticleDate Day *" summary))
+			   (string-to-number  (esxml-query "ArticleDate Month *" summary))
+			   (string-to-number (esxml-query "ArticleDate Year *" summary)))))
     (list 'type type 'date date)))
 
 (defun pubmed--summary-medlinejournalinfo (summary)
@@ -1097,6 +1109,19 @@ SUBSTANCE 'ui UI)\"."
 	(push (list 'registrynumber registrynumber 'substance substance 'ui ui) chemicals)))
     (nreverse chemicals)))
 
+(defun pubmed--summary-commentscorrections (summary)
+  "Return the correction of the article SUMMARY.
+The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
+  (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
+	commentscorrections)
+    (dolist (commentscorrection commentscorrectionslist)
+      (let ((reftype (esxml-node-attribute 'RefType commentscorrection))
+	    (refsource (esxml-query "RefSource *" commentscorrection))
+	    (pmid (esxml-query "PMID *" commentscorrection)))
+	;; For each `commentscorrection' push the reftype, refsource and pmid to the list `commentscorrections'
+    	(push (list 'reftype reftype 'refsource refsource 'pmid pmid) commentscorrections)))
+    (nreverse commentscorrections)))
+
 (defun pubmed--summary-mesh (summary)
   "Return an list of the MeSH terms  of the article SUMMARY.
 Each list element corresponds to one descriptor (or subject heading) and its qualifiers (or subheadings), and is a plist with the form \"('descriptor DESCRIPTOR 'ui UI 'qualifiers (('qualifier QUALIFIER 'ui UI) ('qualifier QUALIFIER 'ui UI) (...)))\"."
@@ -1114,35 +1139,6 @@ Each list element corresponds to one descriptor (or subject heading) and its qua
 	(push (list 'descriptor descriptorname 'ui descriptorui 'qualifiers qualifiers) meshheadings)))
     (nreverse meshheadings)))
 
-(defun pubmed--summary-commentscorrections (summary)
-  "Return the correction of the article SUMMARY.
-The plist has the form \"('reftype REFTYPE 'refsource REFSOURCE 'pmid PMID)\"."
-  (let ((commentscorrectionslist (esxml-query-all "CommentsCorrections" (esxml-query "CommentsCorrectionsList" summary)))
-	commentscorrections)
-    (dolist (commentscorrection commentscorrectionslist)
-      (let ((reftype (esxml-node-attribute 'RefType commentscorrection))
-	    (refsource (esxml-query "RefSource *" commentscorrection))
-	    (pmid (esxml-query "PMID *" commentscorrection)))
-	;; For each `commentscorrection' push the reftype, refsource and pmid to the list `commentscorrections'
-    	(push (list 'reftype reftype 'refsource refsource 'pmid pmid) commentscorrections)))
-    (nreverse commentscorrections)))
-
-(defun pubmed--summary-publicationstatus (summary)
-  "Return the publication status of the article SUMMARY."
-  (esxml-query "PubmedData PublicationStatus *" summary))
-
-(defun pubmed--summary-articleid (summary)
-  "Return an plist of the article IDs of the article SUMMARY.
-The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
-  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "PubmedData ArticleIdList" summary)))
-	articleids)
-    (dolist (articleid articleidlist)
-      (let ((idtype (intern (esxml-node-attribute 'IdType articleid)))
-	    (id (car (esxml-node-children articleid))))
-	(push idtype articleids)
-	(push id articleids)))
-    (nreverse articleids)))
-
 (defun pubmed--summary-keywords (summary)
   "Return an alist of the keywords of article SUMMARY."
   (let ((keywordlist (esxml-query-all "Keyword" (esxml-query "KeywordList" summary)))
@@ -1151,17 +1147,40 @@ The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\".
       (push (car (esxml-node-children keyword)) keywords))
     (nreverse keywords)))
 
-(defun pubmed--summary-investigators (summary)
-  "Return an plist with the investigators of the article SUMMARY.
-Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
-  (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
-	investigators)
-    (dolist (investigator investigatorlist)
-      (let ((lastname (esxml-query "LastName *" investigator))
-	    (forename (esxml-query "ForeName *" investigator))
-    	    (initials (esxml-query "Initials *" investigator)))
-    	(push (list 'lastname lastname 'forename forename 'initials initials) investigators)))
-    (nreverse investigators)))
+(defun pubmed--summary-coistatement (summary)
+  "Return a string with the conflict of interest statement of article SUMMARY."
+  (esxml-query "CoiStatement *" summary))
+
+(defun pubmed--summary-history (summary)
+  "Return a plist of the history of article SUMMARY.
+The plist contains the dates indicating the history of the article's publication, i.e. when it was received, accepted, revised, or retracted. The plist has the form \"('pubstatus PUBSTATUS 'year YEAR 'month MONTH 'day DAY)\"."
+  (let ((pubdatelist (esxml-query-all "PubMedPubDate" (esxml-query "History" summary)))
+	pubdates)
+    (dolist (pubdate pubdatelist)
+      (let ((pubstatus (esxml-node-attribute 'PubStatus pubdate))
+	     (year (esxml-query "Year *" pubdate))
+	 (month (esxml-query "Month *" pubdate))
+	 (day (esxml-query "Day *" pubdate))
+	 (hour (esxml-query "Hour *" pubdate))
+	 (minute (esxml-query "Minute *" pubdate)))
+	    (push (list 'pubstatus pubstatus 'year year 'month month 'day day) pubdates)))
+    (nreverse pubdates)))
+
+(defun pubmed--summary-publicationstatus (summary)
+  "Return the publication status of article SUMMARY."
+  (esxml-query "PublicationStatus *" summary))
+
+(defun pubmed--summary-articleid (summary)
+  "Return an plist of the article IDs of the article SUMMARY.
+The plist has the form \"('pubmed pubmed 'doi DOI 'pii PII 'pmc PMC 'mid MID)\"."
+  (let ((articleidlist (esxml-query-all "ArticleId" (esxml-query "ArticleIdList" summary)))
+	articleids)
+    (dolist (articleid articleidlist)
+      (let ((idtype (intern (esxml-node-attribute 'IdType articleid)))
+	    (id (car (esxml-node-children articleid))))
+	(push idtype articleids)
+	(push id articleids)))
+    (nreverse articleids)))
 
 (defun pubmed--summary-references (summary)
   "Return a plist of the references of the article SUMMARY.
@@ -1176,6 +1195,103 @@ Each list element corresponds to one reference, The has the form \"('citation CI
 		(id (car (esxml-node-children articleid))))
 	    (push (list 'citation citation idtype id) references)))))
     (nreverse references)))
+
+(defun pubmed--summary-investigators (summary)
+  "Return an plist with the investigators of the article SUMMARY.
+Each list element corresponds to one investigator, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS)\"."
+  (let ((investigatorlist (esxml-query-all "Investigator" (esxml-query "InvestigatorList" summary)))
+	investigators)
+    (dolist (investigator investigatorlist)
+      (let ((lastname (esxml-query "LastName *" investigator))
+	    (forename (esxml-query "ForeName *" investigator))
+    	    (initials (esxml-query "Initials *" investigator)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials) investigators)))
+    (nreverse investigators)))
+
+(defun pubmed--summary-chapter (summary)
+  "Return a string with the chapter of book SUMMARY."
+  (esxml-query "LocationLabel[Type=chapter] *" summary))
+
+(defun pubmed--summary-publisher (summary)
+  "Return a plist of the publisher of book SUMMARY.
+The plist has the form \"('name NAME 'location LOCATION)\"."
+  (let ((name (esxml-query "Publisher PublisherName *" summary))
+	(location (esxml-query "Publisher PublisherLocation *" summary)))
+    (list 'name name 'location location)))
+
+(defun pubmed--summary-beginningdate (summary)
+  "Return the beginning date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  (let* ((beginningdate (encode-time 0
+				     0
+				     0
+				     (string-to-number (esxml-query "BeginningDate Day *" summary))
+				     (string-to-number (esxml-query "BeginningDate Month *" summary))
+				     (string-to-number (esxml-query "BeginningDate Year *" summary)))))
+    beginningdate))
+
+(defun pubmed--summary-book-authors (summary)
+  "Return an plist with the authors of the article SUMMARY.
+Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  (let ((authorlist (esxml-query-all "Author" (esxml-query "AuthorList[Type=authors]" summary)))
+	authors)
+    (dolist (author authorlist)
+      (let ((lastname (esxml-query "LastName *" author))
+	    (forename (esxml-query "ForeName *" author))
+    	    (initials (esxml-query "Initials *" author))
+	    (affiliationinfo (esxml-query "AffiliationInfo Affiliation *" author))
+    	    (collectivename (esxml-query "CollectiveName *" author)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) authors)))
+    (nreverse authors)))
+
+(defun pubmed--summary-book-editors (summary)
+  "Return an plist with the editors of SUMMARY.
+Each list element corresponds to one author, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  (let ((editorlist (esxml-query-all "Author" (esxml-query "AuthorList[Type=editors]" summary)))
+	editors)
+    (dolist (editor editorlist)
+      (let ((lastname (esxml-query "LastName *" editor))
+	    (forename (esxml-query "ForeName *" editor))
+    	    (initials (esxml-query "Initials *" editor))
+	    (affiliationinfo (esxml-query "AffiliationInfo Affiliation *" editor))
+    	    (collectivename (esxml-query "CollectiveName *" editor)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) editors)))
+    (nreverse editors)))
+
+(defun pubmed--summary-book-edition (summary)
+  "Return a string with the edition of SUMMARY."
+  (esxml-query "Edition *" summary))
+
+(defun pubmed--summary-book-collectiontitle (summary)
+  "Return a string with the collection title of SUMMARY."
+  (esxml-query "CollectionTitle *" summary))
+
+(defun pubmed--summary-book-isbn (summary)
+  "Return a string with the isbn of SUMMARY."
+  (esxml-query "Isbn *" summary))
+
+(defun pubmed--summary-book-medium (summary)
+  "Return a string with the medium of SUMMARY."
+  (esxml-query "Medium *" summary))
+
+(defun pubmed--summary-sections (summary)
+  "Return a plist of the sections of the book SUMMARY."
+  (let ((sectionlist (esxml-query-all "Section" (esxml-query "Sections" summary)))
+	sections)
+    (dolist (section sectionlist)
+      (push (esxml-query "SectionTitle *" section) sections))
+    (nreverse sections)))
+
+(defun pubmed--summary-contributiondate (summary)
+  "Return the contribution date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  (let* ((contributiondate (encode-time 0
+					0
+					0
+					(string-to-number (esxml-query "ContributionDate Day *" summary))
+					(string-to-number (esxml-query "ContributionDate Month *" summary))
+					(string-to-number (esxml-query "ContributionDate Year *" summary)))))
+    contributiondate))
 
 (defun pubmed--fulltext (uid)
   "Try to fetch the fulltext PDF of UID, using multiple methods.
