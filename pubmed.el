@@ -983,7 +983,13 @@ The plist has the form \"('year YEAR 'season SEASON 'issue ISSUE
 
 (defun pubmed--summary-pagination (summary)
   "Return the pagination of the article SUMMARY."
-  (esxml-query "Article Pagination MedlinePgn *" summary))
+  (cond
+   ((and (esxml-query "Pagination StartPage *" summary) (esxml-query "Pagination EndPage *" summary))
+    (concat (esxml-query "Pagination StartPage *" summary) "--" (esxml-query "Pagination EndPage *" summary)))
+   ((esxml-query "Pagination MedlinePgn *" summary)
+    (esxml-query "Pagination MedlinePgn *" summary))
+   (t
+    nil)))
 
 (defun pubmed--summary-elocation (summary)
   "Return an plist of Elocation IDs of the article SUMMARY.
