@@ -1144,6 +1144,10 @@ Each list element corresponds to one descriptor (or subject heading) and its qua
       (push (car (esxml-node-children keyword)) keywords))
     (nreverse keywords)))
 
+(defun pubmed--summary-coistatement (summary)
+  "Return a string with the conflict of interest statement of article SUMMARY."
+  (esxml-query "CoiStatement *" summary))
+
 (defun pubmed--summary-publicationstatus (summary)
   "Return the publication status of article SUMMARY."
   (esxml-query "PublicationStatus *" summary))
