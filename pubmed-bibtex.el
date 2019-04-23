@@ -742,13 +742,13 @@ of invalid citekey characters."
          	  "}"))
 	(insert ",\n"
     		"year = {"
-    		(pubmed--summary-book-pubdate-year summary)
+    		(pubmed-bibtex-key--year summary)
     		"}")
 	(when (and pubmed-bibtex-book-month
-		   (pubmed--summary-book-pubdate-month summary))
+		   (pubmed-bibtex-key--month summary))
     	  (insert ",\n"
     	   	  "month = {"
-		  (pubmed--summary-book-pubdate-month summary)
+		  (pubmed-bibtex-key--month summary)
     	   	  "}"))
 	(when (and pubmed-bibtex-book-pubmed
 		   (plist-get (pubmed--summary-articleid summary) 'pubmed))
@@ -805,13 +805,13 @@ of invalid citekey characters."
          	  "}"))
 	(insert ",\n"
     		"year = {"
-    		(pubmed--summary-book-pubdate-year summary)
+    		(pubmed-bibtex-key--year summary)
     		"}")
 	(when (and pubmed-bibtex-book-month
-		   (pubmed--summary-book-pubdate-month summary))
+		   (pubmed-bibtex-key--month summary))
     	  (insert ",\n"
     	   	  "month = {"
-		  (pubmed--summary-book-pubdate-month summary)
+		  (pubmed-bibtex-key--month summary)
     	   	  "}"))
 	(when (and pubmed-bibtex-book-pubmed
 		   (plist-get (pubmed--summary-articleid summary) 'pubmed))
@@ -862,13 +862,13 @@ of invalid citekey characters."
     		  "}"))
 	(insert ",\n"
     		"year = {"
-    		(pubmed--summary-pubdate-year summary)
+		(pubmed-bibtex-key--year summary)
     		"}")
 	(when (and pubmed-bibtex-article-month
-		   (pubmed--summary-pubdate-month summary))
+		   (pubmed-bibtex-key--month summary))
     	  (insert ",\n"
     	   	  "month = {"
-    		  (pubmed--summary-pubdate-month summary)
+    		  (pubmed-bibtex-key--month summary)
     	   	  "}"))
 	(when (and pubmed-bibtex-article-volume
 		   (plist-get (pubmed--summary-journal-issue summary) 'volume))
@@ -1692,7 +1692,7 @@ BibTeX allows 7,41,73--97 or 43+."
 (defun pubmed-bibtex-key--shortyear (summary &optional _n _m)
   "Return the [shortyear] key pattern.
 The last 2 digits of the publication year."
-  (s-right 2 (pubmed--summary-pubdate-year summary)))
+  (s-right 2 (pubmed-bibtex-key--year summary)))
 
 (defun pubmed-bibtex-key--year (summary &optional _n _m)
   "Return a string with the publication year of the article SUMMARY."
