@@ -1038,6 +1038,20 @@ Each list element corresponds to one author, and is a plist with the form \"('la
     	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) authors)))
     (nreverse authors)))
 
+(defun pubmed--summary-editors (summary)
+  "Return an plist with the editors of the article SUMMARY.
+Each list element corresponds to one editor, and is a plist with the form \"('lastname LASTNAME 'forename FORENAME 'initials INITIALS 'affiliationinfo AFFILIATIONINFO 'collectivename COLLECTIVENAME)\"."
+  (let ((editorlist (esxml-query-all "Editor" (esxml-query "EditorList" summary)))
+	editors)
+    (dolist (editor editorlist)
+      (let ((lastname (esxml-query "LastName *" editor))
+	    (forename (esxml-query "ForeName *" editor))
+    	    (initials (esxml-query "Initials *" editor))
+	    (affiliationinfo (esxml-query "AffiliationInfo Affiliation *" editor))
+    	    (collectivename (esxml-query "CollectiveName *" editor)))
+    	(push (list 'lastname lastname 'forename forename 'initials initials 'affiliationinfo affiliationinfo 'collectivename collectivename) editors)))
+    (nreverse editors)))
+
 (defun pubmed--summary-language (summary)
   "Return the language of the article SUMMARY."
   (esxml-query "Language *" summary))
