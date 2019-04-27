@@ -920,9 +920,9 @@ The time value of the date can be converted by `format-time-string' to a string 
   (let* ((datecompleted (encode-time 0
 				     0
 				     0
-				     (string-to-number (esxml-query "DateCompleted Day *" summary))
-				     (string-to-number (esxml-query "DateCompleted Month *" summary))
-				     (string-to-number (esxml-query "DateCompleted Year *" summary)))))
+				     (string-to-number (or (esxml-query "DateCompleted Day *" summary) "0"))
+				     (string-to-number (or (esxml-query "DateCompleted Month *" summary) "0"))
+				     (string-to-number (or (esxml-query "DateCompleted Year *" summary) "0")))))
     datecompleted))
 
 (defun pubmed--summary-daterevised (summary)
@@ -931,9 +931,9 @@ The time value of the date can be converted by `format-time-string' to a string 
   (let* ((daterevised (encode-time 0
 				   0
 				   0
-				   (string-to-number (esxml-query "DateRevised Day *" summary))
-				   (string-to-number (esxml-query "DateRevised Month *" summary))
-				   (string-to-number (esxml-query "DateRevised Year *" summary)))))
+				   (string-to-number (or (esxml-query "DateRevised Day *" summary) "0"))
+				   (string-to-number (or (esxml-query "DateRevised Month *" summary) "0"))
+				   (string-to-number (or (esxml-query "DateRevised Year *" summary) "0")))))
     daterevised))
 
 (defun pubmed--summary-pubmodel (summary)
@@ -1101,9 +1101,9 @@ string according to FORMAT-STRING."
 	(date (encode-time 0
 			   0
 			   0
-			   (string-to-number (esxml-query "ArticleDate Day *" summary))
-			   (string-to-number  (esxml-query "ArticleDate Month *" summary))
-			   (string-to-number (esxml-query "ArticleDate Year *" summary)))))
+			   (string-to-number (or (esxml-query "ArticleDate Day *" summary) "0"))
+			   (string-to-number (or (esxml-query "ArticleDate Month *" summary) "0"))
+			   (string-to-number (or (esxml-query "ArticleDate Year *" summary) "0")))))
     (list 'type type 'date date)))
 
 (defun pubmed--summary-medlinejournalinfo (summary)
@@ -1240,16 +1240,29 @@ The plist has the form \"('name NAME 'location LOCATION)\"."
 	(location (esxml-query "Publisher PublisherLocation *" summary)))
     (list 'name name 'location location)))
 
+;; FIXME: return a plist instead of an encoded time
 (defun pubmed--summary-beginningdate (summary)
   "Return the beginning date value of the article SUMMARY.
 The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
   (let* ((beginningdate (encode-time 0
 				     0
 				     0
-				     (string-to-number (esxml-query "BeginningDate Day *" summary))
-				     (string-to-number (esxml-query "BeginningDate Month *" summary))
-				     (string-to-number (esxml-query "BeginningDate Year *" summary)))))
+				     (string-to-number (or (esxml-query "BeginningDate Day *" summary) "0"))
+				     (string-to-number (or (esxml-query "BeginningDate Month *" summary) "0"))
+				     (string-to-number (or (esxml-query "BeginningDate Year *" summary) "0")))))
     beginningdate))
+
+;; FIXME: return a plist instead of an encoded time
+(defun pubmed--summary-endingdate (summary)
+  "Return the ending date value of the article SUMMARY.
+The time value of the date can be converted by `format-time-string' to a string according to FORMAT-STRING."
+  (let* ((endingdate (encode-time 0
+				  0
+				  0
+				  (string-to-number (or (esxml-query "EndingDate Day *" summary) "0"))
+				  (string-to-number (or (esxml-query "EndingDate Month *" summary) "0"))
+				  (string-to-number (or (esxml-query "EndingDate Year *" summary) "0")))))
+    endingdate))
 
 (defun pubmed--summary-book-authors (summary)
   "Return an plist with the authors of the article SUMMARY.
@@ -1309,9 +1322,9 @@ The time value of the date can be converted by `format-time-string' to a string 
   (let* ((contributiondate (encode-time 0
 					0
 					0
-					(string-to-number (esxml-query "ContributionDate Day *" summary))
-					(string-to-number (esxml-query "ContributionDate Month *" summary))
-					(string-to-number (esxml-query "ContributionDate Year *" summary)))))
+					(string-to-number (or (esxml-query "ContributionDate Day *" summary) "0"))
+					(string-to-number (or (esxml-query "ContributionDate Month *" summary) "0"))
+					(string-to-number (or (esxml-query "ContributionDate Year *" summary) "0")))))
     contributiondate))
 
 (defun pubmed--fulltext (uid)
