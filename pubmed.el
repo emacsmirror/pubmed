@@ -1308,6 +1308,11 @@ Each list element corresponds to one author, and is a plist with the form \"('la
   "Return a string with the medium of SUMMARY."
   (esxml-query "Medium *" summary))
 
+(defun pubmed--summary-book-reportnumber (summary)
+  "Return a string with the reportnumber of SUMMARY.
+The reportnummber provides an identifier assigned to scientific or technical reports by the publishing organization. May be contained in: <Book>"
+  (esxml-query "ReportNumber *" summary))
+
 (defun pubmed--summary-sections (summary)
   "Return a plist of the sections of the book SUMMARY."
   (let ((sectionlist (esxml-query-all "Section" (esxml-query "Sections" summary)))
