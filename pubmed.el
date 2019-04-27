@@ -1019,19 +1019,26 @@ The plist has the form \"('type TYPE 'id ID)\"."
 (defun pubmed--summary-abstract (summary)
   "Return the abstract of the article SUMMARY.
 Return nil if no abstract is available."
-  (let ((textlist (esxml-query-all "AbstractText" (esxml-query "Abstract" summary)))
-	texts)
-    (when textlist
+  (let (texts)
+    (when (setq abstract (esxml-query-all "AbstractText" (esxml-query "Abstract" summary)))
       ;; Iterate through AbstractText nodes, where structure is like: (AbstractText ((Label . "LABEL") (NlmCategory . "CATEGORY")) "ABSTRACTTEXT")
-      (dolist (text textlist)
-	(let ((label (esxml-node-attribute 'Label text))
-	      ;; (nlmcategory (esxml-node-attribute 'NlmCategory text)) ; NlmCategory attribute is ignored
-	      (abstracttext (car (esxml-node-children text))))
-	  (if
-	      (and label abstracttext)
-	      (push (concat label ": " abstracttext) texts)
-	    (push abstracttext texts))))
-      (s-join "\n\n" (nreverse texts)))))
+      (dolist (node abstract)
+	(when (setq label (esxml-node-attribute 'Label node))
+	  (push (s-trim label) texts))
+	;; Abstracts of books contain headings in <b> or <i> tags in stead of a Label or NlmCategory attributes
+	(dolist (child (esxml-node-children node))
+	  (cond
+	   ;; Treat as a paragraph if child is a string
+	   ((stringp child)
+	    (push (s-trim child) texts))
+	   ;; Treat as a heading if child is a cons
+	   ((consp child)
+	    (cond
+	     ((setq heading (esxml-query "b *" child))
+	      (push (s-trim heading) texts))
+	     ((setq heading (esxml-query "i *" child))
+	      (push (s-trim heading) texts)))))))
+      (s-join "\n" (nreverse texts)))))
 
 (defun pubmed--summary-authors (summary)
   "Return an plist with the authors of the article SUMMARY.
