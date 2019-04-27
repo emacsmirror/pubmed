@@ -1082,7 +1082,7 @@ Each list element corresponds to one grant, and is a plist with the form \"('gra
   "Return a plist of the publication types of the article SUMMARY.
 The plist has the form \"('type TYPE 'ui UI)\"."
   ;; Iterate through PublicationType nodes, where structure is like: (PublicationType ((UI . "UI")) "PUBLICATIONTYPE")
-  (let ((publicationtypelist (esxml-query-all "PublicationType" (esxml-query "PublicationTypeList" summary)))
+  (let ((publicationtypelist (esxml-query-all "PublicationType" summary))
 	publicationtypes) ;; make sure list starts empty
     (dolist (publicationtype publicationtypelist)
       (let ((type (car (esxml-node-children publicationtype)))
