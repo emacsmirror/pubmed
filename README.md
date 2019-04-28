@@ -1,10 +1,8 @@
 # Emacs PubMed
 
-Emacs-pubmed is a GNU Emacs interface to the PubMed database. It is in an early
-state of development and far from complete, but already usable. Emacs-pubmed
+Emacs-pubmed is a GNU Emacs interface to the PubMed database. Emacs-pubmed
 uses the [NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25500/) to
-query the PubMed database. The most powerful feature probably is the easy access
-to fulltext PDFs of many articles.
+query the PubMed database.
 
 ## Installation
 
@@ -37,11 +35,19 @@ To use emacs-pubmed, include the following in your `init.el` or `.emacs` file:
 (require 'pubmed-advanced-search)
 ```
 
-Then use `M-x pubmed-search` or `M-x pubmed-advanced-search` to search PubMed:
+If you use `use-package`, you can do the below instead:
 
-- `M-x pubmed-search` Simple PubMed query from the minibuffer.
+```lisp
+(use-package pubmed
+  :ensure t
+  :commands (pubmed-search pubmed-advanced-search))
+```
 
-- `M-x pubmed-advanced-search` Advanced Search Builder with history modelled
+Then use <kbd>M-x pubmed-search</kbd> or <kbd>M-x pubmed-advanced-search</kbd> to search PubMed:
+
+- <kbd>M-x pubmed-search</kbd> Simple PubMed query from the minibuffer.
+
+- <kbd>M-x pubmed-advanced-search</kbd> Advanced Search Builder with history modelled
 after <https://www.ncbi.nlm.nih.gov/pubmed/advanced>.
 
 Entries are shown in a tabulated list in `pubmed-mode`.
@@ -61,20 +67,20 @@ The following keybindings are available:
 - <kbd>U</kbd>: Unmark all entries.
 - <kbd>w</kbd>: Write the BibTeX references of the marked entries or current
   entry to file.
-- <kbd>TAB</kbd>: Show the BibTeX references of the marked entries or current
+- <kbd><TAB></kbd>: Show the BibTeX references of the marked entries or current
   entry.
 
 **Completion**
 
 The `pubmed-search` function includes completion for PubMed suggestions. The
-default key to invoke completion is the `C-M-i` or `<TAB>` command.
+default key to invoke completion is the <kbd>C-M-i</kbd> or <kbd><TAB></kbd> command.
 
 In `pubmed-advanced-search`, the "All Fields", "Author" and "Journal" search
 boxes include completion for PubMed suggestions. The default key to invoke
-completion is the `C-M-i` or `M-<TAB>` command, bound to `completion-at-point`.
-On graphical displays, the `M-<TAB>` key is usually reserved by the window
-manager for switching graphical windows, so you should type `C-M-i` or `<ESC>
-<TAB>` instead.
+completion is the <kbd>C-M-i</kbd> or <kbd>M-<TAB></kbd> command, bound to `completion-at-point`.
+On graphical displays, the <kbd>M-<TAB></kbd> key is usually reserved by the window
+manager for switching graphical windows, so you should type <kbd>C-M-i</kbd> or <kbd><ESC>
+<TAB></kbd> instead.
 
 **NCBI API key**
 
@@ -109,13 +115,13 @@ Full text PDFs can be found by using [PubMed Central®
 Button](https://openaccessbutton.org/api)
 [Unpaywall](https://unpaywall.org/products/api) or Sci-Hub:
 
-- The PMC fulltext function is invoked by `M-x pubmed-get-pmc`. PubMed Central®
+- The PMC fulltext function is invoked by <kbd>M-x pubmed-get-pmc</kbd>. PubMed Central®
   (PMC) is a free full-text archive of biomedical and life sciences journal
   literature at the U.S. National Institutes of Health's National Library of
   Medicine (NIH/NLM).
 
-- The Open Access Button fulltext function is invoked by `M-x
-  pubmed-get-openaccessbutton`. Using Open Access Button is legal. Although most
+- The Open Access Button fulltext function is invoked by <kbd>M-x
+  pubmed-get-openaccessbutton</kbd>. Using Open Access Button is legal. Although most
   API operations do not require authorisation, obtaining your own API key is
   encouraged. To create the key, register at
   <https://openaccessbutton.org/account?next=/api>. Provide your API key by
@@ -126,7 +132,7 @@ Button](https://openaccessbutton.org/api)
   (setq pubmed-openaccessbutton-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
   ```
 
-- The Unpaywall fulltext function is invoked by `M-x pubmed-get-unpaywall`.
+- The Unpaywall fulltext function is invoked by <kbd>M-x pubmed-get-unpaywall</kbd>.
   Using Unpaywall is legal and requires you to provide your email address by
   customizing the variable `pubmed-unpaywall-email` or setting the value in your
   `init.el` or `.emacs` file:
@@ -135,7 +141,7 @@ Button](https://openaccessbutton.org/api)
 (setq pubmed-unpaywall-email "your_email@example.com")
 ```
 
-- The Sci-Hub fulltext function is invoked by `M-x pubmed-get-scihub`. Using
+- The Sci-Hub fulltext function is invoked by <kbd>M-x pubmed-get-scihub</kbd>. Using
 Sci-Hub may not be legal and requires you to provide the url by customizing the
 variable `pubmed-scihub-url` or setting the value in your `init.el` or `.emacs`
 file:
@@ -145,7 +151,7 @@ file:
 (setq pubmed-scihub-url "http://url-of-sci-hub.com/")
 ```
 
-- The command `M-x pubmed-get-fulltext` (or <kbd>f</kbd>) tries to fetch the
+- The command <kbd>M-x pubmed-get-fulltext</kbd> (or <kbd>f</kbd>) tries to fetch the
   fulltext PDF of the marked entries or current entry, using multiple methods.
   The functions in `pubmed-fulltext-functions` are tried in order, until a
   fulltext PDF is found.
@@ -177,11 +183,11 @@ or
 
 The PubMed document summaries (DocSums) can be exported to BibTeX references.
 
-- The command `M-x pubmed-bibtex-show` (or <kbd>TAB</kbd>) opens a new frame
+- The command <kbd>M-x pubmed-bibtex-show</kbd> (or <kbd><TAB></kbd>) opens a new frame
   with the BibTeX references of the marked entries, or if there are none marked,
   the current entry in `bibtex-mode`.
 
-- The command `M-x pubmed-bibtex-write` (or <kbd>w</kbd>) writes the BibTeX
+- The command <kbd>M-x pubmed-bibtex-write</kbd> (or <kbd>w</kbd>) writes the BibTeX
   references to a file.
 
 ***Choosing BibTeX field types***
@@ -245,86 +251,84 @@ a field.
 
 ***** Author-related key patterns
 
-- [auth]: The last name of the first author
-- [authors]: The last name of all authors
-- [authorLast]: The last name of the last author
-- [authorsN]: The last name of up to N authors. If there are more authors,
+- `[auth]`: The last name of the first author
+- `[authors]`: The last name of all authors
+- `[authorLast]`: The last name of the last author
+- `[authorsN]`: The last name of up to N authors. If there are more authors,
   \"EtAl\" is appended.
-- [authorsAlpha]: Corresponds to the BibTeX style \"alpha\". One author: First
+- `[authorsAlpha]`: Corresponds to the BibTeX style \"alpha\". One author: First
   three letters of the last name. Two to four authors: First letters of last
   names concatenated. More than four authors: First letters of last names of
   first three authors concatenated. \"+\" at the end.
-- [authIniN]: The beginning of each author's last name, using no more than N
+- `[authIniN]`: The beginning of each author's last name, using no more than N
   characters.
-- [authorIni]: The first 5 characters of the first author's last name, and the
+- `[authorIni]`: The first 5 characters of the first author's last name, and the
   last name initials of the remaining authors.
-- [authN]: The first N characters of the first author's last name
-- [authN_M]: The first N characters of the Mth author's last name
-- [auth.auth.ea]: The last name of the first two authors, and \".ea\" if there
+- `[authN]`: The first N characters of the first author's last name
+- `[authN_M]`: The first N characters of the Mth author's last name
+- `[auth.auth.ea]`: The last name of the first two authors, and \".ea\" if there
   are more than two.
-- [auth.etal]: The last name of the first author, and the last name of the
+- `[auth.etal]`: The last name of the first author, and the last name of the
   second author if there are two authors or \".etal\" if there are more than
   two.
-- [authEtAl]: The last name of the first author, and the last name of the second
+- `[authEtAl]`: The last name of the first author, and the last name of the second
   author if there are two authors or \"EtAl\" if there are more than two. This
   is similar to auth.etal. The difference is that the authors are not separated
   by \".\" and in case of more than 2 authors \"EtAl\" instead of \".etal\" is
   appended.
-- [authshort]: The last name if one author is given; the first character of up
+- `[authshort]`: The last name if one author is given; the first character of up
   to three authors' last names if more than one author is given. A plus
   character is added, if there are more than three authors.
-- [authForeIni]: The forename initial of the first author.
-- [authorLastForeIni]: The forename initial of the last author.
+- `[authForeIni]`: The forename initial of the first author.
+- `[authorLastForeIni]`: The forename initial of the last author.
 
 Note: If there is no author (as in the case of an edited book), then all of the
 above [auth...] markers will use the editor(s) (if any) as a fallback. Thus, the
 editor(s) of a book with no author will be treated as the author(s) for
-label-generation purposes. If you do not want this behaviour, i.e. you require a
-marker which expands to nothing if there is no author, use pureauth instead of
-auth in the above codes. For example, [pureauth], or [pureauthors3].
+label-generation purposes.
 
 ***** Editor-related key patterns
 
-- [edtr]: The last name of the first editor
-- [edtrIniN]: The beginning of each editor's last name, using no more than N
+- `[edtr]`: The last name of the first editor
+- `[edtrIniN]`: The beginning of each editor's last name, using no more than N
   characters
-- [editors]: The last name of all editors
-- [editorLast]: The last name of the last editor
-- [editorIni]: The first 5 characters of the first editor's last name, and the
+- `[editors]`: The last name of all editors
+- `[editorLast]`: The last name of the last editor
+- `[editorIni]`: The first 5 characters of the first editor's last name, and the
   last name initials of the remaining editors.
-- [edtrN]: The first N characters of the first editor's last name
-- [edtrN_M]: The first N characters of the Mth editor's last name
-- [edtr.edtr.ea]: The last name of the first two editors, and \".ea\" if there
+- `[edtrN]`: The first N characters of the first editor's last name
+- `[edtrN_M]`: The first N characters of the Mth editor's last name
+- `[edtr.edtr.ea]`: The last name of the first two editors, and \".ea\" if there
   are more than two.
-- [edtrshort]: The last name if one editor is given; the first character of up
+- `[edtrshort]`: The last name if one editor is given; the first character of up
   to three editors' last names if more than one editor is given. A plus
   character is added, if there are more than three editors.
-- [edtrForeIni]: The forename initial of the first editor.
-- [editorLastForeIni]: The forename initial of the last editor.
+- `[edtrForeIni]`: The forename initial of the first editor.
+- `[editorLastForeIni]`: The forename initial of the last editor.
 
 ***** Title-related key patterns
 
-- [shorttitle]: The first 3 words of the title, ignoring any function words (see
+- `[shorttitle]`: The first 3 words of the title, ignoring any function words (see
   below). For example, An awesome paper on JabRef becomes AwesomePaperJabref.
-- [veryshorttitle]: The first word of the title, ignoring any function words
+- `[veryshorttitle]`: The first word of the title, ignoring any function words
   (see below). For example, An awesome paper on JabRef becomes Awesome.
-- [camel]: Capitalize all the words of the title. For example, An awesome paper
+- `[camel]`: Capitalize all the words of the title. For example, An awesome paper
   on JabRef becomes An Awesome Paper On Jabref.
-- [title]: Capitalize all the significant words of the title. For example, An
+- `[title]`: Capitalize all the significant words of the title. For example, An
   awesome paper on JabRef becomes An Awesome Paper on Jabref.
 
 ***** Other key patterns
 
-- [firstpage]: The number of the first page of the publication (Caution: this
+- `[firstpage]`: The number of the first page of the publication (Caution: this
   will return the lowest number found in the pages field, since BibTeX allows
   7,41,73--97 or 43+.)
-- [pageprefix]: The non-digit prefix of pages (like \"L\" for L7) or \"\" if no
+- `[pageprefix]`: The non-digit prefix of pages (like \"L\" for L7) or \"\" if no
   non-digit prefix exists (like \"\" for 7,41,73--97).
-- [keywordN]: Keyword number N from the \"keywords\" field, assuming keywords
+- `[keywordN]`: Keyword number N from the \"keywords\" field, assuming keywords
   are separated by commas or semicolons.
-- [lastpage]: The number of the last page of the publication (See the remark on
+- `[lastpage]`: The number of the last page of the publication (See the remark on
   firstpage).
-- [shortyear]: The last 2 digits of the publication year.
+- `[shortyear]`: The last 2 digits of the publication year.
 
 Note: the functions above all have the clean filter automatically applied to
 them. If you want more control, you can disable this by configuring the
@@ -335,60 +339,60 @@ them. If you want more control, you can disable this by configuring the
 A field name (or one of the above pseudo-field names) may optionally be followed
 by one or more filters. Filters are applied in the order they are specified.
 
-- abbr: Abbreviates the text produced by the field name or special field marker.
+- `abbr`: Abbreviates the text produced by the field name or special field marker.
   Only the first character and subsequent characters following white space will
-  be included. For example, [journal:abbr] would from the journal name \"Journal
-  of Fish Biology\" produce \"JoFB\", [title:abbr] would from the title \"An
-  awesome paper on JabRef\" produce \"AAPoJ\", [camel:abbr] would from the title
+  be included. For example, `[journal:abbr]` would from the journal name \"Journal
+  of Fish Biology\" produce \"JoFB\", `[title:abbr]` would from the title \"An
+  awesome paper on JabRef\" produce \"AAPoJ\", `[camel:abbr]` would from the title
   \"An awesome paper on JabRef\" produce \"AAPOJ\".
-- alphanum: clears out everything but unicode alphanumeric characters (unicode
+- `alphanum`: clears out everything but unicode alphanumeric characters (unicode
   character classes L and N).
-- ascii: removes all non-ascii characters.
-- capitalize: Changes the first character of each word to uppercase, all other
+- `ascii`: removes all non-ascii characters.
+- `capitalize`: Changes the first character of each word to uppercase, all other
   characters are converted to lowercase. For example, an example title will be
   converted to An Example Title.
-- clean: transliterates the citation keys and removes unsafe characters.
-- condense: this replaces spaces in the value passed in. You can specify what to
-  replace it with by adding it as a parameter, e.g condense=_ will replace
+- `clean`: transliterates the citation keys and removes unsafe characters.
+- `condense`: this replaces spaces in the value passed in. You can specify what to
+  replace it with by adding it as a parameter, e.g `condense=_` will replace
   spaces with underscores. Parameters should not contain spaces unless you want
   the spaces in the value passed in to be replaced with those spaces in the
   parameter.
-- fold: tries to replace diacritics with ascii look-alikes. Removes non-ascii
+- `fold`: tries to replace diacritics with ascii look-alikes. Removes non-ascii
   characters it cannot match.
-- lower: Forces the text inserted by the field marker to be in lowercase. For
-  example, [auth:lower] expands the last name of the first author in lowercase.
-- nopunct: Removes punctuation.
-- nopunctordash: Removes punctuation and word-connecting dashes.
-- postfix: postfixes with its parameter, so postfix=_ will add an underscore to
+- `lower`: Forces the text inserted by the field marker to be in lowercase. For
+  example, `[auth:lower]` expands the last name of the first author in lowercase.
+- `nopunct`: Removes punctuation.
+- `nopunctordash`: Removes punctuation and word-connecting dashes.
+- `postfix`: postfixes with its parameter, so `postfix=_` will add an underscore to
   the end if, and only if, the value it is supposed to postfix isn't empty.
-- prefix: prefixes with its parameter, so prefix=_ will add an underscore to the
+- `prefix`: prefixes with its parameter, so `prefix=_` will add an underscore to the
   front if, and only if, the value it is supposed to prefix isn't empty. If you
-  want to use a reserved character (such as : or \), you'll need to add a
-  backslash (\) in front of it.
-- replace: replaces text, case insensitive; :replace=.etal,&etal will replace
-  .EtAl with &etal.
-- select: selects words from the value passed in. The format is
-  select=start,number (1-based), so select=1,4 would select the first four
+  want to use a reserved character (such as `:` or `\`), you'll need to add a
+  backslash (`\`) in front of it.
+- `replace`: replaces text, case insensitive; `:replace=.etal,&etal` will replace
+  `.EtAl` with `&etal`.
+- `select`: selects words from the value passed in. The format is
+  select=start,number (1-based), so `select=1,4` would select the first four
   words. If number is not given, all words from start to the end of the list are
   selected. It is important to note that 'select' works only on values that have
   the words separated by whitespace, so the caveat below applies.
-- sentencecase: Changes the first character of the first word to uppercase, all
+- `sentencecase`: Changes the first character of the first word to uppercase, all
   remaining words are converted to lowercase. Example: an Example Title will be
   converted to An example title.
-- skipwords: filters out common words like 'of', 'the', … the list of words can
+- `skipwords`: filters out common words like 'of', 'the', … the list of words can
   be seen and changed by customizing the variable
   `pubmed-bibtex-function-words`.
-- substring: (substring=start,n) selects n (default: all) characters starting at
+- `substring`: (substring=start,n) selects n (default: all) characters starting at
   start (default: 1).
-- titlecase: Changes the first character of all normal words to uppercase, all
+- `titlecase`: Changes the first character of all normal words to uppercase, all
   function words (see `pubmed-bibtex-function-words`) are converted to
-  lowercase. Example: example title with An function Word will be converted to
-  Example Title with an Function Word.
-- upper: Forces the text inserted by the field marker to be in uppercase. For
-  example, [auth:upper] expands the last name of the first author in uppercase.
-- (x): The string between the parentheses will be inserted if the field marker
+  lowercase. Example: example title with A function Word will be converted to
+  Example Title with a Function Word.
+- `upper`: Forces the text inserted by the field marker to be in uppercase. For
+  example, `[auth:upper]` expands the last name of the first author in uppercase.
+- `(x)`: The string between the parentheses will be inserted if the field marker
   preceding this filter resolves to an empty value. The placeholder x may be any
-  string. For instance, the marker [volume:(unknown)] will return the entry's
+  string. For instance, the marker `[volume:(unknown)]` will return the entry's
   volume if set, and the string unknown if the entry's volume field is not set.
   
 ***Configuring default BibTeX file***
