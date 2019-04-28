@@ -593,7 +593,7 @@ of invalid citekey characters."
 	  (display-buffer bibtex-entry-buffer))))
      (mark-list
       (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*"))
-	    (summaries (pubmed-bibtex--summaries mark-list)))
+	    (summaries (pubmed-bibtex--summaries (nreverse mark-list))))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
@@ -618,7 +618,10 @@ of invalid citekey characters."
 
 ;;;###autoload
 (defun pubmed-bibtex-write (&optional file entries)
-  "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
+  "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE.
+If optional argument ENTRIES is a list of UIDs, write the BibTeX
+references of the entries. If FILE is not empty, the references
+are appended to the end of the file."
   (interactive
    (list (read-file-name "Write to BibTeX file: " nil pubmed-bibtex-default-file nil pubmed-bibtex-default-file)))
   (pubmed--guard)
@@ -626,16 +629,6 @@ of invalid citekey characters."
     (if entries
 	(pubmed-bibtex--write file entries)
       (pubmed-bibtex--write file))))
-
-;;;###autoload
-(defun pubmed-bibtex-append (&optional file entries)
-  "In PubMed, append the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
-  (interactive "FAppend to BibTeX file: ")
-  (pubmed--guard)
-  (if (not (file-writable-p file)) (error "Output file not writable")
-    (if entries
-	(pubmed-bibtex--write file entries t)
-      (pubmed-bibtex--write file nil t))))
 
 ;;;; Functions
 
@@ -1000,9 +993,9 @@ of invalid citekey characters."
     (setq matches (reverse matches))
     matches))
 
-(defun pubmed-bibtex--write (file &optional entries append)
+(defun pubmed-bibtex--write (file &optional entries)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE.
-If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries. If optional argument APPEND is non-nil, append the BibTeX references to a BibTeX database."
+If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (let (mark
 	mark-list
 	pubmed-uid)
@@ -1016,34 +1009,28 @@ If optional argument ENTRIES is a list of UIDs, write the BibTeX references of t
 	(forward-line)))
     (cond
      (entries
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-     	(with-current-buffer bibtex-entry-buffer
-     	  (erase-buffer)
-     	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
+      (let ((summaries (pubmed-bibtex--summaries entries)))
+     	(with-current-buffer (find-file-noselect file)
+     	  (goto-char (point-max))
+     	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex-unique--citation-keys)
-     	  (bibtex-mode)
-     	  (goto-char (point-min)))
-     	(switch-to-buffer-other-window bibtex-entry-buffer)))
+	  (save-buffer))))
      (mark-list
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-	(with-current-buffer bibtex-entry-buffer
-	  (erase-buffer)
-	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
+      (let ((summaries (pubmed-bibtex--summaries (nreverse mark-list))))
+	(with-current-buffer (find-file-noselect file)
+	  (goto-char (point-max))
+	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex--unique-citation-keys)
-	  (bibtex-mode)
-	  (goto-char (point-min)))))
+	  (save-buffer))))
      ((tabulated-list-get-id)
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-	(with-current-buffer bibtex-entry-buffer
-	  (erase-buffer)
-	  (pubmed-bibtex--insert pubmed-uid)
+      (let ((summaries (pubmed-bibtex--summaries (tabulated-list-get-id))))
+	(with-current-buffer (find-file-noselect file)
+	  (goto-char (point-max))
+	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex--unique-citation-keys)
-	  (bibtex-mode)
-	  (goto-char (point-min)))))
+	  (save-buffer))))
      (t
-      (error "No entry selected")))
-    (with-current-buffer (get-buffer "*BibTeX entry*")
-      (write-region nil nil file append))))
+      (error "No entry selected")))))
 
 ;;;;; Author-related key patterns
 

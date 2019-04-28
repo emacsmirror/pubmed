@@ -50,8 +50,6 @@ Entries are shown in a tabulated list in `pubmed-mode`.
 
 The following keybindings are available:
 
-- <kbd>a</kbd>: Append the BibTeX references of the marked entries or current
-  entry to file.
 - <kbd>RET</kbd>: Show the summary of the current entry.
 - <kbd>f</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
@@ -179,14 +177,11 @@ or
 
 The PubMed document summaries (DocSums) can be exported to BibTeX references.
 
-- The command `M-x pubmed-show-bibtex` (or <kbd>TAB</kbd>) opens a new frame
+- The command `M-x pubmed-bibtex-show` (or <kbd>TAB</kbd>) opens a new frame
   with the BibTeX references of the marked entries, or if there are none marked,
   the current entry in `bibtex-mode`.
 
-- The command `M-x pubmed-write-bibtex` (or <kbd>w</kbd>) writes the BibTeX
-  references to a file.
-
-- The command `M-x pubmed-append-bibtex` (or <kbd>a</kbd>) appends the BibTeX
+- The command `M-x pubmed-bibtex-write` (or <kbd>w</kbd>) writes the BibTeX
   references to a file.
 
 ***Choosing BibTeX field types***
