@@ -131,6 +131,10 @@ the Open Access fulltext article or nil if none is found."
 		   (type (plist-get (car availability) :type))
 		   (url (plist-get (car availability) :url)))
 	      (cond
+	       ;; Workaround of bug in Open Access Button service, where any
+	       ;; article that isn't available returns the same wrong url
+	       ((and (equal type "article") (equal url "https://core.ac.uk/download/pdf/38142439.pdf"))
+		(error "Open Access Button found no fulltext article"))
 	       ((and url (equal type "article"))
 		(setq pdf-url url))
 	       (t
