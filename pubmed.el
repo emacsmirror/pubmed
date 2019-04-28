@@ -148,7 +148,6 @@ entries.")
 (defvar pubmed-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "a") #'pubmed-bibtex-append)
     (define-key map (kbd "RET") #'pubmed-show-current-entry)
     (define-key map (kbd "f") #'pubmed-get-fulltext)
     (define-key map (kbd "m") #'pubmed-mark)

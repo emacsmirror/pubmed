@@ -50,8 +50,6 @@ Entries are shown in a tabulated list in `pubmed-mode`.
 
 The following keybindings are available:
 
-- <kbd>a</kbd>: Append the BibTeX references of the marked entries or current
-  entry to file.
 - <kbd>RET</kbd>: Show the summary of the current entry.
 - <kbd>f</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
