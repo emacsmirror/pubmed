@@ -1016,34 +1016,28 @@ If optional argument ENTRIES is a list of UIDs, write the BibTeX references of t
 	(forward-line)))
     (cond
      (entries
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-     	(with-current-buffer bibtex-entry-buffer
-     	  (erase-buffer)
-     	  (mapc (lambda (x) (pubmed-bibtex--insert x)) entries)
+      (let ((summaries (pubmed-bibtex--summaries entries)))
+     	(with-current-buffer (find-file-noselect file)
+     	  (goto-char (point-max))
+     	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex-unique--citation-keys)
-     	  (bibtex-mode)
-     	  (goto-char (point-min)))
-     	(switch-to-buffer-other-window bibtex-entry-buffer)))
+	  (save-buffer))))
      (mark-list
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-	(with-current-buffer bibtex-entry-buffer
-	  (erase-buffer)
-	  (mapc (lambda (x) (pubmed-bibtex--insert x)) mark-list)
+      (let ((summaries (pubmed-bibtex--summaries (nreverse mark-list))))
+	(with-current-buffer (find-file-noselect file)
+	  (goto-char (point-max))
+	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex--unique-citation-keys)
-	  (bibtex-mode)
-	  (goto-char (point-min)))))
+	  (save-buffer))))
      ((tabulated-list-get-id)
-      (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*")))
-	(with-current-buffer bibtex-entry-buffer
-	  (erase-buffer)
-	  (pubmed-bibtex--insert pubmed-uid)
+      (let ((summaries (pubmed-bibtex--summaries (tabulated-list-get-id))))
+	(with-current-buffer (find-file-noselect file)
+	  (goto-char (point-max))
+	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
 	  (pubmed-bibtex--unique-citation-keys)
-	  (bibtex-mode)
-	  (goto-char (point-min)))))
+	  (save-buffer))))
      (t
-      (error "No entry selected")))
-    (with-current-buffer (get-buffer "*BibTeX entry*")
-      (write-region nil nil file append))))
+      (error "No entry selected")))))
 
 ;;;;; Author-related key patterns
 
