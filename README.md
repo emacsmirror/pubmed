@@ -67,20 +67,20 @@ The following keybindings are available:
 - <kbd>U</kbd>: Unmark all entries.
 - <kbd>w</kbd>: Write the BibTeX references of the marked entries or current
   entry to file.
-- <kbd><TAB></kbd>: Show the BibTeX references of the marked entries or current
+- <kbd>\<TAB\></kbd>: Show the BibTeX references of the marked entries or current
   entry.
 
 **Completion**
 
 The `pubmed-search` function includes completion for PubMed suggestions. The
-default key to invoke completion is the <kbd>C-M-i</kbd> or <kbd><TAB></kbd> command.
+default key to invoke completion is the <kbd>C-M-i</kbd> or <kbd>\<TAB\></kbd> command.
 
 In `pubmed-advanced-search`, the "All Fields", "Author" and "Journal" search
 boxes include completion for PubMed suggestions. The default key to invoke
-completion is the <kbd>C-M-i</kbd> or <kbd>M-<TAB></kbd> command, bound to `completion-at-point`.
-On graphical displays, the <kbd>M-<TAB></kbd> key is usually reserved by the window
-manager for switching graphical windows, so you should type <kbd>C-M-i</kbd> or <kbd><ESC>
-<TAB></kbd> instead.
+completion is the <kbd>C-M-i</kbd> or <kbd>M-\<TAB\></kbd> command, bound to `completion-at-point`.
+On graphical displays, the <kbd>M-\<TAB\></kbd> key is usually reserved by the window
+manager for switching graphical windows, so you should type <kbd>C-M-i</kbd> or <kbd>\<ESC\>
+\<TAB\></kbd> instead.
 
 **NCBI API key**
 
@@ -183,7 +183,7 @@ or
 
 The PubMed document summaries (DocSums) can be exported to BibTeX references.
 
-- The command <kbd>M-x pubmed-bibtex-show</kbd> (or <kbd><TAB></kbd>) opens a new frame
+- The command <kbd>M-x pubmed-bibtex-show</kbd> (or <kbd>\<TAB\></kbd>) opens a new frame
   with the BibTeX references of the marked entries, or if there are none marked,
   the current entry in `bibtex-mode`.
 
