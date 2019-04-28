@@ -593,7 +593,7 @@ of invalid citekey characters."
 	  (display-buffer bibtex-entry-buffer))))
      (mark-list
       (let ((bibtex-entry-buffer (get-buffer-create "*BibTeX entry*"))
-	    (summaries (pubmed-bibtex--summaries mark-list)))
+	    (summaries (pubmed-bibtex--summaries (nreverse mark-list))))
 	(with-current-buffer bibtex-entry-buffer
 	  (erase-buffer)
 	  (mapc (lambda (summary) (pubmed-bibtex--insert summary)) summaries)
