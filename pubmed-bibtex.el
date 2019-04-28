@@ -618,7 +618,10 @@ of invalid citekey characters."
 
 ;;;###autoload
 (defun pubmed-bibtex-write (&optional file entries)
-  "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
+  "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE.
+If optional argument ENTRIES is a list of UIDs, write the BibTeX
+references of the entries. If FILE is not empty, the references
+are appended to the end of the file."
   (interactive
    (list (read-file-name "Write to BibTeX file: " nil pubmed-bibtex-default-file nil pubmed-bibtex-default-file)))
   (pubmed--guard)
@@ -626,16 +629,6 @@ of invalid citekey characters."
     (if entries
 	(pubmed-bibtex--write file entries)
       (pubmed-bibtex--write file))))
-
-;;;###autoload
-(defun pubmed-bibtex-append (&optional file entries)
-  "In PubMed, append the BibTeX references of the marked entries or current entry to file FILE. If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
-  (interactive "FAppend to BibTeX file: ")
-  (pubmed--guard)
-  (if (not (file-writable-p file)) (error "Output file not writable")
-    (if entries
-	(pubmed-bibtex--write file entries t)
-      (pubmed-bibtex--write file nil t))))
 
 ;;;; Functions
 
@@ -1000,9 +993,9 @@ of invalid citekey characters."
     (setq matches (reverse matches))
     matches))
 
-(defun pubmed-bibtex--write (file &optional entries append)
+(defun pubmed-bibtex--write (file &optional entries)
   "In PubMed, write the BibTeX references of the marked entries or current entry to file FILE.
-If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries. If optional argument APPEND is non-nil, append the BibTeX references to a BibTeX database."
+If optional argument ENTRIES is a list of UIDs, write the BibTeX references of the entries."
   (let (mark
 	mark-list
 	pubmed-uid)
