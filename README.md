@@ -6,11 +6,11 @@ query the PubMed database.
 
 ## Installation
 
-**MELPA**
+### MELPA
 
 Emacs-pubmed is not yet available from MELPA.
 
-**Development Version**
+### Development Version
 
 To follow or contribute to emacs-pubmed development, you can browse or clone the
 Git repository [on GitLab](https://gitlab.com/fvdbeek/emacs-pubmed):
@@ -52,7 +52,7 @@ after <https://www.ncbi.nlm.nih.gov/pubmed/advanced>.
 
 Entries are shown in a tabulated list in `pubmed-mode`.
 
-**Keybindings**
+### Keybindings
 
 The following keybindings are available:
 
@@ -70,7 +70,7 @@ The following keybindings are available:
 - <kbd>\<TAB\></kbd>: Show the BibTeX references of the marked entries or current
   entry.
 
-**Completion**
+### Completion
 
 The `pubmed-search` function includes completion for PubMed suggestions. The
 default key to invoke completion is the <kbd>C-M-i</kbd> or <kbd>\<TAB\></kbd> command.
@@ -82,7 +82,7 @@ On graphical displays, the <kbd>M-\<TAB\></kbd> key is usually reserved by the w
 manager for switching graphical windows, so you should type <kbd>C-M-i</kbd> or <kbd>\<ESC\>
 \<TAB\></kbd> instead.
 
-**NCBI API key**
+### NCBI API key
 
 Since May 1, 2018, NCBI limits access to the E-utilities unless you have an API
 key. See
@@ -108,7 +108,7 @@ your `init.el` or `.emacs` file:
 (setq pubmed-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 ```
 
-**Full text PDFs**
+### Full text PDFs
 
 Full text PDFs can be found by using [PubMed Central®
 (PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
@@ -179,7 +179,7 @@ or
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```
 
-**BibTeX**
+### BibTeX
 
 The PubMed document summaries (DocSums) can be exported to BibTeX references.
 
@@ -190,7 +190,7 @@ The PubMed document summaries (DocSums) can be exported to BibTeX references.
 - The command <kbd>M-x pubmed-bibtex-write</kbd> (or <kbd>w</kbd>) writes the BibTeX
   references to a file.
 
-***Choosing BibTeX field types***
+#### Choosing BibTeX field types
 
 PubMed includes citations for journal articles and a subset of books and book
 chapters available on the NCBI Bookshelf. These are declared as @article, @book,
@@ -223,7 +223,7 @@ e.g.
 (setq pubmed-bibtex-article-number t)
 ```
 
-***Choosing BibTeX citation key***
+#### Choosing BibTeX citation key
 
 The first key of a BibTeX entry the citation key, or the BibTeX key. This key
 must be unique for all entries in your bibliography. It is this identifier that
@@ -244,12 +244,12 @@ To change the default key pattern, you can customize the variable
 (setq pubmed-bibtex-keypattern "[auth][year]")
 ```
 
-**** Special field markers
+##### Special field markers
 
 Several special field markers are offered, which extract only a specific part of
 a field.
 
-***** Author-related key patterns
+###### Author-related key patterns
 
 - `[auth]`: The last name of the first author
 - `[authors]`: The last name of all authors
@@ -287,7 +287,7 @@ above [auth...] markers will use the editor(s) (if any) as a fallback. Thus, the
 editor(s) of a book with no author will be treated as the author(s) for
 label-generation purposes.
 
-***** Editor-related key patterns
+###### Editor-related key patterns
 
 - `[edtr]`: The last name of the first editor
 - `[edtrIniN]`: The beginning of each editor's last name, using no more than N
@@ -306,7 +306,7 @@ label-generation purposes.
 - `[edtrForeIni]`: The forename initial of the first editor.
 - `[editorLastForeIni]`: The forename initial of the last editor.
 
-***** Title-related key patterns
+###### Title-related key patterns
 
 - `[shorttitle]`: The first 3 words of the title, ignoring any function words (see
   below). For example, An awesome paper on JabRef becomes AwesomePaperJabref.
@@ -317,7 +317,7 @@ label-generation purposes.
 - `[title]`: Capitalize all the significant words of the title. For example, An
   awesome paper on JabRef becomes An Awesome Paper on Jabref.
 
-***** Other key patterns
+###### Other key patterns
 
 - `[firstpage]`: The number of the first page of the publication (Caution: this
   will return the lowest number found in the pages field, since BibTeX allows
@@ -334,7 +334,7 @@ Note: the functions above all have the clean filter automatically applied to
 them. If you want more control, you can disable this by configuring the
 `pubmed-bibtex-apply-clean` variable.
 
-***** Filters
+###### Filters
 
 A field name (or one of the above pseudo-field names) may optionally be followed
 by one or more filters. Filters are applied in the order they are specified.
@@ -395,7 +395,7 @@ by one or more filters. Filters are applied in the order they are specified.
   string. For instance, the marker `[volume:(unknown)]` will return the entry's
   volume if set, and the string unknown if the entry's volume field is not set.
   
-***Configuring default BibTeX file***
+#### Configuring default BibTeX file
 
 If you have a master BibTeX file, e.g. bibliography.bib, and want it to serve as
 the default file to append or write the BibTeX reference to, you can customize
