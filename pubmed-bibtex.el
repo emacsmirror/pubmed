@@ -1105,7 +1105,7 @@ The last name of the last author."
 		     (pubmed--summary-book-authors summary)
 		     (pubmed--summary-editors summary)
 		     (pubmed--summary-book-editors summary))))
-    (plist-get (car (last authors) 'lastname))))
+    (plist-get (car (last authors)) 'lastname)))
 
 (defun pubmed-bibtex-key--authorsalpha (summary &optional _n _m)
   "Return the [authorsAlpha] key pattern.
@@ -1295,7 +1295,7 @@ means the last name of up to N authors. If there are more authors,
 The last name of the last author."
   (let ((authors (or (pubmed--summary-authors summary)
 		     (pubmed--summary-book-authors summary))))
-    (plist-get (car (last authors) 'lastname))))
+    (plist-get (car (last authors)) 'lastname)))
 
 (defun pubmed-bibtex-key--pureauthorsalpha (summary &optional _n _m)
   "Return the [pureauthorsAlpha] key pattern.
@@ -1469,7 +1469,7 @@ means the last name of up to N editors. If there are more editors,
 The last name of the last editor."
   (let ((editors (or (pubmed--summary-editors summary)
 		     (pubmed--summary-book-editors summary))))
-    (plist-get (car (last editors) 'lastname))))
+    (plist-get (car (last editors)) 'lastname)))
 
 (defun pubmed-bibtex-key--editorsalpha (summary &optional _n _m)
   "Return the [editorsAlpha] key pattern.
