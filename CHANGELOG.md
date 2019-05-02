@@ -4,6 +4,10 @@
 ### Added
 - Added Springer fulltext function
 
+## [0.2.1] - 2019-05-02
+### Fixed
+- Multiple bugfixes in BibTeX keypattern functions
+
 ## [0.2] - 2019-05-01
 ### Added
 - Support summaries of books and chapters
