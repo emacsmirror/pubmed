@@ -1791,8 +1791,7 @@ Only the first character and subsequent characters following white space will be
     (s-join " " (nreverse selected))))
 
 (defun pubmed-bibtex-key--skipwords (string)
-  "Return STRING, ignoring function words (see
-`pubmed-bibtex-function-words')."
+  "Return STRING, ignoring function words."
   (let* ((words (s-split-words string))
 	 (counter 0)
 	 selected)
