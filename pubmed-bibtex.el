@@ -682,7 +682,7 @@ are appended to the end of the file."
      ((and (equal (car summary) 'PubmedBookArticle) (pubmed--summary-article-title summary))
       (progn
 	(insert "@incollection{")
-	(insert (pubmed-bibtex-key--clean (pubmed-bibtex--keypattern summary)))
+	(insert citationkey)
 	;; BibTeX accepts names in the format "forename surname" or "surname, forename". Here, the latter is used.
 	(let ((authorlist (pubmed--summary-book-authors summary))
       	      authors)
@@ -785,7 +785,7 @@ are appended to the end of the file."
      ((equal (car summary) 'PubmedBookArticle)
       (progn
 	(insert "@book{")
-	(insert (pubmed-bibtex-key--clean (pubmed-bibtex--keypattern summary)))
+	(insert citationkey)
 	;; BibTeX accepts names in the format "forename/initials surname" or "surname, forename/initials".
 	;; Here, the latter is used.
 	(let ((authorlist (pubmed--summary-authors summary))
@@ -848,7 +848,7 @@ are appended to the end of the file."
      ((equal (car summary) 'PubmedArticle)
       (progn
 	(insert "@article{")
-	(insert (pubmed-bibtex-key--clean (pubmed-bibtex--keypattern summary)))
+	(insert citationkey)
 	;; BibTeX accepts names in the format "forename surname" or "surname, forename". Here, the latter is used.
 	(let ((authorlist (pubmed--summary-authors summary))
       	      authors)
