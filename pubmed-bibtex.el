@@ -1255,7 +1255,7 @@ The forename initial of the last author."
     (plist-get (car (last authors)) 'initials)))
 
 (defun pubmed-bibtex-key--pureauth (summary &optional n m)
-  "Return the [auth], [authN], or [authN_M] key pattern.
+  "Return the [pureauth], [pureauthN], or [pureauthN_M] key pattern.
 The last name of the first author. Optional argument N means the
 first N characters of the first author's last name. Optional
 argument M means the first N characters of the Mth author's last
@@ -1271,7 +1271,7 @@ name."
       (plist-get (first authors) 'lastname)))))
 
 (defun pubmed-bibtex-key--pureauthors (summary &optional n _m)
-  "Return the [authors] or [authorsN] key pattern.
+  "Return the [pureauthors] or [pureauthorsN] key pattern.
 The last name of the authors. Optional argument N
 means the last name of up to N authors. If there are more authors,
 \"EtAl\" is appended."
@@ -1291,14 +1291,14 @@ means the last name of up to N authors. If there are more authors,
       (s-join " " (mapcar (lambda (author) (plist-get author 'lastname)) authors))))))
 
 (defun pubmed-bibtex-key--pureauthorlast (summary &optional _n _m)
-  "Return the [authorLast] key pattern.
+  "Return the [pureauthorLast] key pattern.
 The last name of the last author."
   (let ((authors (or (pubmed--summary-authors summary)
 		     (pubmed--summary-book-authors summary))))
     (plist-get (car (last authors) 'lastname))))
 
 (defun pubmed-bibtex-key--pureauthorsalpha (summary &optional _n _m)
-  "Return the [authorsAlpha] key pattern.
+  "Return the [pureauthorsAlpha] key pattern.
 Corresponds to the BibTeX style \"alpha\". One author: First
 three letters of the last name. Two to four authors: First
 letters of last names concatenated. More than four authors: First
@@ -1325,7 +1325,7 @@ the end."
 	(mapconcat (lambda (x) (s-left 3 x)) (nreverse authorlist) ""))))))
 
 (defun pubmed-bibtex-key--pureauthini (summary n &optional _m)
-  "Return the [authIniN] key pattern.
+  "Return the [pureauthIniN] key pattern.
 The beginning of each author's last name, using no more than N
 characters."
   (let ((authors (or (pubmed--summary-authors summary)
@@ -1333,7 +1333,7 @@ characters."
     (s-join " " (mapcar (lambda (author) (s-left n (plist-get author 'lastname))) authors))))
 
 (defun pubmed-bibtex-key--pureauthorini (summary &optional _n _m)
-  "Return the [authorIni] key pattern.
+  "Return the [pureauthorIni] key pattern.
 The first 5 characters of the first author's last name, and the
 last name initials of the remaining authors."
   (let ((authors (or (pubmed--summary-authors summary)
@@ -1350,7 +1350,7 @@ last name initials of the remaining authors."
     (s-join " " (nreverse authorlist))))
 
 (defun pubmed-bibtex-key--pureauth.auth.ea (summary &optional _n _m)
-  "Return the [auth.auth.ea] key pattern.
+  "Return the [pureauth.auth.ea] key pattern.
 The last name of the first two authors, and \".ea\" if there are
 more than two."
   (let ((authors (or (pubmed--summary-authors summary)
@@ -1365,7 +1365,7 @@ more than two."
     (s-join "." (nreverse authorlist))))
 
 (defun pubmed-bibtex-key--pureauth.etal (summary &optional _n _m)
-  "Return the [auth.etal] key pattern.
+  "Return the [pureauth.etal] key pattern.
 The last name of the first author, and the last name of
 the second author if there are two authors or \".etal\" if there are
 more than two."
@@ -1378,7 +1378,7 @@ more than two."
       (concat (plist-get (first authors) 'lastname) ".etal")))))
 
 (defun pubmed-bibtex-key--pureauthetal (summary &optional _n _m)
-  "Return the [authEtAl] key pattern.
+  "Return the [pureauthEtAl] key pattern.
 The last name of the first author, and the last name of
 the second author if there are two authors or \"EtAl\" if there are
 more than two. This is similar to auth.etal. The difference is that
@@ -1393,7 +1393,7 @@ authors \"EtAl\" instead of \".etal\" is appended."
       (concat (plist-get (first authors) 'lastname) "EtAl")))))
 
 (defun pubmed-bibtex-key--pureauthshort (summary &optional _n _m)
-  "Return the [authshort] key pattern.
+  "Return the [pureauthshort] key pattern.
 The last name if one author is given; the first character of up
 to three authors' last names if more than one author is given. A
 plus character is added, if there are more than three authors."
@@ -1413,14 +1413,14 @@ plus character is added, if there are more than three authors."
       (s-join " " (nreverse authorlist))))))
 
 (defun pubmed-bibtex-key--pureauthforeini (summary &optional _n _m)
-  "Return the [authForeIni] key pattern.
+  "Return the [pureauthForeIni] key pattern.
 The forename initial of the first author."
   (let ((authors (or (pubmed--summary-authors summary)
 		     (pubmed--summary-book-authors summary))))
     (plist-get (first authors) 'initials)))
 
 (defun pubmed-bibtex-key--pureauthorlastforeini (summary &optional _n _m)
-  "Return the [authorLastForeIni] key pattern.
+  "Return the [pureauthorLastForeIni] key pattern.
 The forename initial of the last author."
   (let ((authors (or (pubmed--summary-authors summary)
 		     (pubmed--summary-book-authors summary))))
