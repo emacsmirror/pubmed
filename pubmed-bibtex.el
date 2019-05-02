@@ -430,7 +430,7 @@ string unknown if the entry's volume field is not set."
     "into" "like" "near" "of" "off" "on" "onto" "since" "to" "toward"
     "through" "under" "until" "up" "upon" "with" "within" "without" "and"
     "but" "for" "nor" "or" "so" "yet")
-  "List of function words"
+  "List of function words."
   :group 'pubmed-bibtex
   :type '(repeat string))
 
@@ -657,7 +657,7 @@ are appended to the end of the file."
 ;;;; Functions
 
 (defun pubmed-bibtex--summaries (uids)
-  "Return list of summaries of UIDS"
+  "Return list of summaries of UIDS."
   (let ((url-request-method "POST")
 	(url-request-extra-headers `(("Content-Type" . ,#'"application/x-www-form-urlencoded")))
 	(url-request-data (concat "db=pubmed"
