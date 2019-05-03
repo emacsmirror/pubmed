@@ -282,10 +282,13 @@ a field.
 - `[authForeIni]`: The forename initial of the first author.
 - `[authorLastForeIni]`: The forename initial of the last author.
 
-Note: If there is no author (as in the case of an edited book), then all of the
-above [auth...] markers will use the editor(s) (if any) as a fallback. Thus, the
-editor(s) of a book with no author will be treated as the author(s) for
-label-generation purposes.
+Note: If there is no author (as in the case of an edited book), then
+all of the above [auth...] markers will use the editor(s) (if any) as
+a fallback. Thus, the editor(s) of a book with no author will be
+treated as the author(s) for label-generation purposes. If you do not
+want this behaviour, i.e. you require a marker which expands to
+nothing if there is no author, use pureauth instead of auth in the
+above codes. For example, [pureauth], or [pureauthors3].
 
 ###### Editor-related key patterns
 
