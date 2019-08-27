@@ -397,14 +397,14 @@ by one or more filters. Filters are applied in the order they are specified.
   preceding this filter resolves to an empty value. The placeholder x may be any
   string. For instance, the marker `[volume:(unknown)]` will return the entry's
   volume if set, and the string unknown if the entry's volume field is not set.
-  
+
 #### Configuring default BibTeX file
 
 If you have a master BibTeX file, e.g. bibliography.bib, and want it to serve as
 the default file to append or write the BibTeX reference to, you can customize
-the variable `pubmed-default-bibtex-file` or set the value in your `init.el` or
+the variable `pubmed-bibtex-default-file` or set the value in your `init.el` or
 `.emacs`:
 
 ```lisp
-(setq pubmed-default-bibtex-file "/path/to/bibliography.bib")
+(setq pubmed-bibtex-default-file "/path/to/bibliography.bib")
 ```
