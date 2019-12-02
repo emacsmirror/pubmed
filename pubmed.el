@@ -144,6 +144,48 @@ entries.")
     map)
   "Local keymap for `pubmed-search-mode'.")
 
+;;;; Menu
+
+(easy-menu-define pubmed-mode-menu pubmed-mode-map
+  "Menu for `pubmed-mode'."
+  `("PubMed"
+    ["Search PubMed" pubmed-search]
+    ["Advanced" pubmed-advanced-search
+     :help "PubMed Advanced Search Builder"]
+
+    "--"
+    ["Show record" pubmed-show-current-entry
+     :help "Show the summary of the current entry"]
+    ["Fetch fulltext PDF" pubmed-get-fulltext
+     :help "Try to fetch the fulltext PDF of the marked entries or current entry, using multiple methods"]
+    ["Fetch PMC fulltext PDF" pubmed-get-pmc
+     :help "Try to fetch the fulltext PDF from PubMed Central®"
+     :active (memq 'pubmed-pmc pubmed-fulltext-functions)]
+    ["Fetch Open Access Button fulltext PDF" pubmed-get-openaccessbutton
+     :help "Try to fetch the fulltext PDF from Open Access Button"
+     :active (memq 'pubmed-openaccessbutton pubmed-fulltext-functions)]
+    ["Fetch Unpaywall fulltext PDF" pubmed-get-unpaywall
+     :help "Try to fetch the fulltext PDF from Unpaywall"
+     :active (memq 'pubmed-unpaywall pubmed-fulltext-functions)]
+    ["Fetch Sci-Hub fulltext PDF" pubmed-get-scihub
+     :help "Try to fetch the fulltext PDF from Sci-Hub"
+     :active (memq 'pubmed-scihub pubmed-fulltext-functions)]
+
+    "--"
+    ["Write to BibTeX" pubmed-bibtex-write :help "Write the
+    BibTeX references of the marked entries or current entry to
+    file"] ["Show BibTeX" pubmed-bibtex-show :help "Show the
+    BibTeX references of the marked entries or current entry"]
+
+    "--"
+    ["Mark the current entry" pubmed-mark :help "Mark the entry and move to the next line"]
+    ["Unmark the current entry" pubmed-unmark :help "Unmark the entry and move to the next line"]
+    ["Mark all entries" pubmed-mark-all :help "Mark all entries"]
+    ["Unmark all entries" pubmed-unmark-all :help "Unmark all entries"]
+
+    "--"
+    ["Quit" quit-window :help "Quit PubMed"]
+    ["Customize" (customize-group 'pubmed)]))
 ;;;; Customization
 
 (defgroup pubmed nil
