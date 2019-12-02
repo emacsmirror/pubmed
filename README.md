@@ -59,6 +59,7 @@ The following keybindings are available:
 - <kbd>RET</kbd>: Show the summary of the current entry.
 - <kbd>f</kbd>: Try to fetch the fulltext PDF of the current entry.
 - <kbd>m</kbd>: Mark the current entry.
+- <kbd>M</kbd>: Mark all entries.
 - <kbd>n</kbd>: Show the summary of the next entry.
 - <kbd>p</kbd>: Show the summary of the previous entry.
 - <kbd>q</kbd>: Quit window.
