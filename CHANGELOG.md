@@ -4,6 +4,18 @@
 ### Added
 - Added Springer fulltext function
 
+## [0.2.3] - 2019-12-02
+### Added
+- Added menu
+
+## [0.2.2] - 2019-12-02
+### Fixed
+- Cleanup
+- Fixed missing dependency
+
+### Added
+- Updated README
+
 ## [0.2.1] - 2019-05-02
 ### Fixed
 - Multiple bugfixes in BibTeX keypattern functions
