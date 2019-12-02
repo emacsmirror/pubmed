@@ -305,7 +305,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
   (tabulated-list-put-tag " " t))
 
 (defun pubmed-mark-all (&optional _num)
-  "Unmark all entries."
+  "Mark all entries."
   ;; TODO: mark all entries in active region
   (interactive "p")
   (pubmed--guard)
