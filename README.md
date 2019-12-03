@@ -139,6 +139,7 @@ Button](https://openaccessbutton.org/api)
   `init.el` or `.emacs` file:
 
 ```lisp
+(require 'pubmed-unpaywall)
 (setq pubmed-unpaywall-email "your_email@example.com")
 ```
 
