@@ -227,7 +227,7 @@ e.g.
 
 #### Choosing BibTeX citation key
 
-The first key of a BibTeX entry the citation key, or the BibTeX key. This key
+The first key of a BibTeX entry is the citation key, or the BibTeX key. This key
 must be unique for all entries in your bibliography. It is this identifier that
 you will use within your document to cross-reference it to this entry (i.e., the
 identifier you use in the \cite{} command in your LaTeX file).
