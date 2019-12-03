@@ -114,7 +114,8 @@ your `init.el` or `.emacs` file:
 Full text PDFs can be found by using [PubMed Central®
 (PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
 Button](https://openaccessbutton.org/api)
-[Unpaywall](https://unpaywall.org/products/api) or Sci-Hub:
+[Unpaywall](https://unpaywall.org/products/api),
+[Dissemin](https://dissem.in/) or Sci-Hub:
 
 - The PMC fulltext function is invoked by <kbd>M-x pubmed-get-pmc</kbd>. PubMed Central®
   (PMC) is a free full-text archive of biomedical and life sciences journal
@@ -141,6 +142,12 @@ Button](https://openaccessbutton.org/api)
 ```lisp
 (require 'pubmed-unpaywall)
 (setq pubmed-unpaywall-email "your_email@example.com")
+```
+- The Dissemin fulltext function is invoked by <kbd>M-x pubmed-get-dissemin</kbd>.
+  Using Dissemin is legal and requires the following in your `init.el` or `.emacs` file:
+
+```lisp
+(require 'pubmed-dissemin)
 ```
 
 - The Sci-Hub fulltext function is invoked by <kbd>M-x pubmed-get-scihub</kbd>. Using
@@ -171,13 +178,14 @@ file:
   or set the value in your `init.el` or `.emacs` file:
 
 ```lisp
-(setq pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton pubmed-unpaywall pubmed-scihub))
+(setq pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton pubmed-unpaywall pubmed-dissemin pubmed-scihub))
 ```
 
 or
 
 ```lisp
 (add-to-list 'pubmed-fulltext-functions 'pubmed-unpaywall t)
+(add-to-list 'pubmed-fulltext-functions 'pubmed-dissemin t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```
 
