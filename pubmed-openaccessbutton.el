@@ -131,10 +131,6 @@ the Open Access fulltext article or nil if none is found."
 		   (type (plist-get (car availability) :type))
 		   (url (plist-get (car availability) :url)))
 	      (cond
-	       ;; Workaround of bug in Open Access Button service, where any
-	       ;; article that isn't available returns the same wrong url
-	       ((and (equal type "article") (equal url "https://core.ac.uk/download/pdf/38142439.pdf"))
-		(error "Open Access Button found no fulltext article"))
 	       ((and url (equal type "article"))
 		(setq pdf-url url))
 	       (t
@@ -152,7 +148,7 @@ the Open Access fulltext article or nil if none is found."
 		  ;; is started.
 		  d)
 	      (deferred:cancel it))))
-	
+
 	;; You can connect deferred callback queues
 	(deferred:nextc it
 	  (lambda (status)
@@ -172,7 +168,7 @@ the Open Access fulltext article or nil if none is found."
 	  (lambda (url)
 	    (deferred:timeout pubmed-openaccessbutton-timeout (error "Timeout")
 	      (deferred:url-retrieve url))))
-	
+
 	(deferred:nextc it
 	  (lambda (buffer)
 	    "Parse the HTML object in BUFFER and show the PDF."
@@ -191,7 +187,7 @@ the Open Access fulltext article or nil if none is found."
 	  "Catch any errors that occur during the deferred chain and return nil."
 	  (message "%s" (cadr deferred-error))
 	  nil))
-      
+
       ;; finally
       (deferred:nextc it
 	(lambda (result)
