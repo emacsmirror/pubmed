@@ -167,6 +167,9 @@ entries.")
     ["Fetch Unpaywall fulltext PDF" pubmed-get-unpaywall
      :help "Try to fetch the fulltext PDF from Unpaywall"
      :active (memq 'pubmed-unpaywall pubmed-fulltext-functions)]
+    ["Fetch Dissemin fulltext PDF" pubmed-get-dissemin
+     :help "Try to fetch the fulltext PDF from Dissemin"
+     :active (memq 'pubmed-dissemin pubmed-fulltext-functions)]
     ["Fetch Sci-Hub fulltext PDF" pubmed-get-scihub
      :help "Try to fetch the fulltext PDF from Sci-Hub"
      :active (memq 'pubmed-scihub pubmed-fulltext-functions)]
@@ -248,6 +251,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
   :options '(pubmed-pmc
 	     pubmed-openaccessbutton
 	     pubmed-unpaywall
+             pubmed-dissemin
 	     pubmed-scihub))
 
 (defcustom pubmed-temp-prefix "pubmed-"
