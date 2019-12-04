@@ -170,6 +170,9 @@ entries.")
     ["Fetch Dissemin fulltext PDF" pubmed-get-dissemin
      :help "Try to fetch the fulltext PDF from Dissemin"
      :active (memq 'pubmed-dissemin pubmed-fulltext-functions)]
+    ["Fetch Springer Nature fulltext PDF" pubmed-get-springer
+     :help "Try to fetch the fulltext PDF from Springer Nature"
+     :active (memq 'pubmed-springer pubmed-fulltext-functions)]
     ["Fetch Sci-Hub fulltext PDF" pubmed-get-scihub
      :help "Try to fetch the fulltext PDF from Sci-Hub"
      :active (memq 'pubmed-scihub pubmed-fulltext-functions)]
@@ -252,6 +255,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 	     pubmed-openaccessbutton
 	     pubmed-unpaywall
              pubmed-dissemin
+             pubmed-springer
 	     pubmed-scihub))
 
 (defcustom pubmed-temp-prefix "pubmed-"

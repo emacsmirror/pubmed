@@ -114,8 +114,8 @@ your `init.el` or `.emacs` file:
 Full text PDFs can be found by using [PubMed Central®
 (PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
 Button](https://openaccessbutton.org/api)
-[Unpaywall](https://unpaywall.org/products/api),
-[Dissemin](https://dissem.in/) or Sci-Hub:
+[Unpaywall](https://unpaywall.org/products/api), [Dissemin](https://dissem.in/)
+[Springer Nature](https://dev.springernature.com/) or Sci-Hub:
 
 - The PMC fulltext function is invoked by <kbd>M-x pubmed-get-pmc</kbd>. PubMed Central®
   (PMC) is a free full-text archive of biomedical and life sciences journal
@@ -150,6 +150,20 @@ Button](https://openaccessbutton.org/api)
 (require 'pubmed-dissemin)
 ```
 
+- The Springer Nature fulltext function is invoked by <kbd>M-x
+  pubmed-get-springer</kbd>. Using Springer Nature is legal and requires you to
+  provide an API key. To create the key, register at
+  <https://dev.springernature.com/signup>. The API key is automatically
+  generated. To get the key, click on the "Applications" link in the top
+  navigation bar after signing in or navigate to
+  <https://dev.springernature.com/admin/applications>. Provide your API key by
+  customizing the variable `pubmed-springer-api-key` or setting the value in
+  your `init.el` or `.emacs` file:
+
+```lisp
+(require 'pubmed-springer)
+(setq pubmed-springer-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
+```
 - The Sci-Hub fulltext function is invoked by <kbd>M-x pubmed-get-scihub</kbd>. Using
 Sci-Hub may not be legal and requires you to provide the url by customizing the
 variable `pubmed-scihub-url` or setting the value in your `init.el` or `.emacs`
