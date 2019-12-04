@@ -1,8 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [0.3]
 ### Added
 - Added Springer fulltext function
+- Added Dissemin fulltext function
+
+### Fixed
+- Fixed typos
+- Removed workaround for a bug in Open Access Button service that is fixed upstream
 
 ## [0.2.3] - 2019-12-02
 ### Added
