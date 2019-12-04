@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3]
+## [0.3] - 2019-12-04
 ### Added
 - Added Springer fulltext function
 - Added Dissemin fulltext function
