@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.1] - 2019-12-20
+### Fixed
+- Hotfix in Sci-Hub fulltext function
+
 ## [0.3] - 2019-12-04
 ### Added
 - Added Springer fulltext function
