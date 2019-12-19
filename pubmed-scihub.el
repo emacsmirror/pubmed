@@ -147,7 +147,7 @@ You need to provide a an URL to use the Sci-Hub database."
 	      (deferred:url-retrieve iframe-url))))
 
 	(deferred:nextc it
-	  (deferred:lambda (buffer)
+	  (lambda (buffer)
 	    "Parse the HTML object in BUFFER and extract the PDF or captcha."
 	    ;; The buffer contains either a PDF file or a HTML file with a captcha image.
 	    (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
