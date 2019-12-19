@@ -113,7 +113,7 @@ your `init.el` or `.emacs` file:
 
 Full text PDFs can be found by using [PubMed Central®
 (PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
-Button](https://openaccessbutton.org/api)
+Button](https://openaccessbutton.org/api),
 [Unpaywall](https://unpaywall.org/products/api), [Dissemin](https://dissem.in/)
 [Springer Nature](https://dev.springernature.com/) or Sci-Hub:
 
