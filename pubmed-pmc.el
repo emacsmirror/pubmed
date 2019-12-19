@@ -64,7 +64,7 @@
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -73,8 +73,8 @@
       (mapcar #'pubmed--get-pmc entries))
      (mark-list
       (mapcar #'pubmed--get-pmc mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-pmc (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-pmc (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 
@@ -119,7 +119,7 @@
       		;; is started.
       		d)
             (deferred:cancel it))))
-      
+
       ;; You can connect deferred callback queues
       (deferred:nextc it
 	(lambda (status)
@@ -134,12 +134,12 @@
 		url-redirect))
 	     (t
 	      (error "PMC found no fulltext article"))))))
-      
+
       (deferred:nextc it
 	(lambda (url)
 	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
-      
+
       (deferred:nextc it
 	(lambda (buffer)
 	  "Parse the HTML in BUFFER. Return the url of the iframe or nil if none is found."
@@ -156,7 +156,7 @@
 	(lambda (url)
 	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
 	    (deferred:url-retrieve url))))
-      
+
       (deferred:nextc it
 	(lambda (buffer)
 	  "Parse the HTML object in BUFFER and show the PDF."
@@ -168,7 +168,7 @@
 	      buffer)
 	     (t
 	      (error "Unknown content-type: %s" content-type)))))))
-    
+
     ;; catch
     (deferred:error it
       (lambda (deferred-error)

@@ -73,7 +73,7 @@ Requests must include your email as a parameter at the end of the
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -82,8 +82,8 @@ Requests must include your email as a parameter at the end of the
       (mapcar #'pubmed--get-unpaywall entries))
      (mark-list
       (mapcar #'pubmed--get-unpaywall mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-unpaywall (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-unpaywall (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 
@@ -170,7 +170,7 @@ Requests must include your email as a parameter at the end of the
 		  ;; is started.
 		  d)
 	      (deferred:cancel it))))
-	
+
 	;; You can connect deferred callback queues
 	(deferred:nextc it
 	  (lambda (status)
@@ -190,7 +190,7 @@ Requests must include your email as a parameter at the end of the
 	  (lambda (url)
 	    (deferred:timeout pubmed-unpaywall-timeout (error "Timeout")
 	      (deferred:url-retrieve url))))
-	
+
 	(deferred:nextc it
 	  (lambda (buffer)
 	    "Parse the HTML object in BUFFER and show the PDF."
@@ -209,7 +209,7 @@ Requests must include your email as a parameter at the end of the
 	  "Catch any errors that occur during the deferred chain and return nil."
 	  (message "%s" (cadr deferred-error))
 	  nil))
-      
+
       ;; finally
       (deferred:nextc it
 	(lambda (result)

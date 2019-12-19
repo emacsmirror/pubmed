@@ -86,7 +86,7 @@ To create the key, register at
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -95,8 +95,8 @@ To create the key, register at
       (mapcar #'pubmed--get-springer entries))
      (mark-list
       (mapcar #'pubmed--get-springer mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-springer (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-springer (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 
