@@ -36,6 +36,7 @@
 (require 'pubmed-pmc)
 (require 'esxml)
 (require 'esxml-query)
+(require 'ewoc)
 (require 'eww)
 (require 'json)
 (require 's)
@@ -77,9 +78,6 @@
 (defvar pubmed-uid nil
   "The UID of the entry currently selected in the PubMed buffer.")
 
-(defvar pubmed-entries nil
-  "The plist of citations retrieved by the last PubMed search.")
-
 (defvar pubmed-history-list nil
   "The PubMed history list.")
 
@@ -118,11 +116,27 @@ entries.")
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
+;;;; Faces
+
+(defgroup pubmed-faces nil
+  "Type faces (fonts) used in PubMed."
+  :group 'pubmed
+  :group 'faces)
+
+(defface pubmed-citation-face
+  '((t :inherit default :height 0.8))
+  "Face for the citation."
+  :group 'pubmed-faces)
+
+(defface pubmed-title-face
+  '((t :inherit default :foreground "#2222CC"))
+  "Face for the title."
+  :group 'pubmed-faces)
+
 ;;;; Keymap
 
 (defvar pubmed-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map tabulated-list-mode-map)
     (define-key map (kbd "RET") #'pubmed-show-current-entry)
     (define-key map (kbd "f") #'pubmed-get-fulltext)
     (define-key map (kbd "m") #'pubmed-mark)
@@ -143,6 +157,70 @@ entries.")
     (define-key map (kbd "TAB") #'completion-at-point)
     map)
   "Local keymap for `pubmed-search-mode'.")
+
+(defconst pubmed-language-codes
+  '(("afr" "Afrikaans")
+    ("alb" "Albanian")
+    ("amh" "Amharic")
+    ("ara" "Arabic")
+    ("arm" "Armenian")
+    ("aze" "Azerbaijani")
+    ("ben" "Bengali")
+    ("bos" "Bosnian")
+    ("bul" "Bulgarian")
+    ("cat" "Catalan")
+    ("chi" "Chinese")
+    ("cze" "Czech")
+    ("dan" "Danish")
+    ("dut" "Dutch")
+    ("eng" "English")
+    ("epo" "Esperanto")
+    ("est" "Estonian")
+    ("fin" "Finnish")
+    ("fre" "French")
+    ("geo" "Georgian")
+    ("ger" "German")
+    ("gla" "Scottish Gaelic")
+    ("gre" "Greek, Modern")
+    ("heb" "Hebrew")
+    ("hin" "Hindi")
+    ("hrv" "Croatian")
+    ("hun" "Hungarian")
+    ("ice" "Icelandic")
+    ("ind" "Indonesian")
+    ("ita" "Italian")
+    ("jpn" "Japanese")
+    ("kin" "Kinyarwanda")
+    ("kor" "Korean")
+    ("lat" "Latin")
+    ("lav" "Latvian")
+    ("lit" "Lithuanian")
+    ("mac" "Macedonian")
+    ("mal" "Malayalam")
+    ("mao" "Maori")
+    ("may" "Malay")
+    ("mul" "Multiple languages")
+    ("nor" "Norwegian")
+    ("per" "Persian, Iranian")
+    ("pol" "Polish")
+    ("por" "Portuguese")
+    ("pus" "Pushto")
+    ("rum" "Romanian, Rumanian, Moldovan")
+    ("rus" "Russian")
+    ("san" "Sanskrit")
+    ("slo" "Slovak")
+    ("slv" "Slovenian")
+    ("spa" "Spanish")
+    ("srp" "Serbian")
+    ("swe" "Swedish")
+    ("tha" "Thai")
+    ("tur" "Turkish")
+    ("ukr" "Ukrainian")
+    ("und" "Undetermined")
+    ("urd" "Urdu")
+    ("vie" "Vietnamese")
+    ("wel" "Welsh"))
+  "The language codes used by PubMed.")
 
 ;;;; Menu
 
@@ -266,28 +344,22 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 ;;;; Mode
 
 ;;;###autoload
-(define-derived-mode pubmed-mode tabulated-list-mode "pubmed"
-  "Major mode for PubMed."
+(define-derived-mode pubmed-mode special-mode "Pubmed"
+  "Major mode for PubMed.
+This buffer contains the results of the PubMed query.
+
+All currently available key bindings:
+
+\\{pubmed-mode-map}"
   :group 'pubmed
-  (setq tabulated-list-format [("Author" 15 t)
-                               ("Title"  75 t)
-                               ("Journal" 30 t)
-			       ("Pubdate" 0 t)])
-  (setq tabulated-list-padding 2)
-  (setq tabulated-list-sort-key nil)
-  (tabulated-list-init-header))
+  ;; Turn on ẁord wrap
+  (visual-line-mode 1)
+  ;; Set the number of characters preceding each entry
+  (setq pubmed-list-padding 2)
+  ;; Set the number of characters preceding continuation lines
+  (setq-local wrap-prefix (make-string pubmed-list-padding ?\s)))
 
 ;;;; Commands
-
-;;;###autoload
-(defun pubmed-show-mode ()
-  "Mode for displaying PubMed entries."
-  (interactive)
-  (use-local-map pubmed-mode-map)
-  (setq major-mode 'pubmed-show-mode
-        mode-name "pubmed-show"
-        buffer-read-only t)
-  (buffer-disable-undo))
 
 ;;;###autoload
 (defun pubmed-search (query)
@@ -297,7 +369,6 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 				   (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t))))
 	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil 'pubmed-history-list)))
      (list query)))
-  (setq pubmed-entries nil)
   (pubmed--esearch query))
 
 (defun pubmed-show-entry (uid)
@@ -318,7 +389,7 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 (defun pubmed-show-current-entry ()
   "Show the current entry in the \"pubmed-show\" buffer."
   (interactive)
-  (setq pubmed-uid (tabulated-list-get-id))
+  (setq pubmed-uid (pubmed--get-uid))
   (when (timerp pubmed-entry-timer)
     (cancel-timer pubmed-entry-timer))
   (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))
@@ -326,9 +397,9 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer "*PubMed*"
-    (forward-line)
-    (setq pubmed-uid (tabulated-list-get-id))
+  (with-current-buffer (ewoc-buffer pubmed-results)
+    (ewoc-goto-next pubmed-results 1)
+    (setq pubmed-uid (pubmed--get-uid))
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
 	(cancel-timer pubmed-entry-timer))
@@ -337,42 +408,52 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer "*PubMed*"
-    (forward-line -1)
-    (setq pubmed-uid (tabulated-list-get-id))
+  (with-current-buffer (ewoc-buffer pubmed-results)
+    (ewoc-goto-prev pubmed-results 1)
+    (setq pubmed-uid (pubmed--get-uid))
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
 	(cancel-timer pubmed-entry-timer))
       (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
 
-(defun pubmed-mark (&optional _num)
-  "Mark an entry and move to the next line."
+(defun pubmed-mark (&optional arg)
+  "Mark ARG entries and move to the next line.
+If ARG is omitted or nil, mark one entry."
   (interactive "p")
-  (tabulated-list-put-tag "*" t))
+  (dotimes (i (or arg 1))
+    (pubmed--put-tag "*" t)))
 
-(defun pubmed-unmark (&optional _num)
-  "Unmark an entry and move to the next line."
+(defun pubmed-unmark (&optional arg)
+  "Unmark ARG entries and move to the next line.
+If ARG is omitted or nil, unmark one entry."
   (interactive "p")
-  (tabulated-list-put-tag " " t))
+  (dotimes (i (or arg 1))
+    (pubmed--put-tag " " t)))
 
-(defun pubmed-mark-all (&optional _num)
+(defun pubmed-mark-all ()
   "Mark all entries."
   ;; TODO: mark all entries in active region
-  (interactive "p")
+  (interactive)
   (pubmed--guard)
   (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      (tabulated-list-put-tag "*" t))))
+    (let ((node (ewoc-nth pubmed-results 0)))
+      (while node
+        (progn
+          (ewoc-goto-node pubmed-results node)
+          (pubmed--put-tag "*" nil)
+          (setq node (ewoc-next pubmed-results node)))))))
 
-(defun pubmed-unmark-all (&optional _num)
+(defun pubmed-unmark-all ()
   "Unmark all entries."
-  (interactive "p")
+  (interactive)
   (pubmed--guard)
   (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      (tabulated-list-put-tag " " t))))
+    (let ((node (ewoc-nth pubmed-results 0)))
+      (while node
+        (progn
+          (ewoc-goto-node pubmed-results node)
+          (pubmed--put-tag " " nil)
+          (setq node (ewoc-next pubmed-results node)))))))
 
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
@@ -383,20 +464,22 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 	mark-list
 	pubmed-uid)
     (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
-	(when (eq mark ?*)
-          (push pubmed-uid mark-list))
-	(forward-line)))
+      (let ((node (ewoc-nth pubmed-results 0)))
+        (while node
+          (progn
+            (ewoc-goto-node pubmed-results node)
+            (setq mark (char-after))
+            (when (eq mark ?*)
+              (setq pubmed-uid (plist-get (ewoc-data node) :uid))
+              (push pubmed-uid mark-list))
+            (setq node (ewoc-next pubmed-results node))))))
     (cond
      (entries
       (mapcar #'pubmed--fulltext entries))
      (mark-list
       (mapcar #'pubmed--fulltext mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--fulltext (tabulated-list-get-id)))
+     ((setq pubmed-current-node (ewoc-locate pubmed-results))
+      (pubmed--fulltext (plist-get (ewoc-data pubmed-current-node) :uid)))
      (t
       (error "No entry selected")))))
 
@@ -480,6 +563,107 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
 
 ;;;; Functions
 
+(defun pubmed--put-tag (tag &optional advance)
+  "Put TAG in the padding area of the current node.
+TAG should be a string, with length <= `pubmed-list-padding'.
+If ADVANCE is non-nil, move forward by one line afterwards."
+  (unless (stringp tag)
+    (error "Invalid argument to `pubmed--put-tag'"))
+  (unless (> pubmed-list-padding 0)
+    (error "Unable to tag the current node"))
+  (save-excursion
+    (when (setq pubmed-current-node (ewoc-locate pubmed-results))
+      (ewoc-goto-node pubmed-results pubmed-current-node)
+      (let ((beg (point))
+	    (inhibit-read-only t))
+        (forward-char pubmed-list-padding)
+	(insert-and-inherit
+         (let ((tag-width (string-width tag)))
+           (if (<= tag-width pubmed-list-padding)
+	       (concat tag
+		       (make-string (- pubmed-list-padding tag-width) ?\s))
+	     (truncate-string-to-width tag pubmed-list-padding))))
+	(delete-region beg (+ beg pubmed-list-padding)))))
+  (when advance (ewoc-goto-next pubmed-results 1)))
+
+(defun pubmed--entry-pp (entry)
+  "Pretty print ENTRY."
+  (let*  ((uid (plist-get entry :uid))
+          (pubdate (plist-get entry :pubdate))
+          (epubdate (plist-get entry :epubdate))
+          (source (plist-get entry :source))
+          (authors (mapcar (lambda (x) (when (equal (plist-get x :authtype) "Author") (plist-get x :name))) (plist-get entry :authors)))
+          (title (pubmed---html-cleanup (or (plist-get entry :title)
+                                            (plist-get entry :booktitle))))
+          (volume (plist-get entry :volume))
+          (issue (plist-get entry :issue))
+          (pages (plist-get entry :pages))
+          (lang (mapcar (lambda (x) (cadr (assoc x pubmed-language-codes))) (plist-get entry :lang)))
+          (nlmuniqueid (plist-get entry :nlmuniqueid))
+          (issn (plist-get entry :issn))
+          (essn (plist-get entry :essn))
+          (pubtype (mapcar #'identity (plist-get entry :pubtype)))
+          (articleids (plist-get entry :articleids))
+          (pmid (mapconcat (lambda (x) (when (equal (plist-get x :idtype) "pubmed") (plist-get x :value))) articleids ""))
+          (doi (mapconcat (lambda (x) (when (equal (plist-get x :idtype) "doi") (plist-get x :value))) articleids ""))
+          (pii (mapconcat (lambda (x) (when (equal (plist-get x :idtype) "pii") (plist-get x :value))) articleids ""))
+          (pmc (mapconcat (lambda (x) (when (equal (plist-get x :idtype) "pmc") (plist-get x :value))) articleids ""))
+          (date (plist-get entry :sortpubdate))
+          (fulljournalname (plist-get entry :fulljournalname))
+          (attributes (plist-get entry :attributes)))
+    ;; Title
+    (indent-to pubmed-list-padding)
+    (insert (propertize (concat title "\n") 'face 'pubmed-title-face 'rear-nonsticky t))
+    ;; Citation
+    (indent-to pubmed-list-padding)
+    (insert (propertize
+             (concat
+              (cond
+               ((eq (length authors) 0)
+                "[No authors listed] ")
+               ((eq (length authors) 1)
+                (concat (first authors) ". "))
+               ((> (length authors) 1)
+                (concat (first authors) ", et al. ")))
+              source
+              ". "
+              pubdate
+              (unless (string-empty-p volume)
+                (concat ";" volume))
+              (unless (string-empty-p issue)
+                (concat "(" issue ")"))
+              (unless (string-empty-p pages)
+                (concat ":" pages))
+              "."
+              (unless (string-empty-p doi)
+                (concat " doi: " doi "."))
+              (unless (string-empty-p epubdate)
+                (concat " Epub " epubdate "."))
+              (unless (null lang)
+                ;; Print only non-english languages
+                (cond
+                 ((and (eq (length lang) 1)
+                       (not (string= (first lang) "English")))
+                  (concat " " (first lang) "."))
+                 ((> (length lang) 1)
+                  (concat " " (s-join ", " lang) "."))
+                 (t
+                  nil)))
+              (unless (null pubtype)
+                ;; Print only non-journal article pubtypes
+                (cond
+                 ((and (eq (length pubtype) 1)
+                       (not (string= (first pubtype) "Journal Article")))
+                  (concat " " (first pubtype) "."))
+                 ((> (length pubtype) 1)
+                  (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
+                 (t
+                  nil)))
+              (when (null attributes)
+                " No abstract available.")
+              "\n")
+             'face 'pubmed-citation-face '1rear-nonsticky t))))
+
 (defun pubmed--guard ()
   "Signal an error when the current buffer is not in `pubmed-mode'."
   (unless (eq major-mode 'pubmed-mode)
@@ -516,14 +700,14 @@ TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
    (pubmed--html-to-unicode string)))
 
 (defun pubmed--list (entries)
-  "Populate the tabulated list mode buffer with ENTRIES."
-  (let ((pubmed-buffer (get-buffer-create "*PubMed*"))
-	(inhibit-read-only t))
+  "Populate the PubMed buffer with ENTRIES."
+  (let ((pubmed-buffer (ewoc-buffer pubmed-results))
+        (inhibit-read-only t))
     (with-current-buffer pubmed-buffer
-      (pubmed-mode)
-      (setq tabulated-list-entries (append entries tabulated-list-entries))
-      (tabulated-list-print nil t)
-      (setq pubmed-uid (tabulated-list-get-id)))
+      ;; Populate the ewoc `pubmed-results' with the `entries'
+      (mapc (lambda (x) (ewoc-enter-last pubmed-results x)) entries)
+      (setq pubmed-current-node (ewoc-nth pubmed-results 0))
+      (ewoc-goto-node pubmed-results pubmed-current-node))
     (switch-to-buffer pubmed-buffer)))
 
 (defun pubmed--esearch (query)
@@ -596,32 +780,36 @@ RETMAX is the total number of records to be retrieved."
 		   retmax
 		 pubmed-retmax))
 	  (counter 0)
-	  (pubmed-buffer (get-buffer-create "*PubMed*")))
+	  (pubmed-buffer (get-buffer-create "*PubMed - Search Results*"))
+          (inhibit-read-only t))
       ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
       (sleep-for 0.5)
       (with-current-buffer pubmed-buffer
-	;; Remove previous entries from the `tabulated-list-entries' variable.
-	(setq tabulated-list-entries nil))
+        (pubmed-mode)
+        ;; Remove previous entries
+	(erase-buffer)
+        ;; Initialize an empty ewoc
+        (setq pubmed-results (ewoc-create #'pubmed--entry-pp nil nil t)))
       (while (< start count)
 	;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
 	(if (string-empty-p pubmed-api-key)
-	    (progn
-	      (if (<= counter pubmed-limit-without-api-key)
-		  (progn
-		    (pubmed--esummary querykey webenv start max)
-		    (setq counter (1+ counter)))
-		(progn
-		  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-		  (setq counter 0))))
-	  (progn
-	    (if (<= counter pubmed-limit-with-api-key)
-		(progn
-		  (pubmed--esummary querykey webenv start max)
-		  (setq counter (1+ counter)))
+            (progn
+              (if (<= counter pubmed-limit-without-api-key)
+                  (progn
+                    (pubmed--esummary querykey webenv start max)
+                    (setq counter (1+ counter)))
+                (progn
+                  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
+                  (setq counter 0))))
+          (progn
+            (if (<= counter pubmed-limit-with-api-key)
+	        (progn
+	          (pubmed--esummary querykey webenv start max)
+	          (setq counter (1+ counter)))
 	      (progn
-		(run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-		(setq counter 0)))))
-	(setq start (+ start max)))
+	        (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
+	        (setq counter 0)))))
+        (setq start (+ start max)))
       (message "Searching...done"))))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
@@ -660,27 +848,12 @@ the total number of records to be retrieved."
 	     (uids (plist-get result :uids))
 	     entries)
 	;; The JSON object is converted to a plist. The first keyword is ":uids", with a list of all uids as value. The rest of the keywords are named ":<uid>", with a plist containing the document summary (DocSum) as value.
-	;; Add the plist containing the DocSums to `pubmed-entries'
-	(setq pubmed-entries (append (cddr (plist-member result :uids)) pubmed-entries))
-	;; Iterate over the list of UIDs, convert them to a keyword, and get the value.
-	;; The  `tabulated-list-entries' variable specifies the entries displayed in the Tabulated List buffer. Each list element corresponds to one entry, and has the form "(ID CONTENTS)", where "ID" is UID and "CONTENTS" is a vector with the same number of elements as `tabulated-list-format'.
+        ;; Iterate over the list of UIDs, convert them to a keyword, and get the value.
 	(dolist (uid uids entries)
 	  (let* ((keyword (intern (concat ":" uid)))
-		 (value (plist-get result keyword))
-		 (articletitle (plist-get value :title))
-		 (booktitle (plist-get value :booktitle))
-		 (title (cond
-		 	 ((not (string-empty-p articletitle))
-		 	  articletitle)
-		 	 ((not (string-empty-p booktitle))
-		 	  booktitle)))
-		 (entry (list (plist-get value :uid)
-	    		      (vector (plist-get value :sortfirstauthor)
-				      (pubmed---html-cleanup title)
-	    			      (plist-get value :source)
-				      (pubmed--parse-time-string (plist-get value :sortpubdate))))))
-	    (push entry entries)))
-	(pubmed--list (nreverse entries)))))))
+		 (entry (plist-get result keyword)))
+            (push entry entries)))
+        (pubmed--list (nreverse entries)))))))
 
 (defun pubmed--parse-efetch (status)
   "Check STATUS and parse the XML object in the current buffer.
@@ -697,7 +870,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	    (inhibit-read-only t)
 	    summary)
 	(with-current-buffer pubmed-entry-buffer
-	  (pubmed-show-mode)
+	  (pubmed-mode)
 	  (erase-buffer)
 	  (cond
 	   ;; metadata associated with an article
@@ -1117,6 +1290,13 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	    (insert "No summary available")))
 	  (save-selected-window
 	    (display-buffer pubmed-entry-buffer))))))))
+
+(defun pubmed--get-uid ()
+  "Return the unique identifier of the current entry."
+  (pubmed--guard)
+  (let* ((current-node (ewoc-locate pubmed-results))
+         (current-entry (ewoc-data current-node)))
+    (plist-get current-entry :uid)))
 
 (defun pubmed--summary-pmid (summary)
   "Return the PMID of the article SUMMARY."
