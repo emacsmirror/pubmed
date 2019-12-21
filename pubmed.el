@@ -293,27 +293,38 @@ A warning is issued if the count of search results exceeds this
   :group 'pubmed
   :type 'integer)
 
-(defcustom pubmed-sort "most+recent"
+(defcustom pubmed-sort 'mostrecent
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified
 sort order and will be retrieved in that order by ESummary or
-EFetch. The default sort order is \"most+recent\".
+EFetch. The default sort order is \"Most recent\".
 
-Valid sort values include: \"journal\": Records are sorted
-alphabetically by journal title, and then by publication date.
+Valid sort values include:
 
-\"pub+date\": Records are sorted chronologically by publication
-date \(with most recent first\), and then alphabetically by
-journal title. \"most+recent\": Records are sorted
-chronologically by date added to PubMed \(with the most recent
-additions first\). \"relevance\": Records are sorted based on
-relevance to your search. For more information about PubMed's
-relevance ranking, see the PubMed Help section on Computation of
-Weighted Relevance Order in PubMed. \"title\": Records are sorted
-alphabetically by article title. \"author\": Records are sorted
-alphabetically by author name, and then by publication date."
+\"Author\": Records are sorted alphabetically by author name, and then
+by publication date.
+
+\"Journal\": Records are sorted alphabetically by journal title, and
+then by publication date.
+
+\"Pub date\": Records are sorted chronologically by publication date
+\(with most recent first\), and then alphabetically by journal title.
+
+\"Most recent\": Records are sorted chronologically by date added to
+PubMed \(with the most recent additions first\).
+
+\"Relevance\": Records are sorted based on relevance to your search.
+For more information about PubMed's relevance ranking, see the PubMed
+Help section on Computation of Weighted Relevance Order in PubMed.
+
+\"Title\": Records are sorted alphabetically by article title."
   :group 'pubmed
-  :type 'string)
+  :type '(choice (const :tag "Author" author)
+                 (const :tag "Journal" journal)
+                 (const :tag "Most recent" mostrecent)
+                 (const :tag "Pub date" pubdate)
+                 (const :tag "Relevance" relevance)
+                 (const :tag "Title" title)))
 
 (defcustom pubmed-time-format-string "%Y-%m-%d"
   "The format-string to convert time values.
@@ -719,15 +730,30 @@ TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
       (ewoc-goto-node pubmed-results pubmed-current-node))
     (switch-to-buffer pubmed-buffer)))
 
-(defun pubmed--esearch (query)
+(defun pubmed--esearch (query &optional sort)
   "Search PubMed with QUERY. Use ESearch to retrieve the UIDs and post them on the History server."
   (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
-	 (url-request-method "POST")
+         (sortby (or sort pubmed-sort))
+         (url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 	 (url-request-data (concat "db=pubmed"
 				   "&retmode=json"
-				   "&sort=" pubmed-sort
+				   "&sort=" (cond
+                                             ((eq sortby 'author)
+                                              "author")
+                                             ((eq sortby 'journal)
+                                              "journal")
+                                             ((eq sortby 'mostrecent)
+                                              "most+recent")
+                                             ((eq sortby 'pubdate)
+                                              "pub+date")
+                                             ((eq sortby 'relevance)
+                                              "relevance")
+                                             ((eq sortby 'title)
+                                              "title")
+                                             (t
+                                              "most+recent"))
 				   "&term=" encoded-query
 				   "&usehistory=y"
 				   (when (not (string-empty-p pubmed-webenv))
