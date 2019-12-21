@@ -369,7 +369,16 @@ All currently available key bindings:
 				   (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t))))
 	  (query (read-from-minibuffer "Query: " nil pubmed-search-mode-map nil 'pubmed-history-list)))
      (list query)))
-  (pubmed--esearch query))
+  (let ((pubmed-buffer (get-buffer-create (format "*PubMed - Search Results - %s*" query)))
+        (inhibit-read-only t))
+    (with-current-buffer pubmed-buffer
+      (pubmed-mode)
+      ;; Remove previous entries
+      (erase-buffer)
+      ;; Initialize an empty ewoc
+      (set (make-local-variable 'pubmed-results) (ewoc-create #'pubmed--entry-pp nil nil t))
+      (set (make-local-variable 'pubmed-query) query)
+      (pubmed--esearch query))))
 
 (defun pubmed-show-entry (uid)
   "Display entry UID in the current buffer."
@@ -779,17 +788,9 @@ RETMAX is the total number of records to be retrieved."
 	  (max (if (boundp 'retmax)
 		   retmax
 		 pubmed-retmax))
-	  (counter 0)
-	  (pubmed-buffer (get-buffer-create "*PubMed - Search Results*"))
-          (inhibit-read-only t))
+	  (counter 0))
       ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
       (sleep-for 0.5)
-      (with-current-buffer pubmed-buffer
-        (pubmed-mode)
-        ;; Remove previous entries
-	(erase-buffer)
-        ;; Initialize an empty ewoc
-        (setq pubmed-results (ewoc-create #'pubmed--entry-pp nil nil t)))
       (while (< start count)
 	;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
 	(if (string-empty-p pubmed-api-key)
