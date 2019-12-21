@@ -402,7 +402,7 @@ All currently available key bindings:
 				  "&retmode=xml"
 				  "&rettype=abstract"
 				  "&id=" uid
-				  (when (not (string-empty-p pubmed-api-key))
+				  (unless (string-empty-p pubmed-api-key)
 				    (concat "&api_key=" pubmed-api-key)))))
     (url-retrieve pubmed-efetch-url #'pubmed--parse-efetch)))
 
@@ -756,9 +756,9 @@ TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
                                               "most+recent"))
 				   "&term=" encoded-query
 				   "&usehistory=y"
-				   (when (not (string-empty-p pubmed-webenv))
+				   (unless (string-empty-p pubmed-webenv)
 				     (concat "&webenv=" pubmed-webenv))
-				   (when (not (string-empty-p pubmed-api-key))
+				   (unless (string-empty-p pubmed-api-key)
 				     (concat "&api_key=" pubmed-api-key)))))
     (message "Searching...")
     (url-retrieve pubmed-esearch-url #'pubmed--parse-esearch)))
@@ -853,7 +853,7 @@ the total number of records to be retrieved."
 				  "&retmax=" (number-to-string retmax)
 				  "&query_key=" querykey
 				  "&webenv=" webenv
-				  (when (not (string-empty-p pubmed-api-key))
+				  (unless (string-empty-p pubmed-api-key)
 				    (concat "&api_key=" pubmed-api-key)))))
     (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary)))
 
