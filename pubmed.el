@@ -662,7 +662,7 @@ If ADVANCE is non-nil, move forward by one line afterwards."
               (when (null attributes)
                 " No abstract available.")
               "\n")
-             'face 'pubmed-citation-face '1rear-nonsticky t))))
+             'face 'pubmed-citation-face 'rear-nonsticky t))))
 
 (defun pubmed--guard ()
   "Signal an error when the current buffer is not in `pubmed-mode'."
