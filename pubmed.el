@@ -380,8 +380,9 @@ All currently available key bindings:
       ;; Remove previous entries
       (erase-buffer)
       ;; Initialize an empty ewoc
-      (set (make-local-variable 'pubmed-results) (ewoc-create #'pubmed--entry-pp nil nil t))
-      (set (make-local-variable 'pubmed-query) query)
+      (setq pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
+      (setq pubmed-query query)
+      (setq pubmed-entries nil)
       (pubmed--esearch query))))
 
 (defun pubmed-show-entry (uid)
