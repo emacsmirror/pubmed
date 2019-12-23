@@ -761,7 +761,8 @@ the node with the same data element as the current node."
                         :sortpubdate)
                        ((eq key 'title)
                         :sorttitle)))
-         ;; The sorting order of the :sortpubdate prop should be reversed
+         ;; All sorting methods are ascending by default, except by date.
+         ;; Therefore, the sorting order of the :sortpubdate prop should be reversed
          (first-sorter (if (eq first-prop :sortpubdate)
                            (lambda (a b) (string> (plist-get a first-prop) (plist-get b first-prop)))
                          (lambda (a b) (string< (plist-get a first-prop) (plist-get b first-prop)))))
