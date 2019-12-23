@@ -411,8 +411,8 @@ All currently available key bindings:
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer (ewoc-buffer pubmed-results)
-    (ewoc-goto-next pubmed-results 1)
+  (with-current-buffer (ewoc-buffer pubmed-ewoc)
+    (ewoc-goto-next pubmed-ewoc 1)
     (setq pubmed-uid (pubmed--get-uid))
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
@@ -422,8 +422,8 @@ All currently available key bindings:
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer (ewoc-buffer pubmed-results)
-    (ewoc-goto-prev pubmed-results 1)
+  (with-current-buffer (ewoc-buffer pubmed-ewoc)
+    (ewoc-goto-prev pubmed-ewoc 1)
     (setq pubmed-uid (pubmed--get-uid))
     (when (get-buffer-window "*PubMed-entry*" "visible")
       (when (timerp pubmed-entry-timer)
@@ -450,24 +450,24 @@ If ARG is omitted or nil, unmark one entry."
   (interactive)
   (pubmed--guard)
   (save-excursion
-    (let ((node (ewoc-nth pubmed-results 0)))
+    (let ((node (ewoc-nth pubmed-ewoc 0)))
       (while node
         (progn
-          (ewoc-goto-node pubmed-results node)
+          (ewoc-goto-node pubmed-ewoc node)
           (pubmed--put-tag "*" nil)
-          (setq node (ewoc-next pubmed-results node)))))))
+          (setq node (ewoc-next pubmed-ewoc node)))))))
 
 (defun pubmed-unmark-all ()
   "Unmark all entries."
   (interactive)
   (pubmed--guard)
   (save-excursion
-    (let ((node (ewoc-nth pubmed-results 0)))
+    (let ((node (ewoc-nth pubmed-ewoc 0)))
       (while node
         (progn
-          (ewoc-goto-node pubmed-results node)
+          (ewoc-goto-node pubmed-ewoc node)
           (pubmed--put-tag " " nil)
-          (setq node (ewoc-next pubmed-results node)))))))
+          (setq node (ewoc-next pubmed-ewoc node)))))))
 
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
@@ -478,21 +478,21 @@ If ARG is omitted or nil, unmark one entry."
 	mark-list
 	pubmed-uid)
     (save-excursion
-      (let ((node (ewoc-nth pubmed-results 0)))
+      (let ((node (ewoc-nth pubmed-ewoc 0)))
         (while node
           (progn
-            (ewoc-goto-node pubmed-results node)
+            (ewoc-goto-node pubmed-ewoc node)
             (setq mark (char-after))
             (when (eq mark ?*)
               (setq pubmed-uid (plist-get (ewoc-data node) :uid))
               (push pubmed-uid mark-list))
-            (setq node (ewoc-next pubmed-results node))))))
+            (setq node (ewoc-next pubmed-ewoc node))))))
     (cond
      (entries
       (mapcar #'pubmed--fulltext entries))
      (mark-list
       (mapcar #'pubmed--fulltext mark-list))
-     ((setq pubmed-current-node (ewoc-locate pubmed-results))
+     ((setq pubmed-current-node (ewoc-locate pubmed-ewoc))
       (pubmed--fulltext (plist-get (ewoc-data pubmed-current-node) :uid)))
      (t
       (error "No entry selected")))))
@@ -586,8 +586,8 @@ If ADVANCE is non-nil, move forward by one line afterwards."
   (unless (> pubmed-list-padding 0)
     (error "Unable to tag the current node"))
   (save-excursion
-    (when (setq pubmed-current-node (ewoc-locate pubmed-results))
-      (ewoc-goto-node pubmed-results pubmed-current-node)
+    (when (setq pubmed-current-node (ewoc-locate pubmed-ewoc))
+      (ewoc-goto-node pubmed-ewoc pubmed-current-node)
       (let ((beg (point))
 	    (inhibit-read-only t))
         (forward-char pubmed-list-padding)
@@ -598,7 +598,7 @@ If ADVANCE is non-nil, move forward by one line afterwards."
 		       (make-string (- pubmed-list-padding tag-width) ?\s))
 	     (truncate-string-to-width tag pubmed-list-padding))))
 	(delete-region beg (+ beg pubmed-list-padding)))))
-  (when advance (ewoc-goto-next pubmed-results 1)))
+  (when advance (ewoc-goto-next pubmed-ewoc 1)))
 
 (defun pubmed--entry-pp (entry)
   "Pretty print ENTRY."
@@ -699,15 +699,7 @@ If ADVANCE is non-nil, move forward by one line afterwards."
   (pubmed--remove-html-tags
    (pubmed--html-to-unicode string)))
 
-(defun pubmed--list (entries)
-  "Populate the PubMed buffer with ENTRIES."
-  (let ((pubmed-buffer (ewoc-buffer pubmed-results))
-        (inhibit-read-only t))
     (with-current-buffer pubmed-buffer
-      ;; Populate the ewoc `pubmed-results' with the `entries'
-      (mapc (lambda (x) (ewoc-enter-last pubmed-results x)) entries)
-      (setq pubmed-current-node (ewoc-nth pubmed-results 0))
-      (ewoc-goto-node pubmed-results pubmed-current-node))
     (switch-to-buffer pubmed-buffer)))
 
 (defun pubmed--esearch (query)
@@ -850,14 +842,20 @@ the total number of records to be retrieved."
   	     (json-object (json-read-from-string json))
   	     (result (plist-get json-object :result))
 	     (uids (plist-get result :uids))
-	     entries)
+             (pubmed-buffer (ewoc-buffer pubmed-ewoc))
+             (inhibit-read-only t))
 	;; The JSON object is converted to a plist. The first keyword is ":uids", with a list of all uids as value. The rest of the keywords are named ":<uid>", with a plist containing the document summary (DocSum) as value.
         ;; Iterate over the list of UIDs, convert them to a keyword, and get the value.
-	(dolist (uid uids entries)
-	  (let* ((keyword (intern (concat ":" uid)))
-		 (entry (plist-get result keyword)))
-            (push entry entries)))
-        (pubmed--list (nreverse entries)))))))
+        (with-current-buffer pubmed-buffer
+          (dolist (uid uids pubmed-entries)
+	    (let* ((keyword (intern (concat ":" uid)))
+		   (entry (plist-get result keyword)))
+              (push entry pubmed-entries)
+              ;; Populate the ewoc `pubmed-ewoc' with the entries
+              (ewoc-enter-last pubmed-ewoc entry)))
+          (setq pubmed-current-node (ewoc-nth pubmed-ewoc 0))
+          (ewoc-goto-node pubmed-ewoc pubmed-current-node))
+        (switch-to-buffer pubmed-buffer))))))
 
 (defun pubmed--parse-efetch (status)
   "Check STATUS and parse the XML object in the current buffer.
@@ -1298,7 +1296,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 (defun pubmed--get-uid ()
   "Return the unique identifier of the current entry."
   (pubmed--guard)
-  (let* ((current-node (ewoc-locate pubmed-results))
+  (let* ((current-node (ewoc-locate pubmed-ewoc))
          (current-entry (ewoc-data current-node)))
     (plist-get current-entry :uid)))
 
