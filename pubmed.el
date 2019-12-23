@@ -293,7 +293,7 @@ A warning is issued if the count of search results exceeds this
   :group 'pubmed
   :type 'integer)
 
-(defcustom pubmed-sort 'mostrecent
+(defcustom pubmed-sort-method 'mostrecent
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified
 sort order and will be retrieved in that order by ESummary or
@@ -730,30 +730,27 @@ TIME-STRING should be formatted as \"yyyy/mm/dd HH:MM\"."
       (ewoc-goto-node pubmed-results pubmed-current-node))
     (switch-to-buffer pubmed-buffer)))
 
-(defun pubmed--esearch (query &optional sort)
+(defun pubmed--esearch (query)
   "Search PubMed with QUERY. Use ESearch to retrieve the UIDs and post them on the History server."
   (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
-         (sortby (or sort pubmed-sort))
          (url-request-method "POST")
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 	 (url-request-data (concat "db=pubmed"
 				   "&retmode=json"
 				   "&sort=" (cond
-                                             ((eq sortby 'author)
+                                             ((eq pubmed-sort-method 'author)
                                               "author")
-                                             ((eq sortby 'journal)
+                                             ((eq pubmed-sort-method 'journal)
                                               "journal")
-                                             ((eq sortby 'mostrecent)
+                                             ((eq pubmed-sort-method 'mostrecent)
                                               "most+recent")
-                                             ((eq sortby 'pubdate)
+                                             ((eq pubmed-sort-method 'pubdate)
                                               "pub+date")
-                                             ((eq sortby 'relevance)
+                                             ((eq pubmed-sort-method 'relevance)
                                               "relevance")
-                                             ((eq sortby 'title)
-                                              "title")
-                                             (t
-                                              "most+recent"))
+                                             ((eq pubmed-sort-method 'title)
+                                              "title"))
 				   "&term=" encoded-query
 				   "&usehistory=y"
 				   (unless (string-empty-p pubmed-webenv)
