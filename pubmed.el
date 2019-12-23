@@ -469,6 +469,42 @@ If ARG is omitted or nil, unmark one entry."
           (pubmed--put-tag " " nil)
           (setq node (ewoc-next pubmed-ewoc node)))))))
 
+(defun pubmed-sort-by-author (&optional reverse)
+  "Sort the PubMed buffer alphabetically by author name, and then
+by publication date. With a prefix argument, the
+sorting order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'author t t)
+    (pubmed--sort 'author nil t)))
+
+(defun pubmed-sort-by-journal (&optional reverse)
+  "Sort the PubMed buffer alphabetically by journal title, and
+then by publication date. With a prefix argument, the sorting
+order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'journal t t)
+    (pubmed--sort 'journal nil t)))
+
+(defun pubmed-sort-by-pubdate (&optional reverse)
+  "Sort the PubMed buffer chronologically by publication date
+\(with most recent first\), and then alphabetically by journal
+title. With a prefix argument, the sorting order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'pubdate t t)
+    (pubmed--sort 'pubdate nil t)))
+
+(defun pubmed-sort-by-title (&optional reverse)
+  "Sort the PubMed buffer alphabetically by article title, and
+then by publication date. With a prefix argument, the sorting
+order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'title t t)
+    (pubmed--sort 'title nil t)))
+
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
   ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
@@ -699,7 +735,63 @@ If ADVANCE is non-nil, move forward by one line afterwards."
   (pubmed--remove-html-tags
    (pubmed--html-to-unicode string)))
 
+;; FIXME: remember marks after sorting
+(defun pubmed--sort (key &optional reverse remember-pos)
+  "Sort the PubMed buffer by KEY.
+If optional argument REVERSE is non-nil, the sorting order is
+reversed. Optional argument REMEMBER-POS means to move point to
+the node with the same data element as the current node."
+  (let* ((pubmed-buffer (ewoc-buffer pubmed-ewoc))
+         (inhibit-read-only t)
+         (first-prop (cond
+                      ((eq key 'author)
+                       :sortpubdate)
+                      ((eq key 'journal)
+                       :sortpubdate)
+                      ((eq key 'pubdate)
+                       :fulljournalname)
+                      ((eq key 'title)
+                       :sortpubdate)))
+         (second-prop (cond
+                       ((eq key 'author)
+                        :sortfirstauthor)
+                       ((eq key 'journal)
+                        :fulljournalname)
+                       ((eq key 'pubdate)
+                        :sortpubdate)
+                       ((eq key 'title)
+                        :sorttitle)))
+         ;; The sorting order of the :sortpubdate prop should be reversed
+         (first-sorter (if (eq first-prop :sortpubdate)
+                           (lambda (a b) (string> (plist-get a first-prop) (plist-get b first-prop)))
+                         (lambda (a b) (string< (plist-get a first-prop) (plist-get b first-prop)))))
+         (second-sorter (if (eq second-prop :sortpubdate)
+                            (lambda (a b) (string> (plist-get a second-prop) (plist-get b second-prop)))
+                          (lambda (a b) (string< (plist-get a second-prop) (plist-get b second-prop)))))
+         (second-sorter (if reverse
+                            (lambda (a b) (funcall second-sorter b a))
+                          second-sorter))
+         (current-uid (pubmed--get-uid)))
+    ;; Sort the entries using two keys. For the 'author, 'journal and
+    ;; 'title keys, the entries are sorted alphabetically, and then by
+    ;; publication date. For the 'pubdate key, the entries are sorted
+    ;; chronologically by publication date, and then alphabetically by
+    ;; journal title.
+    (setq pubmed-entries (sort pubmed-entries first-sorter))
+    (setq pubmed-entries (sort pubmed-entries second-sorter))
     (with-current-buffer pubmed-buffer
+      ;; Delete all nodes
+      (ewoc-filter pubmed-ewoc 'not)
+      ;; Repopulate the ewoc `pubmed-ewoc' with the sorted `pubmed-entries'
+      (mapc (lambda (x) (ewoc-enter-last pubmed-ewoc x)) pubmed-entries)
+      (if remember-pos
+          (let ((counter 0))
+            (while (and
+                    (< counter (length pubmed-entries))
+                    (not (equal (plist-get (nth counter pubmed-entries) :uid) current-uid)))
+              (setq counter (1+ counter)))
+            (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc counter)))
+        (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc 0))))
     (switch-to-buffer pubmed-buffer)))
 
 (defun pubmed--esearch (query)
