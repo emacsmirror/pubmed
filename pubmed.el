@@ -326,13 +326,6 @@ Help section on Computation of Weighted Relevance Order in PubMed.
                  (const :tag "Relevance" relevance)
                  (const :tag "Title" title)))
 
-(defcustom pubmed-time-format-string "%Y-%m-%d"
-  "The format-string to convert time values.
-Default is the ISO 8601 date format, i.e., \"%Y-%m-%d\"."
-  :link '(info-link "(elisp) Time Parsing")
-  :group 'pubmed
-  :type 'string)
-
 (defcustom pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton)
   "The list of functions tried in order by `pubmed-fulltext'.
 To change the behavior of ‘pubmed-get-fulltext’, remove, change
