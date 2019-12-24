@@ -278,7 +278,7 @@ entries.")
      ["Sort by journal (descending)" (pubmed-sort-by-journal t)
       :help "Sort reverse alphabetically by journal title, and then by publication date"]
      ["Sort by pubdate " (pubmed-sort-by-pubdate t)
-      :help "Sort reverse chronologically by publication date \(with oldest first\), and then alphabetically by journal title"]
+      :help "Sort chronologically by publication date \(with oldest first\), and then alphabetically by journal title"]
      ["Sort by pubdate (descending)" pubmed-sort-by-pubdate
       :help "Sort chronologically by publication date \(with most recent first\), and then alphabetically by journal title"]
      ["Sort by title" pubmed-sort-by-title
