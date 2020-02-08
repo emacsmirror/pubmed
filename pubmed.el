@@ -123,12 +123,12 @@ entries.")
   :group 'pubmed
   :group 'faces)
 
-(defface pubmed-citation-face
+(defface pubmed-citation
   '((t :inherit default :height 0.8))
   "Face for the citation."
   :group 'pubmed-faces)
 
-(defface pubmed-title-face
+(defface pubmed-title
   '((t :inherit default :foreground "#2222CC"))
   "Face for the title."
   :group 'pubmed-faces)
@@ -683,7 +683,7 @@ If ADVANCE is non-nil, move forward by one line afterwards."
           (attributes (plist-get entry :attributes)))
     ;; Title
     (indent-to pubmed-list-padding)
-    (insert (propertize (concat title "\n") 'face 'pubmed-title-face 'rear-nonsticky t))
+    (insert (propertize (concat title "\n") 'face 'pubmed-title 'rear-nonsticky t))
     ;; Citation
     (indent-to pubmed-list-padding)
     (insert (propertize
@@ -732,7 +732,7 @@ If ADVANCE is non-nil, move forward by one line afterwards."
               (when (null attributes)
                 " No abstract available.")
               "\n")
-             'face 'pubmed-citation-face 'rear-nonsticky t))))
+             'face 'pubmed-citation 'rear-nonsticky t))))
 
 (defun pubmed--guard ()
   "Signal an error when the current buffer is not in `pubmed-mode'."
