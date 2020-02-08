@@ -1848,7 +1848,7 @@ The functions in `pubmed-fulltext-functions' are tried in order, until a fulltex
   (let ((i 0))
     (deferred:$
       (deferred:next
-	(lambda ()
+	(deferred:lambda ()
 	  (cond
 	   ((eq 0 (length pubmed-fulltext-functions))
 	    (error "No functions in the list `pubmed-fulltext-functions'"))
