@@ -815,6 +815,23 @@ the node with the same data element as the current node."
         (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc 0))))
     (switch-to-buffer pubmed-buffer)))
 
+(defun pubmed--show-query (query querykey webenv count)
+  "Show the results of QUERY. The QUERYKEY specifies which of the
+stored sets to the given WEBENV will be used as input to
+ESummary. COUNT is the total number of records in the stored
+set."
+  (let ((pubmed-buffer (get-buffer-create (format "*PubMed - Search Results - %s*" query)))
+        (inhibit-read-only t))
+    (with-current-buffer pubmed-buffer
+      (pubmed-mode)
+      ;; Remove previous entries
+      (erase-buffer)
+      ;; Initialize an empty ewoc
+      (setq pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
+      (setq pubmed-query query)
+      (setq pubmed-entries nil)
+      (pubmed--get-docsums querykey webenv count))))
+
 (defun pubmed--esearch (query)
   "Search PubMed with QUERY. Use ESearch to retrieve the UIDs and post them on the History server."
   (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.

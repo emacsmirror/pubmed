@@ -368,7 +368,7 @@
 					      (pubmed-advanced-search--history-show)))))
 		  query
 		  (cons count `(help-echo "Show search results" action (lambda (button)
-									 (funcall #'pubmed--get-docsums ,querykey ,webenv (string-to-number ,count)))))
+									 (funcall #'pubmed--show-query ,query ,querykey ,webenv (string-to-number ,count)))))
 		  time))))
     (push entry pubmed-advanced-search-history)
     (pubmed-advanced-search--history-show)))
