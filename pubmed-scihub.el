@@ -22,7 +22,7 @@
 ;; Download fulltext PDFs of articles using the Sci-Hub database. You need to
 ;; provide a Sci-Hub URL by customizing the variable `pubmed-scihub-url' or
 ;; setting the value in your .init.el or .emacs file: (setq pubmed-scihub-url
-;; "http://url-of-sci-hub.com/")
+;; "https://url-of-sci-hub.com/")
 
 ;; Sci-Hub doesn't provide an API, so the PDF is found by parsing the HTML. This
 ;; is probably more subject to change than an API, so expect this to be broken
@@ -130,7 +130,7 @@ You need to provide a an URL to use the Sci-Hub database."
     		       (parsed-url (url-generic-parse-url url)))
     		  ;; Sometimes, the URL is not valid and misses the `http' type.
     		  (when (not (url-type parsed-url))
-    		    (setf (url-type parsed-url) "http")
+    		    (setf (url-type parsed-url) "https")
     		    (setq url (url-recreate-url parsed-url)))
     		  ;; Always chop off anchors.
     		  (when (string-match "#.*" url)
