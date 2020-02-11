@@ -317,6 +317,9 @@ A warning is issued if the count of search results exceeds this
   :group 'pubmed
   :type 'integer)
 
+;; The documentation mentions that "most recent" and "recently added"
+;; are valid sort orders, but these result in a warning and are
+;; ignored. The sort order "author" is equal to "first author".
 (defcustom pubmed-sort-method 'pubdate
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified
@@ -342,6 +345,9 @@ For more information about PubMed's relevance ranking, see the PubMed
 Help section on Computation of Weighted Relevance Order in PubMed.
 
 \"Title\": Records are sorted alphabetically by article title."
+  ;; TODO: "relevance" is the only sort order that cannot be applied
+  ;; after the search is retrieved. Therefore, consider making it the
+  ;; default so all sort order can be adjusted reversibly.
   :group 'pubmed
   :type '(choice (const :tag "First author" firstauthor)
                  (const :tag "Last author" lastauthor)
