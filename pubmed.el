@@ -313,11 +313,11 @@ A warning is issued if the count of search results exceeds this
   :group 'pubmed
   :type 'integer)
 
-(defcustom pubmed-sort-method 'mostrecent
+(defcustom pubmed-sort-method 'pubdate
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified
 sort order and will be retrieved in that order by ESummary or
-EFetch. The default sort order is \"Most recent\".
+EFetch. The default sort order is \"Pub date\".
 
 Valid sort values include:
 
@@ -330,9 +330,6 @@ then by publication date.
 \"Pub date\": Records are sorted chronologically by publication date
 \(with most recent first\), and then alphabetically by journal title.
 
-\"Most recent\": Records are sorted chronologically by date added to
-PubMed \(with the most recent additions first\).
-
 \"Relevance\": Records are sorted based on relevance to your search.
 For more information about PubMed's relevance ranking, see the PubMed
 Help section on Computation of Weighted Relevance Order in PubMed.
@@ -341,7 +338,6 @@ Help section on Computation of Weighted Relevance Order in PubMed.
   :group 'pubmed
   :type '(choice (const :tag "Author" author)
                  (const :tag "Journal" journal)
-                 (const :tag "Most recent" mostrecent)
                  (const :tag "Pub date" pubdate)
                  (const :tag "Relevance" relevance)
                  (const :tag "Title" title)))
@@ -849,8 +845,6 @@ set."
                                               "author")
                                              ((eq pubmed-sort-method 'journal)
                                               "journal")
-                                             ((eq pubmed-sort-method 'mostrecent)
-                                              "most+recent")
                                              ((eq pubmed-sort-method 'pubdate)
                                               "pub+date")
                                              ((eq pubmed-sort-method 'relevance)
