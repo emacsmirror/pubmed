@@ -269,10 +269,14 @@ entries.")
 
     "--"
     ("Sort"
-     ["Sort by author" pubmed-sort-by-author
-      :help "Sort alphabetically by author name, and then by publication date"]
-     ["Sort by author (descending)" (pubmed-sort-by-author t)
-      :help "Sort reverse alphabetically by author name, and then by publication date"]
+     ["Sort by first author" pubmed-sort-by-firstauthor
+      :help "Sort alphabetically by first author name, and then by publication date"]
+     ["Sort by first author (descending)" (pubmed-sort-by-firstauthor t)
+      :help "Sort reverse alphabetically by first author name, and then by publication date"]
+     ["Sort by last author" pubmed-sort-by-lastauthor
+      :help "Sort alphabetically by last author name, and then by publication date"]
+     ["Sort by last author (descending)" (pubmed-sort-by-lastauthor t)
+      :help "Sort reverse alphabetically by last author name, and then by publication date"]
      ["Sort by journal" pubmed-sort-by-journal
       :help "Sort alphabetically by journal title, and then by publication date"]
      ["Sort by journal (descending)" (pubmed-sort-by-journal t)
@@ -321,8 +325,11 @@ EFetch. The default sort order is \"Pub date\".
 
 Valid sort values include:
 
-\"Author\": Records are sorted alphabetically by author name, and then
-by publication date.
+\"First author\": Records are sorted alphabetically by first
+author name, and then by publication date.
+
+\"Last author\": Records are sorted alphabetically by last author
+name, and then by publication date.
 
 \"Journal\": Records are sorted alphabetically by journal title, and
 then by publication date.
@@ -336,7 +343,8 @@ Help section on Computation of Weighted Relevance Order in PubMed.
 
 \"Title\": Records are sorted alphabetically by article title."
   :group 'pubmed
-  :type '(choice (const :tag "Author" author)
+  :type '(choice (const :tag "First author" firstauthor)
+                 (const :tag "Last author" lastauthor)
                  (const :tag "Journal" journal)
                  (const :tag "Pub date" pubdate)
                  (const :tag "Relevance" relevance)
@@ -485,14 +493,23 @@ If ARG is omitted or nil, unmark one entry."
           (pubmed--put-tag " " nil)
           (setq node (ewoc-next pubmed-ewoc node)))))))
 
-(defun pubmed-sort-by-author (&optional reverse)
-  "Sort the PubMed buffer alphabetically by author name, and then
-by publication date. With a prefix argument, the
-sorting order is reversed."
+(defun pubmed-sort-by-firstauthor (&optional reverse)
+  "Sort the PubMed buffer alphabetically by first author name,
+and then by publication date. With a prefix argument, the sorting
+order is reversed."
   (interactive "P")
   (if reverse
-      (pubmed--sort 'author t t)
-    (pubmed--sort 'author nil t)))
+      (pubmed--sort 'firstauthor t t)
+    (pubmed--sort 'firstauthor nil t)))
+
+(defun pubmed-sort-by-lastauthor (&optional reverse)
+  "Sort the PubMed buffer alphabetically by first author name,
+and then by publication date. With a prefix argument, the sorting
+order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'lastauthor t t)
+    (pubmed--sort 'lastauthor nil t)))
 
 (defun pubmed-sort-by-journal (&optional reverse)
   "Sort the PubMed buffer alphabetically by journal title, and
@@ -764,7 +781,9 @@ the node with the same data element as the current node."
   (let* ((pubmed-buffer (ewoc-buffer pubmed-ewoc))
          (inhibit-read-only t)
          (first-prop (cond
-                      ((eq key 'author)
+                      ((eq key 'firstauthor)
+                       :sortpubdate)
+                      ((eq key 'lastauthor)
                        :sortpubdate)
                       ((eq key 'journal)
                        :sortpubdate)
@@ -773,8 +792,10 @@ the node with the same data element as the current node."
                       ((eq key 'title)
                        :sortpubdate)))
          (second-prop (cond
-                       ((eq key 'author)
+                       ((eq key 'firstauthor)
                         :sortfirstauthor)
+                       ((eq key 'lastauthor)
+                        :lastauthor)
                        ((eq key 'journal)
                         :fulljournalname)
                        ((eq key 'pubdate)
@@ -793,11 +814,11 @@ the node with the same data element as the current node."
                             (lambda (a b) (funcall second-sorter b a))
                           second-sorter))
          (current-uid (pubmed--get-uid)))
-    ;; Sort the entries using two keys. For the 'author, 'journal and
-    ;; 'title keys, the entries are sorted alphabetically, and then by
-    ;; publication date. For the 'pubdate key, the entries are sorted
-    ;; chronologically by publication date, and then alphabetically by
-    ;; journal title.
+    ;; Sort the entries using two keys. For the 'firstauthor,
+    ;; 'lastauthor 'journal and 'title keys, the entries are sorted
+    ;; alphabetically, and then by publication date. For the 'pubdate
+    ;; key, the entries are sorted chronologically by publication
+    ;; date, and then alphabetically by journal title.
     (setq pubmed-entries (sort pubmed-entries first-sorter))
     (setq pubmed-entries (sort pubmed-entries second-sorter))
     (with-current-buffer pubmed-buffer
@@ -841,8 +862,10 @@ set."
 	 (url-request-data (concat "db=pubmed"
 				   "&retmode=json"
 				   "&sort=" (cond
-                                             ((eq pubmed-sort-method 'author)
-                                              "author")
+                                             ((eq pubmed-sort-method 'firstauthor)
+                                              "first+author")
+                                             ((eq pubmed-sort-method 'lastauthor)
+                                              "last+author")
                                              ((eq pubmed-sort-method 'journal)
                                               "journal")
                                              ((eq pubmed-sort-method 'pubdate)
