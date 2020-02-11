@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.2] - 2020-02-08
+### Fixed
+- Changed http to https to reflect change in Sci-Hub url
+
 ## [0.3.1] - 2019-12-20
 ### Fixed
 - Hotfix in Sci-Hub fulltext function
