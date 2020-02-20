@@ -99,22 +99,6 @@ entries.")
 (defvar pubmed-limit-without-api-key 3
   "Maximum amount of E-utilities requests/second without API key.")
 
-;; Sequential index of the first record to be retrieved (default=0,
-;; corresponding to the first record of the entire set). This
-;; parameter can be used in conjunction with retmax to download an
-;; arbitrary subset of records from the input set.
-(defvar pubmed-retstart 0
-  "Sequential index of the first record; default=0.")
-
-;; Total number of records from the retrieved set to be shown in the
-;; output. The remainder of the retrieved set will be stored on the
-;; History server. Increasing retmax allows more of the retrieved
-;; records to be included in the output, up to a maximum of 100,000
-;; records. To retrieve more than 100,000 records, submit multiple
-;; esearch requests while incrementing the value of retstart.
-(defvar pubmed-retmax 500
-  "Number of records returned; default=500.")
-
 (defvar pubmed-months '("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
   "Abbreviated months.")
 
@@ -587,12 +571,8 @@ RETMAX is the total number of records to be retrieved."
       (unless (y-or-n-p (format "There are %i results. Are you sure you want to continue? " count))
 	(message "Searching...cancelled")
 	(throw 'cancel t)))
-    (let ((start (if (boundp 'retstart)
-		     retstart
-		   pubmed-retstart))
-	  (max (if (boundp 'retmax)
-		   retmax
-		 pubmed-retmax))
+    (let ((start (if (boundp 'retstart) retstart 0))
+	  (max (if (boundp 'retmax) retmax 500))
 	  (counter 0)
 	  (pubmed-buffer (get-buffer-create "*PubMed*")))
       ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
