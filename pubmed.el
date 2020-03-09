@@ -903,8 +903,6 @@ data in batches of 500."
 	 (esearchresult (plist-get json-object :esearchresult))
 	 (error-message (plist-get esearchresult :ERROR))
 	 (count (string-to-number (plist-get esearchresult :count)))
-	 (retstart (string-to-number (plist-get esearchresult :retstart)))
-	 (retmax (string-to-number (plist-get esearchresult :retmax)))
 	 (querykey (plist-get esearchresult :querykey))
 	 (webenv (plist-get esearchresult :webenv)))
     (cond
@@ -919,7 +917,7 @@ data in batches of 500."
      (t
       (progn
 	(setq pubmed-webenv webenv)
-	(pubmed--get-docsums querykey webenv count retstart retmax))))))
+        (pubmed--get-docsums querykey webenv count))))))
 
 (defun pubmed--get-docsums (querykey webenv count &optional retstart retmax)
   "Retrieve the document summaries (DocSums) from the Entrez History server.
