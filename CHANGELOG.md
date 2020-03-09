@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.3] - 2020-02-21
+### Fixed
+- Fix allowed sort orders
+- Some refactoring
+
+## [0.3.2] - 2020-02-08
+### Fixed
+- Changed http to https to reflect change in Sci-Hub url
+
+## [0.3.1] - 2019-12-20
+### Fixed
+- Hotfix in Sci-Hub fulltext function
+
 ## [0.3] - 2019-12-04
 ### Added
 - Added Springer fulltext function
