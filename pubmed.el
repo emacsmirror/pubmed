@@ -918,29 +918,21 @@ RETMAX is the total number of records to be retrieved."
 	(throw 'cancel t)))
     (let ((start (if (boundp 'retstart) retstart 0))
 	  (max (if (boundp 'retmax) retmax 500))
+          (limit (if (string-empty-p pubmed-api-key)
+                     pubmed-limit-without-api-key
+                   pubmed-limit-with-api-key))
 	  (counter 0))
       ;; Workaround to prevent 400 Bad Request Error: sleep for 0.5 seconds after posting to the Entrez History server
       (sleep-for 0.5)
       (while (< start count)
 	;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
-	(if (string-empty-p pubmed-api-key)
-            (progn
-              (if (<= counter pubmed-limit-without-api-key)
-                  (progn
-                    (pubmed--esummary querykey webenv start max)
-                    (setq counter (1+ counter)))
-                (progn
-                  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-                  (setq counter 0))))
-          (progn
-            (if (<= counter pubmed-limit-with-api-key)
-	        (progn
-	          (pubmed--esummary querykey webenv start max)
-	          (setq counter (1+ counter)))
-	      (progn
-	        (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
-	        (setq counter 0)))))
-        (setq start (+ start max)))
+        (if (<= counter limit)
+	    (progn
+	      (pubmed--esummary querykey webenv start max)
+	      (setq counter (1+ counter)))
+	  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
+	  (setq counter 0))
+	(setq start (+ start max)))
       (message "Searching...done"))))
 
 (defun pubmed--esummary (querykey webenv retstart retmax)
