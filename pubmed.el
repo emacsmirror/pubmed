@@ -483,6 +483,14 @@ If ARG is omitted or nil, unmark one entry."
           (pubmed--put-tag " " nil)
           (setq node (ewoc-next pubmed-ewoc node)))))))
 
+(defun pubmed-sort-by-index (&optional reverse)
+  "Sort the PubMed buffer by index. With a prefix argument, the sorting
+order is reversed."
+  (interactive "P")
+  (if reverse
+      (pubmed--sort 'index t t)
+    (pubmed--sort 'index nil t)))
+
 (defun pubmed-sort-by-firstauthor (&optional reverse)
   "Sort the PubMed buffer alphabetically by first author name,
 and then by publication date. With a prefix argument, the sorting
@@ -771,6 +779,8 @@ the node with the same data element as the current node."
   (let* ((pubmed-buffer (ewoc-buffer pubmed-ewoc))
          (inhibit-read-only t)
          (first-prop (cond
+                      ((eq key 'index)
+                       nil)
                       ((eq key 'firstauthor)
                        :sortpubdate)
                       ((eq key 'lastauthor)
@@ -782,6 +792,8 @@ the node with the same data element as the current node."
                       ((eq key 'title)
                        :sortpubdate)))
          (second-prop (cond
+                       ((eq key 'index)
+                        :index)
                        ((eq key 'firstauthor)
                         :sortfirstauthor)
                        ((eq key 'lastauthor)
@@ -794,12 +806,20 @@ the node with the same data element as the current node."
                         :sorttitle)))
          ;; All sorting methods are ascending by default, except by date.
          ;; Therefore, the sorting order of the :sortpubdate prop should be reversed
-         (first-sorter (if (eq first-prop :sortpubdate)
-                           (lambda (a b) (string> (plist-get a first-prop) (plist-get b first-prop)))
-                         (lambda (a b) (string< (plist-get a first-prop) (plist-get b first-prop)))))
-         (second-sorter (if (eq second-prop :sortpubdate)
-                            (lambda (a b) (string> (plist-get a second-prop) (plist-get b second-prop)))
-                          (lambda (a b) (string< (plist-get a second-prop) (plist-get b second-prop)))))
+         (first-pred (cond
+                      ((eq first-prop :sortpubdate)
+                       #'string>)
+                      (t
+                       #'string<)))
+         (second-pred (cond
+                       ((eq second-prop :index)
+                        #'<)
+                       ((eq second-prop :sortpubdate)
+                        #'string>)
+                       (t
+                        #'string<)))
+         (first-sorter (lambda (a b) (funcall first-pred (plist-get a first-prop) (plist-get b first-prop))))
+         (second-sorter (lambda (a b) (funcall second-pred (plist-get a second-prop) (plist-get b second-prop))))
          (second-sorter (if reverse
                             (lambda (a b) (funcall second-sorter b a))
                           second-sorter))
@@ -809,8 +829,8 @@ the node with the same data element as the current node."
     ;; alphabetically, and then by publication date. For the 'pubdate
     ;; key, the entries are sorted chronologically by publication
     ;; date, and then alphabetically by journal title.
-    (setq pubmed-entries (sort pubmed-entries first-sorter))
-    (setq pubmed-entries (sort pubmed-entries second-sorter))
+    (when first-prop (setq pubmed-entries (sort pubmed-entries first-sorter)))
+    (when second-prop (setq pubmed-entries (sort pubmed-entries second-sorter)))
     (with-current-buffer pubmed-buffer
       ;; Delete all nodes
       (ewoc-filter pubmed-ewoc 'not)
@@ -951,9 +971,9 @@ the total number of records to be retrieved."
 				  "&webenv=" webenv
 				  (unless (string-empty-p pubmed-api-key)
 				    (concat "&api_key=" pubmed-api-key)))))
-    (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary)))
+    (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary (list retstart))))
 
-(defun pubmed--parse-esummary (status)
+(defun pubmed--parse-esummary (status retstart)
   "Check STATUS and parse the JSON object in the current buffer."
   (let ((url-error (plist-get status :error)))
     (cond
@@ -969,19 +989,27 @@ the total number of records to be retrieved."
   	     (json-object (json-read-from-string json))
   	     (result (plist-get json-object :result))
 	     (uids (plist-get result :uids))
+             (index retstart)
              (pubmed-buffer (ewoc-buffer pubmed-ewoc))
              (inhibit-read-only t))
-	;; The JSON object is converted to a plist. The first keyword is ":uids", with a list of all uids as value. The rest of the keywords are named ":<uid>", with a plist containing the document summary (DocSum) as value.
-        ;; Iterate over the list of UIDs, convert them to a keyword, and get the value.
+	;; The JSON object is converted to a plist. The first keyword
+        ;; is ":uids", with a list of all uids as value. The rest of
+        ;; the keywords are named ":<uid>", with a plist containing
+        ;; the document summary (DocSum) as value. Iterate over the
+        ;; list of UIDs, convert them to a keyword, and get the value.
         (with-current-buffer pubmed-buffer
           (dolist (uid uids pubmed-entries)
 	    (let* ((keyword (intern (concat ":" uid)))
-		   (entry (plist-get result keyword)))
-              (push entry pubmed-entries)
+		   (entry (plist-get result keyword))
+                   ;; An index prop is added so the entries can be
+                   ;; sorted, because `url-retrieve' doesn't preserve
+                   ;; the order of the results
+                   (indexed-entry (plist-put entry :index index)))
+              (push indexed-entry pubmed-entries)
+              (setq index (1+ index))
               ;; Populate the ewoc `pubmed-ewoc' with the entries
-              (ewoc-enter-last pubmed-ewoc entry)))
-          (setq pubmed-current-node (ewoc-nth pubmed-ewoc 0))
-          (ewoc-goto-node pubmed-ewoc pubmed-current-node))
+              (ewoc-enter-last pubmed-ewoc indexed-entry)))
+          (pubmed-sort-by-index))
         (switch-to-buffer pubmed-buffer))))))
 
 (defun pubmed--parse-efetch (status)
