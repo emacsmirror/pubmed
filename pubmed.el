@@ -1010,7 +1010,9 @@ the total number of records to be retrieved."
                     ((eq pubmed-sort-method 'relevance)
                      #'pubmed-sort-by-index)
                     ((eq pubmed-sort-method 'title)
-                     #'pubmed-sort-by-title))))
+                     #'pubmed-sort-by-title)))
+          (setq pubmed-current-node (ewoc-nth pubmed-ewoc 0))
+          (ewoc-goto-node pubmed-ewoc pubmed-current-node))
         (switch-to-buffer pubmed-buffer))))))
 
 (defun pubmed--parse-efetch (status)
