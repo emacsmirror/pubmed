@@ -253,6 +253,10 @@ entries.")
 
     "--"
     ("Sort"
+     ["Sort by relevance" pubmed-sort-by-index
+      :help "Sort based on relevance to your search"]
+     ["Sort by relevance (descending)" (pubmed-sort-by-index t)
+      :help "Sort reversely based on relevance to your search"]
      ["Sort by first author" pubmed-sort-by-firstauthor
       :help "Sort alphabetically by first author name, and then by publication date"]
      ["Sort by first author (descending)" (pubmed-sort-by-firstauthor t)
@@ -325,13 +329,8 @@ then by publication date.
 \(with most recent first\), and then alphabetically by journal title.
 
 \"Relevance\": Records are sorted based on relevance to your search.
-For more information about PubMed's relevance ranking, see the PubMed
-Help section on Computation of Weighted Relevance Order in PubMed.
 
 \"Title\": Records are sorted alphabetically by article title."
-  ;; TODO: "relevance" is the only sort order that cannot be applied
-  ;; after the search is retrieved. Therefore, consider making it the
-  ;; default so all sort order can be adjusted reversibly.
   :group 'pubmed
   :type '(choice (const :tag "First author" firstauthor)
                  (const :tag "Last author" lastauthor)
@@ -871,20 +870,8 @@ set."
 	 (url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
 	 (url-request-data (concat "db=pubmed"
 				   "&retmode=json"
-				   "&sort=" (cond
-                                             ((eq pubmed-sort-method 'firstauthor)
-                                              "first+author")
-                                             ((eq pubmed-sort-method 'lastauthor)
-                                              "last+author")
-                                             ((eq pubmed-sort-method 'journal)
-                                              "journal")
-                                             ((eq pubmed-sort-method 'pubdate)
-                                              "pub+date")
-                                             ((eq pubmed-sort-method 'relevance)
-                                              "relevance")
-                                             ((eq pubmed-sort-method 'title)
-                                              "title"))
-				   "&term=" encoded-query
+				   "&sort=relevance"
+                                   "&term=" encoded-query
 				   "&usehistory=y"
 				   (unless (string-empty-p pubmed-webenv)
 				     (concat "&webenv=" pubmed-webenv))
@@ -1009,7 +996,21 @@ the total number of records to be retrieved."
               (setq index (1+ index))
               ;; Populate the ewoc `pubmed-ewoc' with the entries
               (ewoc-enter-last pubmed-ewoc indexed-entry)))
-          (pubmed-sort-by-index))
+          ;; On retrieval, the entries are ordered by relevance. So
+          ;; the index reflects this order by default.
+          (funcall (cond
+                    ((eq pubmed-sort-method 'firstauthor)
+                     #'pubmed-sort-by-firstauthor)
+                    ((eq pubmed-sort-method 'lastauthor)
+                     #'pubmed-sort-by-lastauthor)
+                    ((eq pubmed-sort-method 'journal)
+                     #'pubmed-sort-by-journal)
+                    ((eq pubmed-sort-method 'pubdate)
+                     #'pubmed-sort-by-pubdate)
+                    ((eq pubmed-sort-method 'relevance)
+                     #'pubmed-sort-by-index)
+                    ((eq pubmed-sort-method 'title)
+                     #'pubmed-sort-by-title))))
         (switch-to-buffer pubmed-buffer))))))
 
 (defun pubmed--parse-efetch (status)
