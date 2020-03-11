@@ -308,7 +308,7 @@ A warning is issued if the count of search results exceeds this
 ;; The documentation mentions that "most recent" and "recently added"
 ;; are valid sort orders, but these result in a warning and are
 ;; ignored. The sort order "author" is equal to "first author".
-(defcustom pubmed-sort-method 'relevance
+(defcustom pubmed-sort-method 'pubdate
   "Method used to sort records in the ESearch output.
 The records are loaded onto the History Server in the specified
 sort order and will be retrieved in that order by ESummary or
