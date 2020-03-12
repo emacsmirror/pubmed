@@ -67,7 +67,7 @@
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -76,8 +76,8 @@
       (mapcar #'pubmed--get-dissemin entries))
      (mark-list
       (mapcar #'pubmed--get-dissemin mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-dissemin (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-dissemin (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 

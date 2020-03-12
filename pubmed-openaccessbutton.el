@@ -81,7 +81,7 @@ entries, the current entry or the optional argument ENTRIES."
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -90,8 +90,8 @@ entries, the current entry or the optional argument ENTRIES."
       (mapcar #'pubmed--get-openaccessbutton entries))
      (mark-list
       (mapcar #'pubmed--get-openaccessbutton mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-openaccessbutton (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-openaccessbutton (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 

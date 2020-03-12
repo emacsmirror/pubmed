@@ -50,7 +50,7 @@ Then use <kbd>M-x pubmed-search</kbd> or <kbd>M-x pubmed-advanced-search</kbd> t
 - <kbd>M-x pubmed-advanced-search</kbd> Advanced Search Builder with history modelled
 after <https://www.ncbi.nlm.nih.gov/pubmed/advanced>.
 
-Entries are shown in a tabulated list in `pubmed-mode`.
+Entries are shown in an ewoc structure in `pubmed-mode`.
 
 ### Keybindings
 
@@ -113,7 +113,7 @@ your `init.el` or `.emacs` file:
 
 Full text PDFs can be found by using [PubMed Central®
 (PMC)](https://www.ncbi.nlm.nih.gov/pmc/), [Open Access
-Button](https://openaccessbutton.org/api)
+Button](https://openaccessbutton.org/api),
 [Unpaywall](https://unpaywall.org/products/api), [Dissemin](https://dissem.in/)
 [Springer Nature](https://dev.springernature.com/) or Sci-Hub:
 

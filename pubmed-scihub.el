@@ -75,7 +75,7 @@ You need to provide a an URL to use the Sci-Hub database."
       (goto-char (point-min))
       (while (not (eobp))
         (setq mark (char-after))
-        (setq pubmed-uid (tabulated-list-get-id))
+        (setq pubmed-uid (pubmed--get-uid))
 	(when (eq mark ?*)
           (push pubmed-uid mark-list))
 	(forward-line)))
@@ -84,8 +84,8 @@ You need to provide a an URL to use the Sci-Hub database."
       (mapcar #'pubmed--get-scihub entries))
      (mark-list
       (mapcar #'pubmed--get-scihub mark-list))
-     ((tabulated-list-get-id)
-      (pubmed--get-scihub (tabulated-list-get-id)))
+     ((pubmed--get-uid)
+      (pubmed--get-scihub (pubmed--get-uid)))
      (t
       (error "No entry selected")))))
 
@@ -175,7 +175,7 @@ You need to provide a an URL to use the Sci-Hub database."
 				      captcha-url url)
 				(deferred:url-get captcha-url))
 			    (error "No captcha found")))))
-		    
+
 		    (deferred:nextc it
 		      (lambda (image-buffer)
 			"Show captcha image in a new buffer."
@@ -188,13 +188,13 @@ You need to provide a an URL to use the Sci-Hub database."
 				(read-only-mode)
 		      		(switch-to-buffer-other-frame captcha-buffer))
 		            (kill-buffer image-buffer)))))
-		    
+
 		    (deferred:nextc it
 		      (lambda ()
 			"Read the text displayed by the CAPTCHA from the minibuffer."
 			;; FIXME: when the minibuffer is left, the prompt disappears so the captcha cannot be solved anymore
 			(read-from-minibuffer "Captcha: ")))
-		    
+
 		    (deferred:nextc it
 		      (lambda (answer)
 			"Send the answer to the CAPTCHA in an HTTP POST request to IFRAME-URL"
@@ -218,14 +218,14 @@ You need to provide a an URL to use the Sci-Hub database."
 		buffer)
 	       (t
 		(error "Unknown content-type: %s" content-type)))))))
-      
+
       ;; catch
       (deferred:error it
 	(lambda (deferred-error)
 	  "Catch any errors that occur during the deferred chain and return nil."
 	  (message "%s" (cadr deferred-error))
 	  nil))
-      
+
       ;; finally
       (deferred:nextc it
 	(lambda (result)
