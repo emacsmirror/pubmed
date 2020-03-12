@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4] - 2020-03-12
+### Added
+- Major interface change (using EWOC instead of tabulated-list-mode)
+- Added sorting options
+- Customize default sorting with a menu
+
+### Fixed
+- Preserve the order of the results if the count exceeds 500
+- Minor bugfixes
+
 ## [0.3.3] - 2020-02-21
 ### Fixed
 - Fix allowed sort orders
