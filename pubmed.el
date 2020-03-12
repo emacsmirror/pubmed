@@ -521,7 +521,7 @@ If region is active, unmark entries in active region instead."
 
 (defun pubmed-sort-by-index (&optional reverse)
   "Sort the PubMed buffer by index. With a prefix argument, the sorting
-order is reversed."
+  order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'index t t)
@@ -529,8 +529,8 @@ order is reversed."
 
 (defun pubmed-sort-by-firstauthor (&optional reverse)
   "Sort the PubMed buffer alphabetically by first author name,
-and then by publication date. With a prefix argument, the sorting
-order is reversed."
+  and then by publication date. With a prefix argument, the sorting
+  order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'firstauthor t t)
@@ -538,8 +538,8 @@ order is reversed."
 
 (defun pubmed-sort-by-lastauthor (&optional reverse)
   "Sort the PubMed buffer alphabetically by first author name,
-and then by publication date. With a prefix argument, the sorting
-order is reversed."
+  and then by publication date. With a prefix argument, the sorting
+  order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'lastauthor t t)
@@ -547,8 +547,8 @@ order is reversed."
 
 (defun pubmed-sort-by-journal (&optional reverse)
   "Sort the PubMed buffer alphabetically by journal title, and
-then by publication date. With a prefix argument, the sorting
-order is reversed."
+  then by publication date. With a prefix argument, the sorting
+  order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'journal t t)
@@ -556,8 +556,8 @@ order is reversed."
 
 (defun pubmed-sort-by-pubdate (&optional reverse)
   "Sort the PubMed buffer chronologically by publication date
-\(with most recent first\), and then alphabetically by journal
-title. With a prefix argument, the sorting order is reversed."
+  \(with most recent first\), and then alphabetically by journal
+  title. With a prefix argument, the sorting order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'pubdate t t)
@@ -565,8 +565,8 @@ title. With a prefix argument, the sorting order is reversed."
 
 (defun pubmed-sort-by-title (&optional reverse)
   "Sort the PubMed buffer alphabetically by article title, and
-then by publication date. With a prefix argument, the sorting
-order is reversed."
+  then by publication date. With a prefix argument, the sorting
+  order is reversed."
   (interactive "P")
   (if reverse
       (pubmed--sort 'title t t)
@@ -682,8 +682,8 @@ order is reversed."
 
 (defun pubmed--put-tag (tag &optional advance)
   "Put TAG in the padding area of the current node.
-TAG should be a string, with length <= `pubmed-list-padding'.
-If ADVANCE is non-nil, move forward by one line afterwards."
+  TAG should be a string, with length <= `pubmed-list-padding'.
+  If ADVANCE is non-nil, move forward by one line afterwards."
   (unless (stringp tag)
     (error "Invalid argument to `pubmed--put-tag'"))
   (unless (> pubmed-list-padding 0)
@@ -1771,12 +1771,12 @@ The plist contains the dates indicating the history of the article's publication
 	pubdates)
     (dolist (pubdate pubdatelist)
       (let ((pubstatus (esxml-node-attribute 'PubStatus pubdate))
-	     (year (esxml-query "Year *" pubdate))
-	 (month (esxml-query "Month *" pubdate))
-	 (day (esxml-query "Day *" pubdate))
-	 (hour (esxml-query "Hour *" pubdate))
-	 (minute (esxml-query "Minute *" pubdate)))
-	    (push (list 'pubstatus pubstatus 'year year 'month month 'day day) pubdates)))
+	    (year (esxml-query "Year *" pubdate))
+	    (month (esxml-query "Month *" pubdate))
+	    (day (esxml-query "Day *" pubdate))
+	    (hour (esxml-query "Hour *" pubdate))
+	    (minute (esxml-query "Minute *" pubdate)))
+	(push (list 'pubstatus pubstatus 'year year 'month month 'day day) pubdates)))
     (nreverse pubdates)))
 
 (defun pubmed--summary-publicationstatus (summary)
