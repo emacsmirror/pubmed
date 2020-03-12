@@ -443,23 +443,60 @@ All currently available key bindings:
 	(cancel-timer pubmed-entry-timer))
       (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
 
-(defun pubmed-mark (&optional arg)
-  "Mark ARG entries and move to the next line.
-If ARG is omitted or nil, mark one entry."
-  (interactive "p")
-  (dotimes (i (or arg 1))
-    (pubmed--put-tag "*" t)))
+(defun pubmed-mark (&optional n)
+  "Mark N entries and move to the next line.
+If N is omitted or nil, mark one entry.
 
-(defun pubmed-unmark (&optional arg)
-  "Unmark ARG entries and move to the next line.
-If ARG is omitted or nil, unmark one entry."
+If region is active, mark entries in active region instead."
   (interactive "p")
-  (dotimes (i (or arg 1))
-    (pubmed--put-tag " " t)))
+  (if (use-region-p)
+      (pubmed-mark-region (region-beginning) (region-end))
+    (dotimes (i (or n 1))
+      (pubmed--put-tag "*" t))))
+
+(defun pubmed-unmark (&optional n)
+  "Unmark N entries and move to the next line.
+If N is omitted or nil, unmark one entry.
+
+If region is active, unmark entries in active region instead."
+  (interactive "p")
+  (if (use-region-p)
+      (pubmed-unmark-region (region-beginning) (region-end))
+    (dotimes (i (or n 1))
+      (pubmed--put-tag " " t))))
+
+(defun pubmed-mark-region (beg end)
+  "Unmark all entries between point and mark.
+  BEG and END are the bounds of the region."
+  (interactive "r")
+  (save-excursion
+    (let* ((first-node (ewoc-locate pubmed-ewoc beg))
+           (last-node (ewoc-locate pubmed-ewoc end))
+           (node first-node)
+           (inhibit-read-only t))
+      (while (progn
+               (ewoc-goto-node pubmed-ewoc node)
+               (pubmed--put-tag "*" nil)
+               (setq node (ewoc-next pubmed-ewoc node))
+               (not (eq node (ewoc-next pubmed-ewoc last-node))))))))
+
+(defun pubmed-unmark-region (beg end)
+  "Mark all entries between point and mark.
+  BEG and END are the bounds of the region."
+  (interactive "r")
+  (save-excursion
+    (let* ((first-node (ewoc-locate pubmed-ewoc beg))
+           (last-node (ewoc-locate pubmed-ewoc end))
+           (node first-node)
+           (inhibit-read-only t))
+      (while (progn
+               (ewoc-goto-node pubmed-ewoc node)
+               (pubmed--put-tag " " nil)
+               (setq node (ewoc-next pubmed-ewoc node))
+               (not (eq node (ewoc-next pubmed-ewoc last-node))))))))
 
 (defun pubmed-mark-all ()
   "Mark all entries."
-  ;; TODO: mark all entries in active region
   (interactive)
   (pubmed--guard)
   (save-excursion
