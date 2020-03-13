@@ -78,6 +78,9 @@
 (defvar pubmed-uid nil
   "The UID of the entry currently selected in the PubMed buffer.")
 
+(defvar pubmed-marklist nil
+  "The UIDs of the marked entries in the PubMed buffer.")
+
 (defvar pubmed-history-list nil
   "The PubMed history list.")
 
@@ -574,31 +577,17 @@ If region is active, unmark entries in active region instead."
 
 (defun pubmed-get-fulltext (&optional entries)
   "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
-  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
   (interactive "P")
   (pubmed--guard)
-  (let (mark
-	mark-list
-	pubmed-uid)
-    (save-excursion
-      (let ((node (ewoc-nth pubmed-ewoc 0)))
-        (while node
-          (progn
-            (ewoc-goto-node pubmed-ewoc node)
-            (setq mark (char-after))
-            (when (eq mark ?*)
-              (setq pubmed-uid (plist-get (ewoc-data node) :uid))
-              (push pubmed-uid mark-list))
-            (setq node (ewoc-next pubmed-ewoc node))))))
-    (cond
-     (entries
-      (mapcar #'pubmed--fulltext entries))
-     (mark-list
-      (mapcar #'pubmed--fulltext mark-list))
-     ((setq pubmed-current-node (ewoc-locate pubmed-ewoc))
-      (pubmed--fulltext (plist-get (ewoc-data pubmed-current-node) :uid)))
-     (t
-      (error "No entry selected")))))
+  (cond
+   (entries
+    (mapcar #'pubmed--fulltext entries))
+   (pubmed-marklist
+    (mapcar #'pubmed--fulltext pubmed-marklist))
+   ((setq pubmed-current-node (ewoc-locate pubmed-ewoc))
+    (pubmed--fulltext (plist-get (ewoc-data pubmed-current-node) :uid)))
+   (t
+    (error "No entry selected"))))
 
 ;;;###autoload
 (defun pubmed-complete (&optional _predicate)
@@ -680,6 +669,18 @@ If region is active, unmark entries in active region instead."
 
 ;;;; Functions
 
+(defun pubmed--mark-marklist ()
+  "Mark all entries in `pubmed-marklist'."
+  (pubmed--guard)
+  (save-excursion
+    (let ((node (ewoc-nth pubmed-ewoc 0)))
+      (while node
+        (progn
+          (ewoc-goto-node pubmed-ewoc node)
+          (when (member (plist-get (ewoc-data node) :uid) pubmed-marklist)
+            (pubmed--put-tag "*" nil))
+          (setq node (ewoc-next pubmed-ewoc node)))))))
+
 (defun pubmed--put-tag (tag &optional advance)
   "Put TAG in the padding area of the current node.
   TAG should be a string, with length <= `pubmed-list-padding'.
@@ -689,18 +690,26 @@ If region is active, unmark entries in active region instead."
   (unless (> pubmed-list-padding 0)
     (error "Unable to tag the current node"))
   (save-excursion
-    (when (setq pubmed-current-node (ewoc-locate pubmed-ewoc))
-      (ewoc-goto-node pubmed-ewoc pubmed-current-node)
-      (let ((beg (point))
-	    (inhibit-read-only t))
+    (let* ((node (ewoc-locate pubmed-ewoc))
+           (uid (plist-get (ewoc-data node) :uid))
+           (inhibit-read-only t))
+      ;; Set point to beginning of node
+      (ewoc-goto-node pubmed-ewoc node)
+      (let ((beg (point)))
         (forward-char pubmed-list-padding)
-	(insert-and-inherit
+        (insert-and-inherit
          (let ((tag-width (string-width tag)))
            (if (<= tag-width pubmed-list-padding)
 	       (concat tag
 		       (make-string (- pubmed-list-padding tag-width) ?\s))
 	     (truncate-string-to-width tag pubmed-list-padding))))
-	(delete-region beg (+ beg pubmed-list-padding)))))
+        (delete-region beg (+ beg pubmed-list-padding))
+        ;; Update the marklist
+        (cond
+         ((and (equal tag "*") (not (member uid pubmed-marklist)))
+          (push uid pubmed-marklist))
+         ((and (equal tag " ") (member uid pubmed-marklist))
+          (setq pubmed-marklist (delete uid pubmed-marklist)))))))
   (when advance (ewoc-goto-next pubmed-ewoc 1)))
 
 (defun pubmed--entry-pp (entry)
@@ -806,7 +815,6 @@ If region is active, unmark entries in active region instead."
   (pubmed--remove-html-tags
    (pubmed--html-to-unicode string)))
 
-;; FIXME: remember marks after sorting
 (defun pubmed--sort (key &optional reverse remember-pos)
   "Sort the PubMed buffer by KEY.
 If optional argument REVERSE is non-nil, the sorting order is
@@ -872,6 +880,9 @@ the node with the same data element as the current node."
       (ewoc-filter pubmed-ewoc 'not)
       ;; Repopulate the ewoc `pubmed-ewoc' with the sorted `pubmed-entries'
       (mapc (lambda (x) (ewoc-enter-last pubmed-ewoc x)) pubmed-entries)
+      ;; Mark all stored entries
+      (when pubmed-marklist
+        (pubmed--mark-marklist))
       (if remember-pos
           (let ((counter 0))
             (while (and
