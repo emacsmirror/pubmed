@@ -95,11 +95,11 @@
 		 :notify (lambda (&rest ignore)
 			   (pubmed-advanced-search))
 		 "Clear")
-  
+
   (widget-insert "\n\n")
 
   (widget-insert "Builder\n\n")
-  
+
   (setq pubmed-search-builder
 	(pubmed-advanced-search--widget-add 'search-builder
 					    (widget-create 'editable-list
@@ -193,7 +193,7 @@
 									(pubmed-advanced-search--build-search))
 							      :complete-function pubmed-complete
 							      "")))))
-  
+
   (widget-insert "\n")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
@@ -220,7 +220,7 @@
 		 "Clear history")
 
   (use-local-map widget-keymap)
-  
+
   (widget-setup)
   (pubmed-advanced-search--widget-set-point))
 
@@ -368,7 +368,7 @@
 					      (pubmed-advanced-search--history-show)))))
 		  query
 		  (cons count `(help-echo "Show search results" action (lambda (button)
-									 (funcall #'pubmed--show-query ,query ,querykey ,webenv (string-to-number ,count)))))
+									 (funcall #'pubmed-search ,query ,querykey ,webenv (string-to-number ,count)))))
 		  time))))
     (push entry pubmed-advanced-search-history)
     (pubmed-advanced-search--history-show)))

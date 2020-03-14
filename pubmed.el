@@ -75,12 +75,6 @@
 (defvar pubmed-webenv ""
   "Web environment string.")
 
-(defvar pubmed-uid nil
-  "The UID of the entry currently selected in the PubMed buffer.")
-
-(defvar pubmed-marklist nil
-  "The UIDs of the marked entries in the PubMed buffer.")
-
 (defvar pubmed-history-list nil
   "The PubMed history list.")
 
@@ -382,8 +376,12 @@ All currently available key bindings:
 ;;;; Commands
 
 ;;;###autoload
-(defun pubmed-search (query)
-  "Search PubMed with QUERY."
+(defun pubmed-search (query &optional querykey webenv count)
+  "Search PubMed with QUERY.
+
+The optional argument QUERYKEY specifies which of the stored sets
+to the given WEBENV will be used as input to ESummary. COUNT is
+the total number of records in the stored set."
   (interactive
    (let* ((minibuffer-setup-hook (when (eq pubmed-search-completion t)
 				   (lambda () (add-hook 'completion-at-point-functions #'pubmed-completion-at-point nil t))))
@@ -395,63 +393,55 @@ All currently available key bindings:
       (pubmed-mode)
       ;; Remove previous entries
       (erase-buffer)
-      ;; Initialize an empty ewoc
-      (setq pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
-      (setq pubmed-query query)
-      (setq pubmed-entries nil)
-      (pubmed--esearch query))))
-
-(defun pubmed-show-entry (uid)
-  "Display entry UID in the current buffer."
-  (interactive)
-  ;; "Return the parsed summary for an UID"
-  ;; TODO: Only the summary of the first UID is returned. Consider returning multiple summaries at once when multiple UIDs are passed as argument.
-  (let ((url-request-method "POST")
-	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
-	(url-request-data (concat "db=pubmed"
-				  "&retmode=xml"
-				  "&rettype=abstract"
-				  "&id=" uid
-				  (unless (string-empty-p pubmed-api-key)
-				    (concat "&api_key=" pubmed-api-key)))))
-    (url-retrieve pubmed-efetch-url #'pubmed--parse-efetch)))
+      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t)
+                  pubmed-query query
+                  pubmed-entries nil
+                  pubmed-uid nil
+                  pubmed-marklist nil)
+      (cond
+       ((and querykey webenv count)
+        (pubmed--get-docsums pubmed-buffer querykey webenv count))
+       (t
+        (pubmed--esearch pubmed-buffer query))))))
 
 (defun pubmed-show-current-entry ()
   "Show the current entry in the \"pubmed-show\" buffer."
   (interactive)
+  (pubmed--guard)
   (setq pubmed-uid (pubmed--get-uid))
   (when (timerp pubmed-entry-timer)
     (cancel-timer pubmed-entry-timer))
-  (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))
+  (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed--show-entry pubmed-uid)))
 
 (defun pubmed-show-next ()
   "Show the next item in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer (ewoc-buffer pubmed-ewoc)
-    (ewoc-goto-next pubmed-ewoc 1)
-    (setq pubmed-uid (pubmed--get-uid))
-    (when (get-buffer-window "*PubMed-entry*" "visible")
-      (when (timerp pubmed-entry-timer)
-	(cancel-timer pubmed-entry-timer))
-      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
+  (pubmed--guard)
+  (ewoc-goto-next pubmed-ewoc 1)
+  (setq pubmed-uid (pubmed--get-uid))
+  (when (get-buffer-window "*PubMed-entry*" "visible")
+    (when (timerp pubmed-entry-timer)
+      (cancel-timer pubmed-entry-timer))
+    (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed--show-entry pubmed-uid))))
 
 (defun pubmed-show-prev ()
   "Show the previous entry in the \"pubmed-show\" buffer."
   (interactive)
-  (with-current-buffer (ewoc-buffer pubmed-ewoc)
-    (ewoc-goto-prev pubmed-ewoc 1)
-    (setq pubmed-uid (pubmed--get-uid))
-    (when (get-buffer-window "*PubMed-entry*" "visible")
-      (when (timerp pubmed-entry-timer)
-	(cancel-timer pubmed-entry-timer))
-      (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed-show-entry pubmed-uid)))))
+  (pubmed--guard)
+  (ewoc-goto-prev pubmed-ewoc 1)
+  (setq pubmed-uid (pubmed--get-uid))
+  (when (get-buffer-window "*PubMed-entry*" "visible")
+    (when (timerp pubmed-entry-timer)
+      (cancel-timer pubmed-entry-timer))
+    (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed--show-entry pubmed-uid))))
 
 (defun pubmed-mark (&optional n)
   "Mark N entries and move to the next line.
-If N is omitted or nil, mark one entry.
+  If N is omitted or nil, mark one entry.
 
-If region is active, mark entries in active region instead."
+  If region is active, mark entries in active region instead."
   (interactive "p")
+  (pubmed--guard)
   (if (use-region-p)
       (pubmed-mark-region (region-beginning) (region-end))
     (dotimes (i (or n 1))
@@ -669,6 +659,21 @@ If region is active, unmark entries in active region instead."
 
 ;;;; Functions
 
+(defun pubmed--show-entry (uid)
+  "Display entry UID in the current buffer."
+  (interactive)
+  ;; "Return the parsed summary for an UID"
+  ;; TODO: Only the summary of the first UID is returned. Consider returning multiple summaries at once when multiple UIDs are passed as argument.
+  (let ((url-request-method "POST")
+	(url-request-extra-headers `(("Content-Type" . "application/x-www-form-urlencoded")))
+	(url-request-data (concat "db=pubmed"
+				  "&retmode=xml"
+				  "&rettype=abstract"
+				  "&id=" uid
+				  (unless (string-empty-p pubmed-api-key)
+				    (concat "&api_key=" pubmed-api-key)))))
+    (url-retrieve pubmed-efetch-url #'pubmed--parse-efetch)))
+
 (defun pubmed--mark-marklist ()
   "Mark all entries in `pubmed-marklist'."
   (pubmed--guard)
@@ -760,38 +765,38 @@ If region is active, unmark entries in active region instead."
               pubdate
               (unless (string-empty-p volume)
                 (concat ";" volume))
-              (unless (string-empty-p issue)
-                (concat "(" issue ")"))
-              (unless (string-empty-p pages)
-                (concat ":" pages))
-              "."
-              (unless (string-empty-p doi)
-                (concat " doi: " doi "."))
-              (unless (string-empty-p epubdate)
-                (concat " Epub " epubdate "."))
-              (unless (null lang)
-                ;; Print only non-english languages
-                (cond
-                 ((and (eq (length lang) 1)
-                       (not (string= (first lang) "English")))
-                  (concat " " (first lang) "."))
-                 ((> (length lang) 1)
-                  (concat " " (s-join ", " lang) "."))
-                 (t
-                  nil)))
-              (unless (null pubtype)
-                ;; Print only non-journal article pubtypes
-                (cond
-                 ((and (eq (length pubtype) 1)
-                       (not (string= (first pubtype) "Journal Article")))
-                  (concat " " (first pubtype) "."))
-                 ((> (length pubtype) 1)
-                  (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
-                 (t
-                  nil)))
-              (when (null attributes)
-                " No abstract available.")
-              "\n")
+  (unless (string-empty-p issue)
+    (concat "(" issue ")"))
+  (unless (string-empty-p pages)
+    (concat ":" pages))
+  "."
+  (unless (string-empty-p doi)
+    (concat " doi: " doi "."))
+  (unless (string-empty-p epubdate)
+    (concat " Epub " epubdate "."))
+  (unless (null lang)
+    ;; Print only non-english languages
+    (cond
+     ((and (eq (length lang) 1)
+           (not (string= (first lang) "English")))
+      (concat " " (first lang) "."))
+     ((> (length lang) 1)
+      (concat " " (s-join ", " lang) "."))
+     (t
+      nil)))
+  (unless (null pubtype)
+    ;; Print only non-journal article pubtypes
+    (cond
+     ((and (eq (length pubtype) 1)
+           (not (string= (first pubtype) "Journal Article")))
+      (concat " " (first pubtype) "."))
+     ((> (length pubtype) 1)
+      (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
+     (t
+      nil)))
+  (when (null attributes)
+    " No abstract available.")
+  "\n")
              'face 'pubmed-citation 'rear-nonsticky t))))
 
 (defun pubmed--guard ()
@@ -820,8 +825,7 @@ If region is active, unmark entries in active region instead."
 If optional argument REVERSE is non-nil, the sorting order is
 reversed. Optional argument REMEMBER-POS means to move point to
 the node with the same data element as the current node."
-  (let* ((pubmed-buffer (ewoc-buffer pubmed-ewoc))
-         (inhibit-read-only t)
+  (let* ((inhibit-read-only t)
          (first-prop (cond
                       ((eq key 'index)
                        nil)
@@ -875,23 +879,21 @@ the node with the same data element as the current node."
     ;; date, and then alphabetically by journal title.
     (when first-prop (setq pubmed-entries (sort pubmed-entries first-sorter)))
     (when second-prop (setq pubmed-entries (sort pubmed-entries second-sorter)))
-    (with-current-buffer pubmed-buffer
-      ;; Delete all nodes
-      (ewoc-filter pubmed-ewoc 'not)
-      ;; Repopulate the ewoc `pubmed-ewoc' with the sorted `pubmed-entries'
-      (mapc (lambda (x) (ewoc-enter-last pubmed-ewoc x)) pubmed-entries)
-      ;; Mark all stored entries
-      (when pubmed-marklist
-        (pubmed--mark-marklist))
-      (if remember-pos
-          (let ((counter 0))
-            (while (and
-                    (< counter (length pubmed-entries))
-                    (not (equal (plist-get (nth counter pubmed-entries) :uid) current-uid)))
-              (setq counter (1+ counter)))
-            (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc counter)))
-        (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc 0))))
-    (switch-to-buffer pubmed-buffer)))
+    ;; Delete all nodes
+    (ewoc-filter pubmed-ewoc 'not)
+    ;; Repopulate the ewoc `pubmed-ewoc' with the sorted `pubmed-entries'
+    (mapc (lambda (x) (ewoc-enter-last pubmed-ewoc x)) pubmed-entries)
+    ;; Mark all stored entries
+    (when pubmed-marklist
+      (pubmed--mark-marklist))
+    (if remember-pos
+        (let ((counter 0))
+          (while (and
+                  (< counter (length pubmed-entries))
+                  (not (equal (plist-get (nth counter pubmed-entries) :uid) current-uid)))
+            (setq counter (1+ counter)))
+          (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc counter)))
+      (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc 0)))))
 
 (defun pubmed--show-query (query querykey webenv count)
   "Show the results of QUERY. The QUERYKEY specifies which of the
@@ -905,12 +907,16 @@ set."
       ;; Remove previous entries
       (erase-buffer)
       ;; Initialize an empty ewoc
-      (setq pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
-      (setq pubmed-query query)
-      (setq pubmed-entries nil)
-      (pubmed--get-docsums querykey webenv count))))
+      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t)
+                  pubmed-query query
+                  pubmed-entries nil
+                  ;; The UID of the entry currently selected in the PubMed buffer.
+                  pubmed-uid nil
+                  ;; The UIDs of the marked entries in the PubMed buffer.
+                  pubmed-marklist nil)
+      (pubmed--get-docsums pubmed-buffer querykey webenv count))))
 
-(defun pubmed--esearch (query)
+(defun pubmed--esearch (pubmed-buffer query)
   "Search PubMed with QUERY. Use ESearch to retrieve the UIDs and post them on the History server."
   (let* ((hexified-query (url-hexify-string query)) ;  All special characters are URL encoded.
 	 (encoded-query (s-replace "%20" "+" hexified-query)) ; All (hexified) spaces are replaced by '+' signs
@@ -926,9 +932,9 @@ set."
 				   (unless (string-empty-p pubmed-api-key)
 				     (concat "&api_key=" pubmed-api-key)))))
     (message "Searching...")
-    (url-retrieve pubmed-esearch-url #'pubmed--parse-esearch)))
+    (url-retrieve pubmed-esearch-url #'pubmed--parse-esearch (list pubmed-buffer))))
 
-(defun pubmed--parse-esearch (status)
+(defun pubmed--parse-esearch (status pubmed-buffer)
   "Check STATUS and parse the JSON object in the current buffer.
 First use ESearch to retrieve the UIDs and post them on the
 History server, then use multiple ESummary calls to retrieve the
@@ -956,9 +962,9 @@ data in batches of 500."
      (t
       (progn
 	(setq pubmed-webenv webenv)
-        (pubmed--get-docsums querykey webenv count))))))
+        (pubmed--get-docsums pubmed-buffer querykey webenv count))))))
 
-(defun pubmed--get-docsums (querykey webenv count &optional retstart retmax)
+(defun pubmed--get-docsums (pubmed-buffer querykey webenv count &optional retstart retmax)
   "Retrieve the document summaries (DocSums) from the Entrez History server.
 Use multiple ESummary calls in batches of 500. The QUERYKEY
 specifies which of the stored sets to the given WEBENV will be
@@ -983,14 +989,14 @@ RETMAX is the total number of records to be retrieved."
 	;; Limit the amount of requests to prevent errors like "Too Many Requests (RFC 6585)" and "Bad Request". NCBI mentions a limit of 3 requests/second without an API key and 10 requests/second with an API key (see <https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/>).
         (if (<= counter limit)
 	    (progn
-	      (pubmed--esummary querykey webenv start max)
+	      (pubmed--esummary pubmed-buffer querykey webenv start max)
 	      (setq counter (1+ counter)))
-	  (run-with-timer "1 sec" nil #'pubmed--esummary querykey webenv start max)
+	  (run-with-timer "1 sec" nil #'pubmed--esummary pubmed-buffer querykey webenv start max)
 	  (setq counter 0))
 	(setq start (+ start max)))
       (message "Searching...done"))))
 
-(defun pubmed--esummary (querykey webenv retstart retmax)
+(defun pubmed--esummary (pubmed-buffer querykey webenv retstart retmax)
   "Retrieve the document summaries (DocSums) from the Entrez History server.
 The QUERYKEY specifies which of the stored sets to the given
 WEBENV will be used as input to ESummary. RETSTART is the
@@ -1006,9 +1012,9 @@ the total number of records to be retrieved."
 				  "&webenv=" webenv
 				  (unless (string-empty-p pubmed-api-key)
 				    (concat "&api_key=" pubmed-api-key)))))
-    (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary (list retstart))))
+    (url-retrieve pubmed-esummary-url #'pubmed--parse-esummary (list pubmed-buffer retstart))))
 
-(defun pubmed--parse-esummary (status retstart)
+(defun pubmed--parse-esummary (status pubmed-buffer retstart)
   "Check STATUS and parse the JSON object in the current buffer."
   (let ((url-error (plist-get status :error)))
     (cond
@@ -1025,7 +1031,6 @@ the total number of records to be retrieved."
   	     (result (plist-get json-object :result))
 	     (uids (plist-get result :uids))
              (index retstart)
-             (pubmed-buffer (ewoc-buffer pubmed-ewoc))
              (inhibit-read-only t))
 	;; The JSON object is converted to a plist. The first keyword
         ;; is ":uids", with a list of all uids as value. The rest of
@@ -1501,7 +1506,6 @@ Show the result in the \"*PubMed-entry*\" buffer."
 
 (defun pubmed--get-uid ()
   "Return the unique identifier of the current entry."
-  (pubmed--guard)
   (let* ((current-node (ewoc-locate pubmed-ewoc))
          (current-entry (ewoc-data current-node)))
     (plist-get current-entry :uid)))
