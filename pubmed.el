@@ -449,10 +449,11 @@ the total number of records in the stored set."
 
 (defun pubmed-unmark (&optional n)
   "Unmark N entries and move to the next line.
-If N is omitted or nil, unmark one entry.
+  If N is omitted or nil, unmark one entry.
 
-If region is active, unmark entries in active region instead."
+  If region is active, unmark entries in active region instead."
   (interactive "p")
+  (pubmed--guard)
   (if (use-region-p)
       (pubmed-unmark-region (region-beginning) (region-end))
     (dotimes (i (or n 1))
@@ -462,6 +463,7 @@ If region is active, unmark entries in active region instead."
   "Unmark all entries between point and mark.
   BEG and END are the bounds of the region."
   (interactive "r")
+  (pubmed--guard)
   (save-excursion
     (let* ((first-node (ewoc-locate pubmed-ewoc beg))
            (last-node (ewoc-locate pubmed-ewoc end))
@@ -477,6 +479,7 @@ If region is active, unmark entries in active region instead."
   "Mark all entries between point and mark.
   BEG and END are the bounds of the region."
   (interactive "r")
+  (pubmed--guard)
   (save-excursion
     (let* ((first-node (ewoc-locate pubmed-ewoc beg))
            (last-node (ewoc-locate pubmed-ewoc end))
@@ -516,6 +519,7 @@ If region is active, unmark entries in active region instead."
   "Sort the PubMed buffer by index. With a prefix argument, the sorting
   order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'index t t)
     (pubmed--sort 'index nil t)))
@@ -525,6 +529,7 @@ If region is active, unmark entries in active region instead."
   and then by publication date. With a prefix argument, the sorting
   order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'firstauthor t t)
     (pubmed--sort 'firstauthor nil t)))
@@ -534,6 +539,7 @@ If region is active, unmark entries in active region instead."
   and then by publication date. With a prefix argument, the sorting
   order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'lastauthor t t)
     (pubmed--sort 'lastauthor nil t)))
@@ -543,6 +549,7 @@ If region is active, unmark entries in active region instead."
   then by publication date. With a prefix argument, the sorting
   order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'journal t t)
     (pubmed--sort 'journal nil t)))
@@ -552,6 +559,7 @@ If region is active, unmark entries in active region instead."
   \(with most recent first\), and then alphabetically by journal
   title. With a prefix argument, the sorting order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'pubdate t t)
     (pubmed--sort 'pubdate nil t)))
@@ -561,6 +569,7 @@ If region is active, unmark entries in active region instead."
   then by publication date. With a prefix argument, the sorting
   order is reversed."
   (interactive "P")
+  (pubmed--guard)
   (if reverse
       (pubmed--sort 'title t t)
     (pubmed--sort 'title nil t)))
