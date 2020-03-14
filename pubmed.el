@@ -774,38 +774,38 @@ the total number of records in the stored set."
               pubdate
               (unless (string-empty-p volume)
                 (concat ";" volume))
-  (unless (string-empty-p issue)
-    (concat "(" issue ")"))
-  (unless (string-empty-p pages)
-    (concat ":" pages))
-  "."
-  (unless (string-empty-p doi)
-    (concat " doi: " doi "."))
-  (unless (string-empty-p epubdate)
-    (concat " Epub " epubdate "."))
-  (unless (null lang)
-    ;; Print only non-english languages
-    (cond
-     ((and (eq (length lang) 1)
-           (not (string= (first lang) "English")))
-      (concat " " (first lang) "."))
-     ((> (length lang) 1)
-      (concat " " (s-join ", " lang) "."))
-     (t
-      nil)))
-  (unless (null pubtype)
-    ;; Print only non-journal article pubtypes
-    (cond
-     ((and (eq (length pubtype) 1)
-           (not (string= (first pubtype) "Journal Article")))
-      (concat " " (first pubtype) "."))
-     ((> (length pubtype) 1)
-      (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
-     (t
-      nil)))
-  (when (null attributes)
-    " No abstract available.")
-  "\n")
+              (unless (string-empty-p issue)
+                (concat "(" issue ")"))
+              (unless (string-empty-p pages)
+                (concat ":" pages))
+              "."
+              (unless (string-empty-p doi)
+                (concat " doi: " doi "."))
+              (unless (string-empty-p epubdate)
+                (concat " Epub " epubdate "."))
+              (unless (null lang)
+                ;; Print only non-english languages
+                (cond
+                 ((and (eq (length lang) 1)
+                       (not (string= (first lang) "English")))
+                  (concat " " (first lang) "."))
+                 ((> (length lang) 1)
+                  (concat " " (s-join ", " lang) "."))
+                 (t
+                  nil)))
+              (unless (null pubtype)
+                ;; Print only non-journal article pubtypes
+                (cond
+                 ((and (eq (length pubtype) 1)
+                       (not (string= (first pubtype) "Journal Article")))
+                  (concat " " (first pubtype) "."))
+                 ((> (length pubtype) 1)
+                  (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
+                 (t
+                  nil)))
+              (when (null attributes)
+                " No abstract available.")
+              "\n")
              'face 'pubmed-citation 'rear-nonsticky t))))
 
 (defun pubmed--guard ()
