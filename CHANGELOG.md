@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.1] - 2020-03-15
+## [0.4.2] - 2020-03-15
 ### Added
 - Marks are remembered after sorting
 
