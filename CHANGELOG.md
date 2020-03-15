@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1] - 2020-03-15
+### Added
+- Marks are remembered after sorting
+
+### Fixed
+- Multiple buffers don't interfere with each other because of buffer-local variables
+
 ## [0.4] - 2020-03-12
 ### Added
 - Major interface change (using EWOC instead of tabulated-list-mode)
