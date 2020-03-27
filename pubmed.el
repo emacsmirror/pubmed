@@ -4,7 +4,7 @@
 ;; Created: 2018-05-23
 ;; Version: 0.4.1
 ;; Keywords: pubmed, hypermedia
-;; Package-Requires: ((emacs "25.1") (deferred "0.5.1") (esxml "0.3.4") (s "1.12.0") (unidecode "20180312.1926"))
+;; Package-Requires: ((emacs "25.1") (deferred "0.5.1") (esxml "0.3.4") (s "1.12.0") (unidecode "0.2"))
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.
