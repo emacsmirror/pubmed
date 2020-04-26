@@ -393,11 +393,11 @@ the total number of records in the stored set."
       (pubmed-mode)
       ;; Remove previous entries
       (erase-buffer)
-      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t)
-                  pubmed-query query
-                  pubmed-entries nil
-                  pubmed-uid nil
-                  pubmed-marklist nil)
+      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
+      (setq-local pubmed-query query)
+      (setq-local pubmed-entries nil)
+      (setq-local pubmed-uid nil)
+      (setq-local pubmed-marklist nil)
       (cond
        ((and querykey webenv count)
         (pubmed--get-docsums pubmed-buffer querykey webenv count))
@@ -916,13 +916,13 @@ set."
       ;; Remove previous entries
       (erase-buffer)
       ;; Initialize an empty ewoc
-      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t)
-                  pubmed-query query
-                  pubmed-entries nil
-                  ;; The UID of the entry currently selected in the PubMed buffer.
-                  pubmed-uid nil
-                  ;; The UIDs of the marked entries in the PubMed buffer.
-                  pubmed-marklist nil)
+      (setq-local pubmed-ewoc (ewoc-create #'pubmed--entry-pp nil nil t))
+      (setq-local pubmed-query query)
+      (setq-local pubmed-entries nil)
+      ;; The UID of the entry currently selected in the PubMed buffer.
+      (setq-local pubmed-uid nil)
+      ;; The UIDs of the marked entries in the PubMed buffer.
+      (setq-local pubmed-marklist nil)
       (pubmed--get-docsums pubmed-buffer querykey webenv count))))
 
 (defun pubmed--esearch (pubmed-buffer query)
