@@ -1,0 +1,7 @@
+# Compiled
+*.elc
+
+# Backup files and locks
+*~
+.#*
+\#*\#
