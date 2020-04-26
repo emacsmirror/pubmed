@@ -1,4 +1,7 @@
 # Changelog
+## [0.4.3] - 2020-04-26
+### Fixed
+- Set only one variable with setq-local for backward compatibility
 
 ## [0.4.2] - 2020-03-15
 ### Added
