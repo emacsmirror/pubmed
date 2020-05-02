@@ -2,7 +2,7 @@
 
 ;; Author: Folkert van der Beek <folkertvanderbeek@gmail.com>
 ;; Created: 2018-05-23
-;; Version: 0.4.3
+;; Version: 0.5
 ;; Keywords: pubmed, hypermedia
 ;; Package-Requires: ((emacs "25.1") (deferred "0.5.1") (esxml "0.3.4") (s "1.12.0") (unidecode "20180312.1926"))
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
