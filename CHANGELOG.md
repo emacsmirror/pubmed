@@ -1,4 +1,14 @@
 # Changelog
+## [0.5] - 2020-05-02
+### Added
+- Font-locking is used for more consistent hightlighting.
+
+### Removed
+- Customization of faces is removed because of font-locking
+
+### Fixed
+- Added a new mode for showing entries, because of different indentation for query results
+
 ## [0.4.3] - 2020-04-26
 ### Fixed
 - Set only one variable with setq-local for backward compatibility
