@@ -358,6 +358,14 @@ All currently available key bindings:
   ;; Set the number of characters preceding continuation lines
   (setq-local wrap-prefix (make-string pubmed-list-padding ?\s)))
 
+(define-derived-mode pubmed-show-mode special-mode "Pubmed-entry"
+  "Mode for displaying PubMed entries."
+  :group 'pubmed
+  ;; Turn on highlighting
+  (font-lock-mode 1)
+  ;; Turn on ẁord wrap
+  (visual-line-mode 1))
+
 ;;;; Commands
 
 ;;;###autoload
@@ -1077,7 +1085,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	    (inhibit-read-only t)
 	    summary)
 	(with-current-buffer pubmed-entry-buffer
-	  (pubmed-mode)
+	  (pubmed-show-mode)
 	  (erase-buffer)
 	  (cond
 	   ;; metadata associated with an article
