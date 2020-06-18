@@ -355,6 +355,20 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
   :group 'pubmed
   :type 'string)
 
+;;;; Buttons
+
+(define-button-type 'pubmed-pmid
+  'help-echo "mouse-2, RET: Search reference in PubMed."
+  'follow-link t
+  'action (lambda (button)
+	    (pubmed-search (concat (button-get button 'pubmed-pmid) "[pmid]"))))
+
+(define-button-type 'pubmed-mh
+  'help-echo "mouse-2, RET: Search MeSH heading in PubMed."
+  'follow-link t
+  'action (lambda (button)
+	    (pubmed-search (concat (button-get button 'pubmed-mh) "[mh]"))))
+
 ;;;; Mode
 
 ;;;###autoload
@@ -1183,10 +1197,9 @@ Show the result in the \"*PubMed-entry*\" buffer."
       	      (insert "\n")
       	      (let ((commentslist (pubmed--summary-commentscorrections summary)))
       	      	(dolist (comment commentslist)
-      	      	  ;; (insert (plist-get comment 'reftype))
-      	      	  (insert (plist-get comment 'refsource))
-      	      	  ;; TODO: make refsource a link
-      	      	  ;; (insert (plist-get comment 'pmid))
+                  (insert-button (plist-get comment 'refsource)
+                                 'type 'pubmed-pmid
+                                 'pubmed-pmid (plist-get comment 'pmid))
       	      	  (insert "\n"))))
 	    (when (pubmed--summary-references summary)
       	      (insert "\n")
@@ -1196,9 +1209,9 @@ Show the result in the \"*PubMed-entry*\" buffer."
       	      (insert "\n")
       	      (let ((referencelist (pubmed--summary-references summary)))
       	      	(dolist (reference referencelist)
-      	      	  (insert (plist-get reference 'citation))
-      	      	  ;; TODO: make reference a link
-      	      	  ;; (insert (plist-get reference 'pubmed))
+                  (insert-button (plist-get reference 'citation)
+                                 'type 'pubmed-pmid
+                                 'pubmed-pmid (plist-get reference 'pubmed))
       	      	  (insert "\n"))))
 	    (when (pubmed--summary-publicationtype summary)
       	      (insert "\n")
@@ -1219,19 +1232,27 @@ Show the result in the \"*PubMed-entry*\" buffer."
       	      (let ((meshheadinglist (pubmed--summary-mesh summary)))
       	      	;; Iterate over the meshheadings
       	      	(dolist (meshheading meshheadinglist)
-      	      	  (let ((qualifiers (plist-get meshheading 'qualifiers)))
+      	      	  (let ((heading (plist-get meshheading 'descriptor))
+                        (qualifiers (plist-get meshheading 'qualifiers)))
       	      	    ;; If the descriptor (or subject heading) has qualifiers (or subheadings)
       	      	    (if qualifiers
       	      		;; Iterate over the qualifiers
       	      		(dolist (qualifier qualifiers)
-      	      		  ;; Insert "descriptor/qualifier"
-      	      		  (insert (plist-get meshheading 'descriptor))
-      	      		  (insert "/")
-      	      		  (insert (plist-get qualifier 'qualifier))
-      	      		  (insert "\n"))
+                          (let ((subheading (plist-get qualifier 'qualifier)))
+                            ;; Insert "heading/subheading"
+                            (insert-button heading
+                                           'type 'pubmed-mh
+                                           'pubmed-mh heading)
+      	      		    (insert "/")
+                            (insert-button subheading
+                                           'type 'pubmed-mh
+                                           'pubmed-mh (concat heading "/" subheading))
+      	      		    (insert "\n")))
       	      	      ;; If the descriptor (or subject heading) has no qualifiers (or subheadings)
-      	      	      ;; Insert "descriptor"
-      	      	      (insert (plist-get meshheading 'descriptor))
+      	      	      ;; Insert "heading"
+                      (insert-button heading
+                                     'type 'pubmed-mh
+                                     'pubmed-mh heading)
       	      	      (insert "\n"))))))
 	    (when (pubmed--summary-grant summary)
       	      (insert "\n")
