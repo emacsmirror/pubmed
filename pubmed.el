@@ -116,6 +116,12 @@ entries.")
     map)
   "Local keymap for `pubmed-mode'.")
 
+(defvar pubmed-show-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map (make-composed-keymap button-buffer-map special-mode-map))
+    map)
+  "Local keymap for `pubmed-show-mode'.")
+
 (defvar pubmed-search-mode-map
   (let ((map (copy-keymap minibuffer-local-map)))
     (define-key map (kbd "TAB") #'completion-at-point)
