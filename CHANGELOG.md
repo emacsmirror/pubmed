@@ -1,4 +1,8 @@
 # Changelog
+## [0.5.1] - 2020-06-18
+### Added
+- Added hyperlinked references and MeSH terms in entry buffer
+
 ## [0.5] - 2020-05-02
 ### Added
 - Font-locking is used for more consistent hightlighting.
