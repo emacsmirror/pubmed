@@ -1,4 +1,8 @@
 # Changelog
+## [0.5.2] - 2021-09-27
+### Fixed
+- Removed calls to `first' in deprecated `cl' package
+
 ## [0.5.1] - 2020-06-18
 ### Added
 - Added hyperlinked references and MeSH terms in entry buffer
