@@ -418,7 +418,7 @@ field marker preceding this filter resolves to an empty value.
 The placeholder x may be any string. For instance, the marker
 [volume:(unknown)] will return the entry's volume if set, and the
 string unknown if the entry's volume field is not set."
-  
+
   :link '(url-link "https://help.jabref.org/en/BibtexKeyPatterns")
   :group 'pubmed-bibtex
   :type 'string)
@@ -1072,9 +1072,9 @@ name."
      ((and n m)
       (s-left n (plist-get (nth (1- m) authors) 'lastname)))
      (n
-      (s-left n (plist-get (first authors) 'lastname)))
+      (s-left n (plist-get (car authors) 'lastname)))
      (t
-      (plist-get (first authors) 'lastname)))))
+      (plist-get (car authors) 'lastname)))))
 
 (defun pubmed-bibtex-key--authors (summary &optional n _m)
   "Return the [authors] or [authorsN] key pattern.
@@ -1122,7 +1122,7 @@ the end."
 	authorlist)
     (cond
      ((= (length authors) 1)
-      (s-left 3 (plist-get (first authors) 'lastname)))
+      (s-left 3 (plist-get (car authors) 'lastname)))
      ((and (>= (length authors) 2) (<= (length authors) 4))
       (while (< counter (length authors))
 	(push (plist-get (nth counter authors) 'lastname) authorlist)
@@ -1193,9 +1193,9 @@ more than two."
 		     (pubmed--summary-book-editors summary))))
     (cond
      ((<= (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) "." (plist-get (nth 1 authors) 'lastname)))
+      (concat (plist-get (car authors) 'lastname) "." (plist-get (nth 1 authors) 'lastname)))
      ((> (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) ".etal")))))
+      (concat (plist-get (car authors) 'lastname) ".etal")))))
 
 (defun pubmed-bibtex-key--authetal (summary &optional _n _m)
   "Return the [authEtAl] key pattern.
@@ -1212,7 +1212,7 @@ authors \"EtAl\" instead of \".etal\" is appended."
      ((<= (length authors) 2)
       (concat (plist-get (car authors) 'lastname) (plist-get (cadr authors) 'lastname)))
      ((> (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) "EtAl")))))
+      (concat (plist-get (car authors) 'lastname) "EtAl")))))
 
 (defun pubmed-bibtex-key--authshort (summary &optional _n _m)
   "Return the [authshort] key pattern.
@@ -1227,7 +1227,7 @@ plus character is added, if there are more than three authors."
 	authorlist)
     (cond
      ((= (length authors) 1)
-      (plist-get (first authors) 'lastname))
+      (plist-get (car authors) 'lastname))
      ((> (length authors) 1)
       (while (< counter 3)
 	(push (s-left 1 (plist-get (nth counter authors) 'lastname)) authorlist)
@@ -1243,7 +1243,7 @@ The forename initial of the first author."
 		     (pubmed--summary-book-authors summary)
 		     (pubmed--summary-editors summary)
 		     (pubmed--summary-book-editors summary))))
-    (plist-get (first authors) 'initials)))
+    (plist-get (car authors) 'initials)))
 
 (defun pubmed-bibtex-key--authorlastforeini (summary &optional _n _m)
   "Return the [authorLastForeIni] key pattern.
@@ -1266,9 +1266,9 @@ name."
      ((and n m)
       (s-left n (plist-get (nth (1- m) authors) 'lastname)))
      (n
-      (s-left n (plist-get (first authors) 'lastname)))
+      (s-left n (plist-get (car authors) 'lastname)))
      (t
-      (plist-get (first authors) 'lastname)))))
+      (plist-get (car authors) 'lastname)))))
 
 (defun pubmed-bibtex-key--pureauthors (summary &optional n _m)
   "Return the [pureauthors] or [pureauthorsN] key pattern.
@@ -1310,7 +1310,7 @@ the end."
 	authorlist)
     (cond
      ((= (length authors) 1)
-      (s-left 3 (plist-get (first authors) 'lastname)))
+      (s-left 3 (plist-get (car authors) 'lastname)))
      ((and (>= (length authors) 2) (<= (length authors) 4))
       (while (< counter (length authors))
 	(push (plist-get (nth counter authors) 'lastname) authorlist)
@@ -1373,9 +1373,9 @@ more than two."
 		     (pubmed--summary-book-authors summary))))
     (cond
      ((<= (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) "." (plist-get (nth 1 authors) 'lastname)))
+      (concat (plist-get (car authors) 'lastname) "." (plist-get (nth 1 authors) 'lastname)))
      ((> (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) ".etal")))))
+      (concat (plist-get (car authors) 'lastname) ".etal")))))
 
 (defun pubmed-bibtex-key--pureauthetal (summary &optional _n _m)
   "Return the [pureauthEtAl] key pattern.
@@ -1390,7 +1390,7 @@ authors \"EtAl\" instead of \".etal\" is appended."
      ((<= (length authors) 2)
       (concat (plist-get (car authors) 'lastname) (plist-get (cadr authors) 'lastname)))
      ((> (length authors) 2)
-      (concat (plist-get (first authors) 'lastname) "EtAl")))))
+      (concat (plist-get (car authors) 'lastname) "EtAl")))))
 
 (defun pubmed-bibtex-key--pureauthshort (summary &optional _n _m)
   "Return the [pureauthshort] key pattern.
@@ -1403,7 +1403,7 @@ plus character is added, if there are more than three authors."
 	authorlist)
     (cond
      ((= (length authors) 1)
-      (plist-get (first authors) 'lastname))
+      (plist-get (car authors) 'lastname))
      ((> (length authors) 1)
       (while (< counter 3)
 	(push (s-left 1 (plist-get (nth counter authors) 'lastname)) authorlist)
@@ -1417,7 +1417,7 @@ plus character is added, if there are more than three authors."
 The forename initial of the first author."
   (let ((authors (or (pubmed--summary-authors summary)
 		     (pubmed--summary-book-authors summary))))
-    (plist-get (first authors) 'initials)))
+    (plist-get (car authors) 'initials)))
 
 (defun pubmed-bibtex-key--pureauthorlastforeini (summary &optional _n _m)
   "Return the [pureauthorLastForeIni] key pattern.
@@ -1440,9 +1440,9 @@ name."
      ((and n m)
       (s-left n (plist-get (nth (1- m) editors) 'lastname)))
      (n
-      (s-left n (plist-get (first editors) 'lastname)))
+      (s-left n (plist-get (car editors) 'lastname)))
      (t
-      (plist-get (first editors) 'lastname)))))
+      (plist-get (car editors) 'lastname)))))
 
 (defun pubmed-bibtex-key--editors (summary &optional n _m)
   "Return the [editors] or [editorsN] key pattern.
@@ -1484,7 +1484,7 @@ the end."
 	 editorlist)
     (cond
      ((= (length editors) 1)
-      (s-left 3 (plist-get (first editors) 'lastname)))
+      (s-left 3 (plist-get (car editors) 'lastname)))
      ((and (>= (length editors) 2) (<= (length editors) 4))
       (while (< counter (length editors))
 	(push (plist-get (nth counter editors) 'lastname) editorlist)
@@ -1547,9 +1547,9 @@ more than two."
 		     (pubmed--summary-book-editors summary))))
     (cond
      ((<= (length editors) 2)
-      (concat (plist-get (first editors) 'lastname) "." (plist-get (nth 1 editors) 'lastname)))
+      (concat (plist-get (car editors) 'lastname) "." (plist-get (nth 1 editors) 'lastname)))
      ((> (length editors) 2)
-      (concat (plist-get (first editors) 'lastname) ".etal")))))
+      (concat (plist-get (car editors) 'lastname) ".etal")))))
 
 (defun pubmed-bibtex-key--edtretal (summary &optional _n _m)
   "Return the [edtrEtAl] key pattern.
@@ -1564,7 +1564,7 @@ editors \"EtAl\" instead of \".etal\" is appended."
      ((<= (length editors) 2)
       (concat (plist-get (car editors) 'lastname) (plist-get (cadr editors) 'lastname)))
      ((> (length editors) 2)
-      (concat (plist-get (first editors) 'lastname) "EtAl")))))
+      (concat (plist-get (car editors) 'lastname) "EtAl")))))
 
 (defun pubmed-bibtex-key--edtrshort (summary &optional _n _m)
   "Return the [edtrshort] key pattern.
@@ -1577,7 +1577,7 @@ plus character is added, if there are more than three editors."
 	editorlist)
     (cond
      ((= (length editors) 1)
-      (plist-get (first editors) 'lastname))
+      (plist-get (car editors) 'lastname))
      ((> (length editors) 1)
       (while (< counter 3)
 	(push (s-left 1 (plist-get (nth counter editors) 'lastname)) editorlist)
@@ -1591,7 +1591,7 @@ plus character is added, if there are more than three editors."
 The forename initial of the first editor."
   (let ((editors (or (pubmed--summary-editors summary)
 		     (pubmed--summary-book-editors summary))))
-    (plist-get (first editors) 'initials)))
+    (plist-get (car editors) 'initials)))
 
 (defun pubmed-bibtex-key--editorlastforeini (summary &optional _n _m)
   "Return the [editorLastForeIni] key pattern.
@@ -1676,7 +1676,7 @@ The number of the first page of the publication. Caution: this
 will return the lowest number found in the pages field, since
 BibTeX allows 7,41,73--97 or 43+."
   (let ((pagination (pubmed--summary-pagination summary)))
-    (first (s-split "[-,]" pagination))))
+    (car (s-split "[-,]" pagination))))
 
 (defun pubmed-bibtex-key--pageprefix (summary &optional _n _m)
   "Return the [pageprefix] key pattern.

@@ -779,9 +779,9 @@ the total number of records in the stored set."
                ((eq (length authors) 0)
                 "[No authors listed] ")
                ((eq (length authors) 1)
-                (concat (first authors) ". "))
+                (concat (car authors) ". "))
                ((> (length authors) 1)
-                (concat (first authors) ", et al. ")))
+                (concat (car authors) ", et al. ")))
               source
               ". "
               pubdate
@@ -800,8 +800,8 @@ the total number of records in the stored set."
                 ;; Print only non-english languages
                 (cond
                  ((and (eq (length lang) 1)
-                       (not (string= (first lang) "English")))
-                  (concat " " (first lang) "."))
+                       (not (string= (car lang) "English")))
+                  (concat " " (car lang) "."))
                  ((> (length lang) 1)
                   (concat " " (s-join ", " lang) "."))
                  (t
@@ -810,8 +810,8 @@ the total number of records in the stored set."
                 ;; Print only non-journal article pubtypes
                 (cond
                  ((and (eq (length pubtype) 1)
-                       (not (string= (first pubtype) "Journal Article")))
-                  (concat " " (first pubtype) "."))
+                       (not (string= (car pubtype) "Journal Article")))
+                  (concat " " (car pubtype) "."))
                  ((> (length pubtype) 1)
                   (concat " " (s-join ", " (delete "Journal Article" pubtype)) "."))
                  (t
