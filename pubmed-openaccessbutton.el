@@ -102,13 +102,8 @@ Return the url or nil if none is found. See URL
 	 (url (plist-get (car availability) :url)))
     (if (and url (equal type "article"))
         (progn
-          (let* ((parsed-url (url-generic-parse-url url))
-                 (path (car (url-path-and-query parsed-url))))
-            ;; Remove query part
-            (setf (url-filename parsed-url) path)
-            (setq url (url-recreate-url parsed-url))
-            (message "Find fulltext link for UID %s using Open Access Button...done" uid)
-            url))
+          (message "Find fulltext link for UID %s using Open Access Button...done" uid)
+          url)
       (message "Find fulltext link for UID %s using Open Access Button...failed" uid)
       nil)))
 
