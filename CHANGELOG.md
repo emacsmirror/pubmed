@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.1] - 2022-07-10
+### Fixed
+- Return to PubMed buffer after fulltext action to access buffer-local bindings
+- Fix bug in Open Access Button function that prevented the rendering of PDFs
+
 ## [0.6] - 2022-07-10
 ### Fixed
 - Fixed fulltext functions
