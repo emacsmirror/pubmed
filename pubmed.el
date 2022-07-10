@@ -484,31 +484,29 @@ the total number of records in the stored set."
 
 (defun pubmed-mark (&optional n)
   "Mark N entries and move to the next line.
-  If N is omitted or nil, mark one entry.
-
-  If region is active, mark entries in active region instead."
+If N is omitted or nil, mark one entry. If region is active, mark
+entries in active region instead."
   (interactive "p")
   (pubmed--guard)
   (if (use-region-p)
       (pubmed-mark-region (region-beginning) (region-end))
-    (dotimes (i (or n 1))
+    (dotimes (_ (or n 1))
       (pubmed--put-tag "*" t))))
 
 (defun pubmed-unmark (&optional n)
   "Unmark N entries and move to the next line.
-  If N is omitted or nil, unmark one entry.
-
-  If region is active, unmark entries in active region instead."
+If N is omitted or nil, unmark one entry. If region is active,
+unmark entries in active region instead."
   (interactive "p")
   (pubmed--guard)
   (if (use-region-p)
       (pubmed-unmark-region (region-beginning) (region-end))
-    (dotimes (i (or n 1))
+    (dotimes (_ (or n 1))
       (pubmed--put-tag " " t))))
 
 (defun pubmed-mark-region (beg end)
   "Unmark all entries between point and mark.
-  BEG and END are the bounds of the region."
+BEG and END are the bounds of the region."
   (interactive "r")
   (pubmed--guard)
   (save-excursion
@@ -524,7 +522,7 @@ the total number of records in the stored set."
 
 (defun pubmed-unmark-region (beg end)
   "Mark all entries between point and mark.
-  BEG and END are the bounds of the region."
+BEG and END are the bounds of the region."
   (interactive "r")
   (pubmed--guard)
   (save-excursion
@@ -563,8 +561,8 @@ the total number of records in the stored set."
           (setq node (ewoc-next pubmed-ewoc node)))))))
 
 (defun pubmed-sort-by-index (&optional reverse)
-  "Sort the PubMed buffer by index. With a prefix argument, the sorting
-  order is reversed."
+  "Sort the PubMed buffer by index.
+With a prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -572,9 +570,9 @@ the total number of records in the stored set."
     (pubmed--sort 'index nil t)))
 
 (defun pubmed-sort-by-firstauthor (&optional reverse)
-  "Sort the PubMed buffer alphabetically by first author name,
-  and then by publication date. With a prefix argument, the sorting
-  order is reversed."
+  "Sort the PubMed buffer by first author name.
+If first author is equal, then sort by publication date. With a
+prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -582,9 +580,9 @@ the total number of records in the stored set."
     (pubmed--sort 'firstauthor nil t)))
 
 (defun pubmed-sort-by-lastauthor (&optional reverse)
-  "Sort the PubMed buffer alphabetically by first author name,
-  and then by publication date. With a prefix argument, the sorting
-  order is reversed."
+  "Sort the PubMed buffer by first author name.
+If first author is equal, then sort by publication date. With a
+prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -592,9 +590,9 @@ the total number of records in the stored set."
     (pubmed--sort 'lastauthor nil t)))
 
 (defun pubmed-sort-by-journal (&optional reverse)
-  "Sort the PubMed buffer alphabetically by journal title, and
-  then by publication date. With a prefix argument, the sorting
-  order is reversed."
+  "Sort the PubMed buffer by journal title.
+If journal title is equal, then sort by publication date. With a
+prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -602,9 +600,10 @@ the total number of records in the stored set."
     (pubmed--sort 'journal nil t)))
 
 (defun pubmed-sort-by-pubdate (&optional reverse)
-  "Sort the PubMed buffer chronologically by publication date
-  \(with most recent first\), and then alphabetically by journal
-  title. With a prefix argument, the sorting order is reversed."
+  "Sort the PubMed buffer by publication date.
+Sorting is chronologically with most recent first. If the
+publication date is equal, then sort by journal title. With a
+prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -612,9 +611,9 @@ the total number of records in the stored set."
     (pubmed--sort 'pubdate nil t)))
 
 (defun pubmed-sort-by-title (&optional reverse)
-  "Sort the PubMed buffer alphabetically by article title, and
-  then by publication date. With a prefix argument, the sorting
-  order is reversed."
+  "Sort the PubMed buffer alphabetically by article title.
+If article title is equal, then sort by publication date. With a
+prefix argument, the sorting order is reversed."
   (interactive "P")
   (pubmed--guard)
   (if reverse
@@ -807,8 +806,8 @@ The file is saved in `pubmed-default-directory'."
 
 (defun pubmed--put-tag (tag &optional advance)
   "Put TAG in the padding area of the current node.
-  TAG should be a string, with length <= `pubmed-list-padding'.
-  If ADVANCE is non-nil, move forward by one line afterwards."
+TAG should be a string, with length <= `pubmed-list-padding'. If
+ADVANCE is non-nil, move forward by one line afterwards."
   (unless (stringp tag)
     (error "Invalid argument to `pubmed--put-tag'"))
   (unless (> pubmed-list-padding 0)
@@ -1015,10 +1014,10 @@ the node with the same data element as the current node."
       (ewoc-goto-node pubmed-ewoc (ewoc-nth pubmed-ewoc 0)))))
 
 (defun pubmed--show-query (query querykey webenv count)
-  "Show the results of QUERY. The QUERYKEY specifies which of the
-stored sets to the given WEBENV will be used as input to
-ESummary. COUNT is the total number of records in the stored
-set."
+  "Show the results of QUERY.
+The QUERYKEY specifies which of the stored sets to the given
+WEBENV will be used as input to ESummary. COUNT is the total
+number of records in the stored set."
   (let ((pubmed-buffer (get-buffer-create (format "*PubMed - Search Results - %s*" query)))
         (inhibit-read-only t))
     (with-current-buffer pubmed-buffer
@@ -1494,7 +1493,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 		(put-text-property 0 (length heading) 'font-lock-face 'info-title-4 heading)
 		(insert heading)
 		(insert "\n"))
-	      (mapcar (lambda (x) (insert (plist-get x 'type) "\n")) (pubmed--summary-publicationtype summary))
+	      (mapc (lambda (x) (insert (plist-get x 'type) "\n")) (pubmed--summary-publicationtype summary))
 	      (insert "\n"))
 	    (goto-char (point-min)))
 	   ;; metadata associated with a book
@@ -1622,7 +1621,7 @@ Show the result in the \"*PubMed-entry*\" buffer."
 		(put-text-property 0 (length heading) 'font-lock-face 'info-title-4 heading)
 		(insert heading)
 		(insert "\n"))
-	      (mapcar (lambda (x) (insert (plist-get x 'type) "\n")) (pubmed--summary-publicationtype summary))
+	      (mapc (lambda (x) (insert (plist-get x 'type) "\n")) (pubmed--summary-publicationtype summary))
 	      (insert "\n"))
 	    (goto-char (point-min)))
 	   (t
