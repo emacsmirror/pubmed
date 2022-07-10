@@ -38,9 +38,8 @@
 ;;;; Requirements
 
 (require 'pubmed)
-(require 'deferred)
-(require 'eww)
 (require 'json)
+(require 'seq)
 (require 'url)
 
 ;;;; Variables
@@ -54,8 +53,8 @@
   "Fetch fulltext PDFs from Springer Nature."
   :group 'pubmed)
 
-(defcustom pubmed-springer-timeout 5000
-  "Springer timeout in milliseconds."
+(defcustom pubmed-springer-timeout 5
+  "Springer timeout in seconds."
   :group 'pubmed-springer
   :type 'integer)
 
@@ -74,153 +73,63 @@ To create the key, register at
 ;;;; Commands
 
 ;;;###autoload
-(defun pubmed-get-springer (&optional entries)
-  "In PubMed, try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
-  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
+(defun pubmed-get-springer (&optional uids)
+  "Try to fetch the fulltext PDF articles using  Springer Nature.
+The entries in the optional argument UIDS are used. If no uids
+are supplied, the marked entries, the entries in the active
+region, or the current entry are used.
+
+The variable `pubmed-fulltext-action' says which function to
+use."
   (interactive "P")
-  (pubmed--guard)
-  (let (mark
-	mark-list
-	pubmed-uid)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (setq mark (char-after))
-        (setq pubmed-uid (pubmed--get-uid))
-	(when (eq mark ?*)
-          (push pubmed-uid mark-list))
-	(forward-line)))
-    (cond
-     (entries
-      (mapcar #'pubmed--get-springer entries))
-     (mark-list
-      (mapcar #'pubmed--get-springer mark-list))
-     ((pubmed--get-uid)
-      (pubmed--get-springer (pubmed--get-uid)))
-     (t
-      (error "No entry selected")))))
+  (if-let ((uids (or uids (pubmed-get-uids))))
+      (dolist (uid uids)
+        (when-let ((url (pubmed-springer uid)))
+          (funcall pubmed-fulltext-action url)))
+    (error "No entry selected")))
 
 ;;;; Functions
 
-(defun pubmed--get-springer (uid)
-  "Try to fetch the fulltext PDF of UID, using SPRINGER."
-  (deferred:$
-    (deferred:call #'pubmed-springer uid)
-
-    (deferred:nextc it
-      (lambda (result)
-	(when (bufferp result)
-	  (pubmed--view-pdf result))))))
-
 (defun pubmed-springer (uid)
-  "Deferred chain to retrieve the fulltext PDF of the UID."
-  (deferred:$
-    ;; try
-    (deferred:$
-      (deferred:next
-	(lambda ()
-	  (let* ((keyword (intern (concat ":" uid)))
-		 (value (plist-get pubmed-entries keyword))
-		 (articleids (plist-get value :articleids))
-		 doi)
-	    (dolist (articleid articleids doi)
-	      (when (equal (plist-get articleid :idtype) "doi")
-		(setq doi (plist-get articleid :value)))))))
-
-      (deferred:nextc it
-	(lambda (doi)
-	  (deferred:timeout pubmed-springer-timeout (error "Timeout")
-	    (let* ((url pubmed-springer-url)
-		   (parameters (list (cons "q" doi) (cons "api_key" pubmed-springer-api-key))))
-              (cond
-               ((and doi pubmed-springer-api-key)
-		(deferred:url-get url parameters))
-               ((not pubmed-springer-api-key)
-                (error "Using Springer Nature requires an API key."))
-               ((not doi)
-		(error "Article has no doi")))))))
-
-      (deferred:nextc it
-	(lambda (buffer)
-	  "Parse the JSON object in BUFFER. Return the url of the Open Access fulltext article or nil if none is found."
-	  (let* ((json (with-current-buffer buffer (decode-coding-string (buffer-string) 'utf-8)))
-		 (json-object-type 'plist)
-		 (json-array-type 'list)
-		 (json-key-type nil)
-		 (json-object (json-read-from-string json))
-		 (records (car (plist-get json-object :records)))
-                 (openaccess (plist-get records :openaccess))
-                 (urls (plist-get records :url)))
-	    (cond
-	     ;; Loop through urls to find an url_for_pdf and return the first one found
-             ((and (equal openaccess "true") urls)
-	      (let ((i 0))
-                (while (not (or (>= i (length urls))
-				(equal (plist-get (nth i urls) :format) "pdf")))
-		  (setq i (1+ i)))
-		(if (>= i (length urls))
-		    (error "Springer found no fulltext article")
-                  (setq pdf-url (plist-get (nth i urls) :value)))))
-	     (t
-	      (error "Springer found no fulltext article"))))))
-
-      (deferred:nextc it
-        (lambda (url)
-	  (if url
-	      (lexical-let ((d (deferred:new #'identity)))
-	        (url-retrieve url (lambda (status)
-				    ;; Start the following callback queue now.
-				    (deferred:callback-post d status)))
-	        ;; Return the unregistered (not yet started) callback
-	        ;; queue, so that the following queue will wait until it
-	        ;; is started.
-	        d)
-	    (deferred:cancel it))))
-
-      ;; You can connect deferred callback queues
-      (deferred:nextc it
-        (lambda (status)
-	  (let ((url-error (plist-get status :error))
-	        (url-redirect (plist-get status :redirect)))
-	    (cond
-	     (url-error
-	      (signal (car url-error) (cdr url-error)))
-	     (url-redirect
-	      (progn
-	        (message "Redirected-to: %s" url-redirect)
-	        url-redirect))
-	     (t
-	      pdf-url)))))
-
-      (deferred:nextc it
-        (lambda (url)
-	  (deferred:timeout pubmed-springer-timeout (error "Timeout")
-	    (deferred:url-retrieve url))))
-
-      (deferred:nextc it
-        (lambda (buffer)
-	  "Parse the HTML object in BUFFER and show the PDF."
-	  (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
-	         (content-type (cdr (assoc "content-type" headers))))
-	    (cond
-	     ;; Return buffer if the iframe contains a pdf file
-	     ((equal content-type "application/pdf")
-	      buffer)
-	     (t
-	      (error "Unknown content-type: %s" content-type)))))))
-
-    ;; catch
-    (deferred:error it
-      (lambda (deferred-error)
-        "Catch any errors that occur during the deferred chain and return nil."
-        (message "%s" (cadr deferred-error))
-        nil))
-
-    ;; finally
-    (deferred:nextc it
-      (lambda (result)
-        "Return non-nil if a fulltext article is found, otherwise nil."
-        result))))
+  "Try to fetch the fulltext PDF of UID, using Springer Nature.
+Return the url or nil if none is found. See URL
+`https://dev.springernature.com/'."
+  (message "Find fulltext link for UID %s using Springer Nature..." uid)
+  (unless pubmed-springer-api-key
+    (error "Using Springer Nature requires an API key"))
+  (catch 'result
+    (let* ((entry (seq-find (lambda (entry) (equal (plist-get entry :uid) uid)) pubmed-entries))
+	   (articleids (plist-get entry :articleids))
+           (articleid (seq-find (lambda (articleid) (equal (plist-get articleid :idtype) "doi")) articleids))
+           (doi (plist-get articleid :value)))
+      (unless doi
+        (message "Find fulltext link for UID %s using Springer Nature...failed" uid)
+        (throw 'result nil))
+      (let* ((arguments (concat "?"
+			        "q=" doi
+			        "&api_key=" pubmed-springer-api-key))
+             (url (concat pubmed-springer-url arguments))
+             (buffer (url-retrieve-synchronously url nil nil pubmed-springer-timeout))
+             (json (with-current-buffer buffer (decode-coding-string (buffer-substring (1+ url-http-end-of-headers) (point-max)) 'utf-8)))
+	     (json-object-type 'plist)
+	     (json-array-type 'list)
+	     (json-key-type nil)
+	     (json-object (json-read-from-string json))
+	     (records (plist-get json-object :records))
+             (record (car records))
+             (openaccess (plist-get record :openaccess))
+             (urls (plist-get record :url))
+             (has-pdf-p (lambda (url) (equal (plist-get url :format) "pdf")))
+             (url (when (and (equal openaccess "true") urls)
+                    (thread-first
+                        (seq-find has-pdf-p urls)
+                      (plist-get :value)))))
+        (if url
+            (progn
+              (message "Find fulltext link for UID %s using Springer Nature...done" uid)
+              (throw 'result url))
+          (message "Find fulltext link for UID %s using Springer Nature...failed" uid)
+          (throw 'result nil))))))
 
 ;;;; Footer
 

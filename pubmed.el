@@ -4,7 +4,7 @@
 ;; Created: 2018-05-23
 ;; Version: 0.5.1
 ;; Keywords: pubmed, hypermedia
-;; Package-Requires: ((emacs "25.1") (deferred "0.5.1") (esxml "0.3.4") (s "1.12.0") (unidecode "0.2"))
+;; Package-Requires: ((emacs "26.1") (esxml "0.3.4") (s "1.12.0") (unidecode "0.2"))
 ;; URL: https://gitlab.com/fvdbeek/emacs-pubmed
 
 ;; This file is NOT part of GNU Emacs.
@@ -37,7 +37,6 @@
 (require 'esxml)
 (require 'esxml-query)
 (require 'ewoc)
-(require 'eww)
 (require 'json)
 (require 's)
 (require 'url)
@@ -45,17 +44,20 @@
 
 ;;;; Variables
 
-(defvar pubmed-efetch-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-  "EFetch base URL.")
+(defvar pubmed-eutils-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+  "E-utilities base URL.")
 
-(defvar pubmed-esearch-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-  "ESearch base URL.")
+(defvar pubmed-efetch-url (concat pubmed-eutils-url "efetch.fcgi")
+  "EFetch URL.")
 
-(defvar pubmed-espell-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/espell.fcgi"
-  "ESpell base URL.")
+(defvar pubmed-esearch-url (concat pubmed-eutils-url "esearch.fcgi")
+  "ESearch URL.")
 
-(defvar pubmed-esummary-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-  "ESummary base URL.")
+(defvar pubmed-espell-url (concat pubmed-eutils-url "espell.fcgi")
+  "ESpell URL.")
+
+(defvar pubmed-esummary-url (concat pubmed-eutils-url "esummary.fcgi")
+  "ESummary URL.")
 
 (defvar pubmed-completion-url
   "https://www.ncbi.nlm.nih.gov/portal/utils/autocomp.fcgi?dict=pm_related_queries_2&callback=?&q=%s")
@@ -328,8 +330,8 @@ then by publication date.
 (defcustom pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton)
   "The list of functions tried in order by `pubmed-fulltext'.
 To change the behavior of ‘pubmed-get-fulltext’, remove, change
-  the order of, or insert functions in this list. Each function
-  should accept no arguments, and return a string or nil."
+the order of, or insert functions in this list. Each function
+should accept no arguments, and return a string or nil."
   :group 'pubmed
   :type '(repeat function)
   :options '(pubmed-pmc
@@ -339,10 +341,42 @@ To change the behavior of ‘pubmed-get-fulltext’, remove, change
              pubmed-springer
 	     pubmed-scihub))
 
-(defcustom pubmed-temp-prefix "pubmed-"
-  "Prefix for temporary files created by pubmed."
+(defcustom pubmed-fulltext-action 'pubmed-open
+  "Default function called by `pubmed-get-fulltext'.
+The function should accept one argument: a string with an URL."
   :group 'pubmed
-  :type 'string)
+  :type '(choice (function :tag "Open the articles using `pubmed-open-file-command'" pubmed-open)
+	         (function :tag "Save the articles to `pubmed-default-directory'" pubmed-save)
+	         (function :tag "Save the articles and prompt for filename" pubmed-save-as)
+                 (function :tag "Ask a WWW browser to load the article" browse-url)
+	         (function :tag "Function")))
+
+(defcustom pubmed-default-directory "~"
+  "Default directory for saving fulltext articles."
+  :group 'pubmed
+  :type 'directory)
+
+(defcustom pubmed-open-file-command 'find-file-other-window
+  "Application for opening PDF files.
+
+Possible values are:
+
+`system': Use the system command for opening files, like
+\"open\". This value is intented for graphical desktop
+environments on GNU/Linux, macOS, or Microsoft Windows.
+
+`mailcap': Use command specified in the mailcaps.
+
+string: A command to be executed by a shell; %s will be replaced
+by the path to the file, e.g. \"evince \"%s\"\".
+
+function: A Lisp function, which will be called with the file
+path as argument."
+  :group 'pubmed
+  :type '(choice (const :tag "Use default" default)
+	         (const :tag "Use the system command" system)
+	         (string :tag "Command")
+	         (function :tag "Function")))
 
 ;;;; Buttons
 
@@ -421,7 +455,7 @@ the total number of records in the stored set."
   "Show the current entry in the \"pubmed-show\" buffer."
   (interactive)
   (pubmed--guard)
-  (setq pubmed-uid (pubmed--get-uid))
+  (setq pubmed-uid (pubmed-get-uid))
   (when (timerp pubmed-entry-timer)
     (cancel-timer pubmed-entry-timer))
   (setq pubmed-entry-timer (run-with-timer pubmed-entry-delay nil #'pubmed--show-entry pubmed-uid)))
@@ -431,7 +465,7 @@ the total number of records in the stored set."
   (interactive)
   (pubmed--guard)
   (ewoc-goto-next pubmed-ewoc 1)
-  (setq pubmed-uid (pubmed--get-uid))
+  (setq pubmed-uid (pubmed-get-uid))
   (when (get-buffer-window "*PubMed-entry*" "visible")
     (when (timerp pubmed-entry-timer)
       (cancel-timer pubmed-entry-timer))
@@ -442,7 +476,7 @@ the total number of records in the stored set."
   (interactive)
   (pubmed--guard)
   (ewoc-goto-prev pubmed-ewoc 1)
-  (setq pubmed-uid (pubmed--get-uid))
+  (setq pubmed-uid (pubmed-get-uid))
   (when (get-buffer-window "*PubMed-entry*" "visible")
     (when (timerp pubmed-entry-timer)
       (cancel-timer pubmed-entry-timer))
@@ -587,19 +621,82 @@ the total number of records in the stored set."
       (pubmed--sort 'title t t)
     (pubmed--sort 'title nil t)))
 
-(defun pubmed-get-fulltext (&optional entries)
-  "Try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
-  (interactive "P")
+(defun pubmed-get-uids-in-region ()
+  "Return a list of uids the entries in the active region."
   (pubmed--guard)
-  (cond
-   (entries
-    (mapcar #'pubmed--fulltext entries))
-   (pubmed-marklist
-    (mapcar #'pubmed--fulltext pubmed-marklist))
-   ((setq pubmed-current-node (ewoc-locate pubmed-ewoc))
-    (pubmed--fulltext (plist-get (ewoc-data pubmed-current-node) :uid)))
-   (t
-    (error "No entry selected"))))
+  (when (use-region-p)
+    (save-excursion
+      (let* ((first-node (ewoc-locate pubmed-ewoc (region-beginning)))
+             (last-node (ewoc-locate pubmed-ewoc (region-end)))
+             (node first-node)
+             (inhibit-read-only t)
+             uids)
+        (while (progn
+                 (push (plist-get (ewoc-data node) :uid) uids)
+                 (ewoc-goto-node pubmed-ewoc node)
+                 (setq node (ewoc-next pubmed-ewoc node))
+                 (not (eq node (ewoc-next pubmed-ewoc last-node)))))
+        (nreverse uids)))))
+
+(defun pubmed-get-uids ()
+  "Return a list of uids.
+The marked entries are used, or else the entries in the active
+region, or else the current entry."
+  (let ((uids (or pubmed-marklist
+                  (pubmed-get-uids-in-region)
+                  (list (pubmed-get-uid)))))
+    uids))
+
+;;;###autoload
+(defun pubmed-get-fulltext (&optional uids)
+  "Try to fetch the fulltext PDF articles.
+The entries in the optional argument UIDS are used. If no uids
+are supplied, the marked entries, the entries in the active
+region, or the current entry are used.
+
+The variable `pubmed-fulltext-action' says which
+function to use."
+  (interactive "P")
+  (if-let ((uids (or uids (pubmed-get-uids))))
+      (dolist (uid uids)
+        (when-let ((url (pubmed--get-fulltext-url uid)))
+          (funcall pubmed-fulltext-action url)))
+    (error "No entry selected")))
+
+(defun pubmed-open (url)
+  "Open the fulltext PDF of URL."
+  (let* ((filename (url-file-nondirectory url))
+         (path (concat (temporary-file-directory) filename)))
+    (when path
+      (condition-case err
+          (url-copy-file url path 1)
+        (file-already-exists
+         (message "%s" (error-message-string err))))
+      (funcall #'pubmed--open-file path))))
+
+(defun pubmed-save (url)
+  "Save the fulltext PDF of URL.
+The file is saved in `pubmed-default-directory'."
+  (let ((filename (expand-file-name (url-file-nondirectory url)
+                                    pubmed-default-directory)))
+    (condition-case err
+        (url-copy-file url filename 1)
+      (file-already-exists
+       (message "%s" (error-message-string err))))))
+
+(defun pubmed-save-as (url)
+  "Prompt for filename and save the fulltext PDF of URL."
+  (let* ((default-filename (expand-file-name (url-file-nondirectory url)
+                                             pubmed-default-directory))
+         (filename (read-file-name "Save file:"
+                                   pubmed-default-directory
+                                   default-filename
+			           nil
+                                   default-filename)))
+    (condition-case err
+        (url-copy-file url filename 1)
+      (file-already-exists
+       (message "%s" (error-message-string err))))))
 
 ;;;###autoload
 (defun pubmed-complete (&optional _predicate)
@@ -893,7 +990,7 @@ the node with the same data element as the current node."
          (second-sorter (if reverse
                             (lambda (a b) (funcall second-sorter b a))
                           second-sorter))
-         (current-uid (pubmed--get-uid)))
+         (current-uid (pubmed-get-uid)))
     ;; Sort the entries using two keys. For the 'firstauthor,
     ;; 'lastauthor 'journal and 'title keys, the entries are sorted
     ;; alphabetically, and then by publication date. For the 'pubdate
@@ -1533,11 +1630,31 @@ Show the result in the \"*PubMed-entry*\" buffer."
 	  (save-selected-window
 	    (display-buffer pubmed-entry-buffer))))))))
 
-(defun pubmed--get-uid ()
+(defun pubmed-get-uid ()
   "Return the unique identifier of the current entry."
-  (let* ((current-node (ewoc-locate pubmed-ewoc))
-         (current-entry (ewoc-data current-node)))
-    (plist-get current-entry :uid)))
+  (pubmed--guard)
+  (let* ((node (ewoc-locate pubmed-ewoc))
+         (entry (ewoc-data node))
+         (uid (plist-get entry :uid)))
+    uid))
+
+(defun pubmed-get-doi ()
+  "Return the Digital Object Identifier (DOI) of the current entry."
+  (let* ((node (ewoc-locate pubmed-ewoc))
+         (entry (ewoc-data node))
+	 (articleids (plist-get entry :articleids))
+         (articleid (seq-find (lambda (articleid) (equal (plist-get articleid :idtype) "doi")) articleids))
+         (doi (plist-get articleid :value)))
+    doi))
+
+(defun pubmed-get-pmcid ()
+  "Return the PubMed Central ID (PMC) of the current entry."
+  (let* ((node (ewoc-locate pubmed-ewoc))
+         (entry (ewoc-data node))
+	 (articleids (plist-get entry :articleids))
+         (articleid (seq-find (lambda (articleid) (equal (plist-get articleid :idtype) "pmc")) articleids))
+         (pmc (plist-get articleid :value)))
+    pmc))
 
 (defun pubmed--summary-pmid (summary)
   "Return the PMID of the article SUMMARY."
@@ -1968,42 +2085,65 @@ The time value of the date can be converted by `format-time-string' to a string 
 					(string-to-number (or (esxml-query "ContributionDate Year *" summary) "0")))))
     contributiondate))
 
-(defun pubmed--fulltext (uid)
-  "Try to fetch the fulltext PDF of UID, using multiple methods.
-The functions in `pubmed-fulltext-functions' are tried in order, until a fulltext PDF is found."
-  (let ((i 0))
-    (deferred:$
-      (deferred:next
-	(deferred:lambda ()
-	  (cond
-	   ((eq 0 (length pubmed-fulltext-functions))
-	    (error "No functions in the list `pubmed-fulltext-functions'"))
-	   ((>= i (length pubmed-fulltext-functions))
-	    (error "No fulltext PDF found"))
-	   ((< i (length pubmed-fulltext-functions))
-	    (progn
-	      (message "Trying %S..." (nth i pubmed-fulltext-functions))
+(defun pubmed--get-fulltext-url (uid)
+  "Return the url of the fulltext PDF of UID, using multiple methods.
+The functions in `pubmed-fulltext-functions' are tried in order,
+until a fulltext PDF is found."
+  (catch 'found
+    (let ((functions pubmed-fulltext-functions)
+          url)
+      (while functions
+        (let* ((fn (pop functions))
+               (result (funcall fn uid)))
+          (when result
+            (message "Found fulltext link for UID %s: %s" uid result)
+            (throw 'found result)))))))
 
-	      (deferred:$
-		(deferred:call (nth i pubmed-fulltext-functions) uid)
-
-		(deferred:nextc it
-		  (lambda (result)
-		    (message "Trying %S...done" (nth i pubmed-fulltext-functions))
-		    (setq i (1+ i))
-		    (if result
-			(when (bufferp result)
-			  (pubmed--view-pdf result))
-		      (deferred:next self)))))))))))))
-
-(defun pubmed--view-pdf (buffer)
-  "Create a temporary pdf file containing BUFFER and open it with the default pdf viewer."
-  (let ((data (with-current-buffer buffer (buffer-substring (1+ url-http-end-of-headers) (point-max))))
-	(tempfile (make-nearby-temp-file pubmed-temp-prefix nil ".pdf")))
-    (with-temp-file tempfile
-      (set-buffer-file-coding-system 'binary)
-      (insert data))
-    (find-file-other-frame tempfile)))
+(defun pubmed--open-file (path)
+  "Open the file at PATH.
+The variable `pubmed-open-file-command' says which command to
+use."
+  (let ((extension (file-name-extension path)))
+    (pcase pubmed-open-file-command
+      ('system
+       (pcase system-type
+         ('cygwin
+          (let ((cmd "cygstart"))
+            (start-process cmd nil cmd (shell-quote-argument path))))
+         ('darwin
+          (let ((cmd "open"))
+            (start-process cmd nil cmd (shell-quote-argument path))))
+         ('gnu/linux
+          (let ((process-connection-type nil)
+                (cmd "xdg-open"))
+            (start-process cmd nil cmd (shell-quote-argument path))))
+         ('windows-nt
+          (when (fboundp 'w32-shell-execute)
+            (w32-shell-execute "open" path)))
+         (_
+          (error "Unable to determine default application on operating system %S" system-type))))
+      ('mailcap
+       (require 'mailcap)
+       (mailcap-parse-mailcaps)
+       (let* ((mime-type (mailcap-extension-to-mime extension))
+	      (command (mailcap-mime-info mime-type)))
+         (if command
+             (let ((cmd (replace-regexp-in-string
+	                 "%s"
+	                 (shell-quote-argument path)
+	                 command
+	                 nil t)))
+               (start-process-shell-command cmd nil cmd))
+           (error "Unable to determine the MIME viewer command for mime-type %s" mime-type))))
+      ((pred stringp)
+       (let ((cmd (replace-regexp-in-string
+		   "%s"
+		   (shell-quote-argument path)
+                   pubmed-open-file-command
+		   nil t)))
+         (start-process-shell-command cmd nil cmd)))
+      ((pred functionp)
+       (funcall pubmed-open-file-command path)))))
 
 (defun pubmed--sentence-at-point ()
   "Return the sentence at point."

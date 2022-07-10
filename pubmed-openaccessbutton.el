@@ -35,8 +35,6 @@
 
 ;;;; Requirements
 
-(require 'deferred)
-(require 'eww)
 (require 'json)
 (require 'url)
 
@@ -60,139 +58,58 @@ Although Open Access Button API doesn't require authorisation, it
   '(url-link "https://openaccessbutton.org/account?next=/api")
   :group 'pubmed-openaccessbutton :type 'string)
 
-(defcustom pubmed-openaccessbutton-timeout 5000
-  "Open Access Button timeout in milliseconds."
+(defcustom pubmed-openaccessbutton-timeout 5
+  "Open Access Button timeout in seconds."
   :group 'pubmed-openaccessbutton
   :type 'integer)
 
 ;;;; Commands
 
-(defun pubmed-get-openaccessbutton (&optional entries)
-  "In PubMed, try to fetch the fulltext PDF of the marked
-entries, the current entry or the optional argument ENTRIES."
-  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to
-  ;; confirm.
+;;;###autoload
+(defun pubmed-get-openaccessbutton (&optional uids)
+  "Try to fetch the fulltext PDF articles using Open Access Button.
+The entries in the optional argument UIDS are used. If no uids
+are supplied, the marked entries, the entries in the active
+region, or the current entry are used.
+
+The variable `pubmed-fulltext-action' says which function to
+use."
   (interactive "P")
-  (pubmed--guard)
-  (let (mark
-	mark-list
-	pubmed-uid)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (setq mark (char-after))
-        (setq pubmed-uid (pubmed--get-uid))
-	(when (eq mark ?*)
-          (push pubmed-uid mark-list))
-	(forward-line)))
-    (cond
-     (entries
-      (mapcar #'pubmed--get-openaccessbutton entries))
-     (mark-list
-      (mapcar #'pubmed--get-openaccessbutton mark-list))
-     ((pubmed--get-uid)
-      (pubmed--get-openaccessbutton (pubmed--get-uid)))
-     (t
-      (error "No entry selected")))))
+  (if-let ((uids (or uids (pubmed-get-uids))))
+      (dolist (uid uids)
+        (when-let ((url (pubmed-openaccessbutton uid)))
+          (funcall pubmed-fulltext-action url)))
+    (error "No entry selected")))
 
 ;;;; Functions
 
-(defun pubmed--get-openaccessbutton (uid)
-  "Try to fetch the fulltext PDF of UID, using Open Access Button."
-  (deferred:$
-    (deferred:call #'pubmed-openaccessbutton uid)
-
-    (deferred:nextc it
-      (lambda (result)
-	(when (bufferp result)
-	  (pubmed--view-pdf result))))))
-
 (defun pubmed-openaccessbutton (uid)
-  "Deferred chain to retrieve the fulltext PDF of the UID."
-  (let (pdf-url)
-    (deferred:$
-      ;; try
-      (deferred:$
-	(deferred:timeout pubmed-openaccessbutton-timeout (error "Timeout")
-	  (let* ((parameters (list (cons "pmid" uid))))
-	    (deferred:url-get pubmed-openaccessbutton-url parameters)))
-
-	(deferred:nextc it
-	  (lambda (buffer)
-	    "Parse the JSON object in BUFFER. Return the url of
-the Open Access fulltext article or nil if none is found."
-	    (let* ((json (with-current-buffer buffer (decode-coding-string (buffer-string) 'utf-8)))
-		   (json-object-type 'plist)
-		   (json-array-type 'list)
-		   (json-key-type nil)
-		   (json-object (json-read-from-string json))
-		   (data (plist-get json-object :data))
-		   (availability (plist-get data :availability))
-		   (type (plist-get (car availability) :type))
-		   (url (plist-get (car availability) :url)))
-	      (cond
-	       ((and url (equal type "article"))
-		(setq pdf-url url))
-	       (t
-		(error "Open Access Button found no fulltext article"))))))
-
-	(deferred:nextc it
-	  (lambda (url)
-	    (if url
-		(lexical-let ((d (deferred:new #'identity)))
-		  (url-retrieve url (lambda (status)
-				      ;; Start the following callback queue now.
-				      (deferred:callback-post d status)))
-		  ;; Return the unregistered (not yet started) callback
-		  ;; queue, so that the following queue will wait until it
-		  ;; is started.
-		  d)
-	      (deferred:cancel it))))
-
-	;; You can connect deferred callback queues
-	(deferred:nextc it
-	  (lambda (status)
-	    (let ((url-error (plist-get status :error))
-		  (url-redirect (plist-get status :redirect)))
-	      (cond
-	       (url-error
-		(signal (car url-error) (cdr url-error)))
-	       (url-redirect
-		(progn
-		  (message "Redirected-to: %s" url-redirect)
-		  url-redirect))
-	       (t
-		pdf-url)))))
-
-	(deferred:nextc it
-	  (lambda (url)
-	    (deferred:timeout pubmed-openaccessbutton-timeout (error "Timeout")
-	      (deferred:url-retrieve url))))
-
-	(deferred:nextc it
-	  (lambda (buffer)
-	    "Parse the HTML object in BUFFER and show the PDF."
-	    (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
-		   (content-type (cdr (assoc "content-type" headers))))
-	      (cond
-	       ;; Return buffer if the iframe contains a pdf file
-	       ((equal content-type "application/pdf")
-		buffer)
-	       (t
-		(error "Unknown content-type: %s" content-type)))))))
-
-      ;; catch
-      (deferred:error it
-	(lambda (deferred-error)
-	  "Catch any errors that occur during the deferred chain and return nil."
-	  (message "%s" (cadr deferred-error))
-	  nil))
-
-      ;; finally
-      (deferred:nextc it
-	(lambda (result)
-	  "Return non-nil if a fulltext article is found, otherwise nil."
-	  result)))))
+  "Try to fetch the fulltext PDF of UID, using Open Access Button.
+Return the url or nil if none is found. See URL
+`https://openaccessbutton.org/api'."
+  (message "Find fulltext link for UID %s using Open Access Button..." uid)
+  (let* ((url (concat pubmed-openaccessbutton-url "?pmid=" uid))
+         (buffer (url-retrieve-synchronously url nil nil pubmed-openaccessbutton-timeout))
+         (json (with-current-buffer buffer (decode-coding-string (buffer-substring (1+ url-http-end-of-headers) (point-max)) 'utf-8)))
+	 (json-object-type 'plist)
+	 (json-array-type 'list)
+	 (json-key-type nil)
+	 (json-object (json-read-from-string json))
+	 (data (plist-get json-object :data))
+	 (availability (plist-get data :availability))
+	 (type (plist-get (car availability) :type))
+	 (url (plist-get (car availability) :url)))
+    (if (and url (equal type "article"))
+        (progn
+          (let* ((parsed-url (url-generic-parse-url url))
+                 (path (car (url-path-and-query parsed-url))))
+            ;; Remove query part
+            (setf (url-filename parsed-url) path)
+            (setq url (url-recreate-url parsed-url))
+            (message "Find fulltext link for UID %s using Open Access Button...done" uid)
+            url))
+      (message "Find fulltext link for UID %s using Open Access Button...failed" uid)
+      nil)))
 
 ;;;; Footer
 

@@ -28,14 +28,12 @@
 
 ;;;; Requirements
 
-(require 'deferred)
-(require 'eww)
 (require 'esxml)
 (require 'esxml-query)
 (require 'url)
 
 ;;;; Variables
-(defvar pubmed-pmc-url "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/elink.fcgi"
+(defvar pubmed-pmc-url "https://www.ncbi.nlm.nih.gov/pmc/utils/oa/oa.fcgi"
   "PMC base URL.")
 
 ;;;; Customization
@@ -44,143 +42,60 @@
   "Fetch fulltext PDFs from PubMed Central (PMC)."
   :group 'pubmed)
 
-(defcustom pubmed-pmc-timeout 5000
-  "PMC timeout in milliseconds."
+(defcustom pubmed-pmc-timeout 5
+  "PMC timeout in seconds."
   :group 'pubmed-pmc
   :type 'integer)
 
 ;;;; Commands
 
 ;;;###autoload
-(defun pubmed-get-pmc (&optional entries)
-  "In PubMed, try to fetch the fulltext PDF of the marked entries, the current entry or the optional argument ENTRIES."
-  ;; TODO: optional argument NOQUERY non-nil means do not ask the user to confirm.
+(defun pubmed-get-pmc (&optional uids)
+  "Try to fetch the fulltext PDF articles using using PubMed Central (PMC).
+The entries in the optional argument UIDS are used. If no uids
+are supplied, the marked entries, the entries in the active
+region, or the current entry are used.
+
+The variable `pubmed-fulltext-action' says which function to
+use."
   (interactive "P")
-  (pubmed--guard)
-  (let (mark
-	mark-list
-	pubmed-uid)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        (setq mark (char-after))
-        (setq pubmed-uid (pubmed--get-uid))
-	(when (eq mark ?*)
-          (push pubmed-uid mark-list))
-	(forward-line)))
-    (cond
-     (entries
-      (mapcar #'pubmed--get-pmc entries))
-     (mark-list
-      (mapcar #'pubmed--get-pmc mark-list))
-     ((pubmed--get-uid)
-      (pubmed--get-pmc (pubmed--get-uid)))
-     (t
-      (error "No entry selected")))))
+  (if-let ((uids (or uids (pubmed-get-uids))))
+      (dolist (uid uids)
+        (when-let ((url (pubmed-pmc uid)))
+          (funcall pubmed-fulltext-action url)))
+    (error "No entry selected")))
 
 ;;;; Functions
 
-(defun pubmed--get-pmc (uid)
-  "Try to fetch the fulltext PDF of UID, using PMC."
-  (deferred:$
-    (deferred:call #'pubmed-pmc uid)
-
-    (deferred:nextc it
-      (lambda (result)
-	(when (bufferp result)
-	  (pubmed--view-pdf result))))))
-
 (defun pubmed-pmc (uid)
-  "Deferred chain to retrieve the fulltext PDF of the UID."
-  (deferred:$
-    ;; try
-    (deferred:$
-      (deferred:next
-	(lambda ()
-	  (let ((url-request-method "GET")
-		(arguments (concat "?"
-				   "dbfrom=pubmed"
-				   "&cmd=prlinks"
-				   "&retmode=ref"
-				   "&id=" uid
-				   (when (not (string-empty-p pubmed-api-key))
-				     (concat "&api_key=" pubmed-api-key)))))
-	    (concat pubmed-pmc-url arguments))))
-
-      (deferred:nextc it
-        (lambda (url)
-          (if url
-      	      (lexical-let ((d (deferred:new #'identity)))
-      		(url-retrieve url (lambda (status)
-      				    ;; Start the following callback queue now.
-      				    (deferred:callback-post d status)))
-      		;; Return the unregistered (not yet started) callback
-      		;; queue, so that the following queue will wait until it
-      		;; is started.
-      		d)
-            (deferred:cancel it))))
-
-      ;; You can connect deferred callback queues
-      (deferred:nextc it
-	(lambda (status)
-	  (let ((url-error (plist-get status :error))
-		(url-redirect (plist-get status :redirect)))
-	    (cond
-	     (url-error
-	      (signal (car url-error) (cdr url-error)))
-	     (url-redirect
-	      (progn
-		(message "Redirected-to: %s" url-redirect)
-		url-redirect))
-	     (t
-	      (error "PMC found no fulltext article"))))))
-
-      (deferred:nextc it
-	(lambda (url)
-	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
-	    (deferred:url-retrieve url))))
-
-      (deferred:nextc it
-	(lambda (buffer)
-	  "Parse the HTML in BUFFER. Return the url of the iframe or nil if none is found."
-	  ;; Extract the url of the pdf. The url is marked up as follows:
-	  ;; <meta name="citation_pdf_url" content="URL_FOR_PDF"/>
-	  ;; TODO: Some journals require a captcha, e.g. Indian Journal of Psychological Medicine.
-	  (let* ((dom (with-current-buffer buffer (libxml-parse-html-region (point-min) (point-max))))
-		 (url (esxml-node-attribute 'content (esxml-query "meta[name=citation_pdf_url]" dom))))
-	    (if url
-    	    	url
-	      (error "PMC found no fulltext article")))))
-
-      (deferred:nextc it
-	(lambda (url)
-	  (deferred:timeout pubmed-pmc-timeout (error "Timeout")
-	    (deferred:url-retrieve url))))
-
-      (deferred:nextc it
-	(lambda (buffer)
-	  "Parse the HTML object in BUFFER and show the PDF."
-	  (let* ((headers (with-current-buffer buffer (eww-parse-headers)))
-		 (content-type (cdr (assoc "content-type" headers))))
-	    (cond
-	     ;; Return buffer if the iframe contains a pdf file
-	     ((equal content-type "application/pdf")
-	      buffer)
-	     (t
-	      (error "Unknown content-type: %s" content-type)))))))
-
-    ;; catch
-    (deferred:error it
-      (lambda (deferred-error)
-	"Catch any errors that occur during the deferred chain and return nil."
-	(message "%s" (cadr deferred-error))
-	nil))
-
-    ;; finally
-    (deferred:nextc it
-      (lambda (result)
-	"Return non-nil if a fulltext article is found, otherwise nil."
-	result))))
+  "Try to fetch the fulltext PDF of UID, using PubMed Central (PMC).
+Return the url or nil if none is found. See URL
+`https://www.ncbi.nlm.nih.gov/pmc/tools/oa-service/'."
+  (message "Find fulltext link for UID %s using PMC..." uid)
+  (if-let ((entry (seq-find (lambda (entry) (equal (plist-get entry :uid) uid)) pubmed-entries))
+           (articleids (plist-get entry :articleids))
+           (articleid (seq-find (lambda (articleid) (equal (plist-get articleid :idtype) "pmc")) articleids))
+           (pmc (plist-get articleid :value))
+           (url-request-method "GET")
+	   (arguments (concat "?"
+                              "&id=" pmc
+			      (when (not (string-empty-p pubmed-api-key))
+			        (concat "&api_key=" pubmed-api-key))))
+           (url (concat pubmed-pmc-url arguments))
+           (buffer (url-retrieve-synchronously url nil nil pubmed-pmc-timeout))
+           (dom (with-current-buffer buffer (libxml-parse-html-region (point-min) (point-max))))
+           (url (esxml-node-attribute 'href (esxml-query "link[format=pdf]" dom)))
+           (parsed-url (url-generic-parse-url url)))
+      (progn
+        ;; The PDF articles are available for download with FTP, but can
+        ;; be retrieved with HTTP as well.
+        (when (equal (url-type parsed-url) "ftp")
+          (setf (url-type parsed-url) "https")
+          (setq url (url-recreate-url parsed-url)))
+        (message "Find fulltext link for UID %s using PMC...done" uid)
+        url)
+    (message "Find fulltext link for UID %s using PMC...failed" uid)
+    nil))
 
 ;;;; Footer
 
