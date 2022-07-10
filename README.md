@@ -143,12 +143,18 @@ Button](https://openaccessbutton.org/api),
 (require 'pubmed-unpaywall)
 (setq pubmed-unpaywall-email "your_email@example.com")
 ```
+
 - The Dissemin fulltext function is invoked by <kbd>M-x pubmed-get-dissemin</kbd>.
-  Using Dissemin is legal and requires the following in your `init.el` or `.emacs` file:
+  Using Dissemin is legal and requires the following in your `init.el` or `.emacs`
+  file:
 
 ```lisp
 (require 'pubmed-dissemin)
 ```
+
+*Warning*: Dissemin may link to a fulltext html page instead of a remote PDF
+  file. This may lead to errors if the `pubmed-fulltext-action` depends on a PDF
+  filetype.
 
 - The Springer Nature fulltext function is invoked by <kbd>M-x
   pubmed-get-springer</kbd>. Using Springer Nature is legal and requires you to
@@ -164,6 +170,7 @@ Button](https://openaccessbutton.org/api),
 (require 'pubmed-springer)
 (setq pubmed-springer-api-key "1234567890abcdefghijklmnopqrstuvwxyz")
 ```
+
 - The Sci-Hub fulltext function is invoked by <kbd>M-x pubmed-get-scihub</kbd>. Using
 Sci-Hub may not be legal and requires you to provide the url by customizing the
 variable `pubmed-scihub-url` or setting the value in your `init.el` or `.emacs`
@@ -179,17 +186,21 @@ file:
   The functions in `pubmed-fulltext-functions` are tried in order, until a
   fulltext PDF is found.
 
+- The commands <kbd>M-x pubmed-open</kbd>, <kbd>M-x pubmed-save</kbd>, and
+  <kbd>M-x pubmed-save-as</kbd> try to fetch the fulltext PDF and open it, save
+  in the default directory, or prompt for a filename to save as, respectively.
+
 - The value of the variable `pubmed-fulltext-functions` should be a list of
   functions, which are tried in order by `pubmed-get-fulltext` to fetch fulltext
   articles. To change the behavior of `pubmed-get-fulltext`, remove, change the
   order of, or insert functions in this list. When the command
   `pubmed-get-fulltext` runs, it calls the functions in the list one by one,
   without any argument. Each function should return nil if it is unable to find
-  a fulltext article of the entry at point. Otherwise it should return the
-  buffer of the PDF and show the PDF in a new frame as a side effect. By
-  default, only `pubmed-pmc` and `pubmed-openaccessbutton` are used. To add
-  other fulltext functions, customize the variable `pubmed-fulltext-functions`
-  or set the value in your `init.el` or `.emacs` file:
+  a fulltext article of the entry at point. Otherwise it should return the url
+  of the remote PDF file. By default, only `pubmed-pmc` and
+  `pubmed-openaccessbutton` are used. To add other fulltext functions, customize
+  the variable `pubmed-fulltext-functions` or set the value in your `init.el` or
+  `.emacs` file:
 
 ```lisp
 (setq pubmed-fulltext-functions '(pubmed-pmc pubmed-openaccessbutton pubmed-unpaywall pubmed-dissemin pubmed-scihub))
@@ -202,6 +213,9 @@ or
 (add-to-list 'pubmed-fulltext-functions 'pubmed-dissemin t)
 (add-to-list 'pubmed-fulltext-functions 'pubmed-scihub t)
 ```
+- The variable `pubmed-fulltext-action` holds the function that is called by
+  `pubmed-get-fulltext`, `pubmed-get-pmc`, and the other `pubmed-get-*` fulltext
+  functions. The function should accept one argument: a string with an URL.
 
 ### BibTeX
 
