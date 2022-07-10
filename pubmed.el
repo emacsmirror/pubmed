@@ -659,7 +659,8 @@ function to use."
   (if-let ((uids (or uids (pubmed-get-uids))))
       (dolist (uid uids)
         (when-let ((url (pubmed--get-fulltext-url uid)))
-          (funcall pubmed-fulltext-action url)))
+          (save-current-buffer
+            (funcall pubmed-fulltext-action url))))
     (error "No entry selected")))
 
 (defun pubmed-open (url)

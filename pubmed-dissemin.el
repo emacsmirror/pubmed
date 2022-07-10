@@ -66,7 +66,8 @@ use."
   (if-let ((uids (or uids (pubmed-get-uids))))
       (dolist (uid uids)
         (when-let ((url (pubmed-dissemin uid)))
-          (funcall pubmed-fulltext-action url)))
+          (save-current-buffer
+            (funcall pubmed-fulltext-action url))))
     (error "No entry selected")))
 
 ;;;; Functions
