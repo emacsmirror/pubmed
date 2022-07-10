@@ -1,4 +1,15 @@
 # Changelog
+
+## [0.6] - 2022-07-10
+### Fixed
+- Fixed fulltext functions
+- Removed dependency on emacs-deferred to make debugging easier
+- Fixed coding style issues
+
+### Added
+- Added customizable fulltext actions
+- Added functions to open, save, or save as fulltext PDFs
+
 ## [0.5.2] - 2021-09-27
 ### Fixed
 - Removed calls to `first' in deprecated `cl' package
