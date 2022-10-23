@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.6.2] - 2022-10-23
+### Fixed
+- Fix regression when translating PubMed docsums to BibTeX entries
+
 ## [0.6.1] - 2022-07-10
 ### Fixed
 - Return to PubMed buffer after fulltext action to access buffer-local bindings
